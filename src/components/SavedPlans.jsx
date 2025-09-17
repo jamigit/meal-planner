@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
+import { mealHistoryService } from '../database/mealHistoryService.js'
 
 function SavedPlans() {
   const [savedPlans, setSavedPlans] = useState([])
+  const [eatenMeals, setEatenMeals] = useState(new Set()) // Track which meals are marked as eaten
 
   const loadPlans = async () => {
     const plans = await weeklyPlanService.getAllWithRecipes()
@@ -33,6 +35,31 @@ function SavedPlans() {
   const handleSetAsCurrent = async (planId) => {
     await weeklyPlanService.setAsCurrent(planId)
     loadPlans()
+  }
+
+  const handleMarkAsEaten = async (recipe, planCreatedAt) => {
+    try {
+      // Use plan creation date as the week reference
+      const eatenDate = new Date().toISOString().split('T')[0] // Today
+
+      await mealHistoryService.addMealToHistory(recipe.id, eatenDate)
+
+      // Add to eaten meals set for UI feedback
+      setEatenMeals(prev => new Set([...prev, `${recipe.id}-${planCreatedAt}`]))
+
+      console.log(`✅ Marked "${recipe.name}" as eaten`)
+
+      // Optional: Show success feedback
+      // Could add a toast notification here in the future
+
+    } catch (error) {
+      console.error('Failed to mark meal as eaten:', error)
+      alert('Failed to mark meal as eaten. Please try again.')
+    }
+  }
+
+  const isMealEaten = (recipeId, planCreatedAt) => {
+    return eatenMeals.has(`${recipeId}-${planCreatedAt}`)
   }
 
   return (
@@ -92,20 +119,45 @@ function SavedPlans() {
               {plan.meals && plan.meals.length > 0 && (
                 <div className="mb-4">
                   <h4 className="font-medium text-gray-900 mb-2">Meals:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-3">
                     {plan.meals.map((meal, index) => (
-                      <div key={meal.id || index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
-                        <span className="font-medium">{meal.name}</span>
-                        {meal.url && (
-                          <a
-                            href={meal.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            →
-                          </a>
-                        )}
+                      <div key={meal.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <span className="font-medium">{meal.name}</span>
+                          {meal.url && (
+                            <a
+                              href={meal.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              View Recipe →
+                            </a>
+                          )}
+                          {meal.tags && meal.tags.length > 0 && (
+                            <div className="flex flex-wrap">
+                              {meal.tags.slice(0, 3).map(tag => (
+                                <span key={tag} className="tag text-xs">{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          {isMealEaten(meal.id, plan.created_at) ? (
+                            <span className="text-green-600 text-sm font-medium flex items-center">
+                              <span className="text-green-600 mr-1">✓</span>
+                              Eaten
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleMarkAsEaten(meal, plan.created_at)}
+                              className="text-sm px-3 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-full transition-colors"
+                            >
+                              Mark as Eaten
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
