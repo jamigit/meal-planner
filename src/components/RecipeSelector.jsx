@@ -11,9 +11,20 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     if (isOpen) {
       const allRecipes = recipeStorage.getAll()
       setRecipes(allRecipes)
-      // Pre-select already selected meals
-      const alreadySelected = allRecipes.filter(recipe => selectedMealIds.includes(recipe.id))
-      setSelectedRecipes(alreadySelected)
+
+      // Clear selection first, then pre-select if needed
+      if (selectedMealIds && selectedMealIds.length > 0) {
+        const alreadySelected = allRecipes.filter(recipe =>
+          selectedMealIds.includes(recipe.id)
+        )
+        setSelectedRecipes(alreadySelected)
+      } else {
+        setSelectedRecipes([])
+      }
+
+      // Reset search and filters when opening
+      setSearchTerm('')
+      setSelectedTag('')
     }
   }, [isOpen, selectedMealIds])
 
@@ -27,11 +38,13 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
   const toggleRecipeSelection = (recipe) => {
     setSelectedRecipes(prev => {
-      const isSelected = prev.some(r => r.id === recipe.id)
-      if (isSelected) {
+      const isCurrentlySelected = prev.some(r => r.id === recipe.id)
+
+      if (isCurrentlySelected) {
+        // Remove if already selected
         return prev.filter(r => r.id !== recipe.id)
       } else {
-        // Limit to 4 meals as per requirements
+        // Add if not selected and under limit
         if (prev.length >= 4) {
           return prev
         }
@@ -48,8 +61,8 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Select Meals ({selectedRecipes.length}/4)</h2>
           <button
@@ -94,22 +107,32 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
         </div>
 
         {/* Recipe Grid */}
-        <div className="overflow-y-auto max-h-96 mb-6">
+        <div className="overflow-y-auto flex-1 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredRecipes.map(recipe => {
               const isSelected = selectedRecipes.some(r => r.id === recipe.id)
               const canSelect = selectedRecipes.length < 4 || isSelected
 
+
+
+              // More explicit class building
+              const baseClasses = 'border rounded-lg p-4 cursor-pointer transition-colors'
+              let specificClasses = ''
+
+              if (isSelected) {
+                specificClasses = 'border-blue-500 bg-blue-50'
+              } else if (canSelect) {
+                specificClasses = 'border-gray-200 hover:border-gray-300 bg-white'
+              } else {
+                specificClasses = 'border-gray-100 bg-gray-50 cursor-not-allowed'
+              }
+
+              const cardClasses = `${baseClasses} ${specificClasses}`
+
               return (
                 <div
                   key={recipe.id}
-                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                    isSelected
-                      ? 'border-blue-500 bg-blue-50'
-                      : canSelect
-                        ? 'border-gray-200 hover:border-gray-300'
-                        : 'border-gray-100 bg-gray-50 cursor-not-allowed'
-                  }`}
+                  className={cardClasses}
                   onClick={() => canSelect && toggleRecipeSelection(recipe)}
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -145,7 +168,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 flex-shrink-0 pt-4 border-t border-gray-200">
           <button onClick={onClose} className="btn-secondary">
             Cancel
           </button>

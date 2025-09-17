@@ -119,33 +119,52 @@ export const weeklyPlanStorage = {
   }
 }
 
+export const clearAllData = () => {
+  localStorage.removeItem(STORAGE_KEYS.RECIPES)
+  localStorage.removeItem(STORAGE_KEYS.WEEKLY_PLANS)
+  console.log('All meal planner data cleared from localStorage')
+}
+
 export const seedSampleData = () => {
   const existingRecipes = recipeStorage.getAll()
   if (existingRecipes.length === 0) {
+    const baseTimestamp = Date.now()
     const sampleRecipes = [
       {
+        id: (baseTimestamp + 1).toString(),
         name: "Spaghetti Carbonara",
         url: "https://example.com/carbonara",
-        tags: ["pasta", "italian", "quick"]
+        tags: ["pasta", "italian", "quick"],
+        createdAt: new Date(baseTimestamp + 1).toISOString()
       },
       {
+        id: (baseTimestamp + 2).toString(),
         name: "Chicken Stir Fry",
         url: "https://example.com/stirfry",
-        tags: ["chicken", "asian", "vegetables", "quick"]
+        tags: ["chicken", "asian", "vegetables", "quick"],
+        createdAt: new Date(baseTimestamp + 2).toISOString()
       },
       {
+        id: (baseTimestamp + 3).toString(),
         name: "Beef Tacos",
         url: "",
-        tags: ["mexican", "beef", "easy"]
+        tags: ["mexican", "beef", "easy"],
+        createdAt: new Date(baseTimestamp + 3).toISOString()
       },
       {
+        id: (baseTimestamp + 4).toString(),
         name: "Greek Salad",
         url: "https://example.com/greek-salad",
-        tags: ["vegetarian", "healthy", "mediterranean"]
+        tags: ["vegetarian", "healthy", "mediterranean"],
+        createdAt: new Date(baseTimestamp + 4).toISOString()
       }
     ]
 
-    sampleRecipes.forEach(recipe => recipeStorage.add(recipe))
-    console.log('Sample recipes added to localStorage')
+    // Store the recipes directly with unique IDs
+    const serialized = safeJSONStringify(sampleRecipes)
+    if (serialized) {
+      localStorage.setItem(STORAGE_KEYS.RECIPES, serialized)
+      console.log('Sample recipes added to localStorage with unique IDs:', sampleRecipes.map(r => ({ id: r.id, name: r.name })))
+    }
   }
 }

@@ -51,8 +51,8 @@ function WeeklyPlanner() {
             <p className="text-gray-500">No meals selected yet.</p>
           ) : (
             <div className="space-y-2">
-              {weeklyPlan.meals.map((meal, index) => (
-                <div key={meal.id || index} className="p-3 bg-gray-50 rounded">
+              {weeklyPlan.meals.map((meal) => (
+                <div key={meal.id} className="p-3 bg-gray-50 rounded">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{meal.name}</h4>
                     <button
@@ -109,7 +109,7 @@ function WeeklyPlanner() {
         isOpen={isRecipeSelectorOpen}
         onClose={() => setIsRecipeSelectorOpen(false)}
         onSelectRecipes={handleSelectRecipes}
-        selectedMealIds={weeklyPlan.meals.map(meal => meal.id)}
+        selectedMealIds={weeklyPlan.meals.map(meal => meal.id).filter(Boolean)}
       />
     </div>
   )

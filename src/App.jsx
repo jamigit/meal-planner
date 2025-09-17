@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation'
 import RecipeList from './components/RecipeList'
 import WeeklyPlanner from './components/WeeklyPlanner'
+import SavedPlans from './components/SavedPlans'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Routes>
             <Route path="/" element={<RecipeList />} />
             <Route path="/planner" element={<WeeklyPlanner />} />
+            <Route path="/saved-plans" element={<SavedPlans />} />
           </Routes>
         </main>
       </div>
