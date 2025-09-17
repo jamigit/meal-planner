@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { weeklyPlanStorage } from '../utils/localStorage'
+import RecipeSelector from './RecipeSelector'
 
 function WeeklyPlanner() {
   const [weeklyPlan, setWeeklyPlan] = useState({
     meals: [],
     notes: ''
   })
+  const [isRecipeSelectorOpen, setIsRecipeSelectorOpen] = useState(false)
 
   useEffect(() => {
     const currentPlan = weeklyPlanStorage.getCurrent()
@@ -16,6 +18,27 @@ function WeeklyPlanner() {
       })
     }
   }, [])
+
+  const handleSelectRecipes = (selectedRecipes) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      meals: selectedRecipes
+    }))
+  }
+
+  const handleRemoveMeal = (mealId) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      meals: prev.meals.filter(meal => meal.id !== mealId)
+    }))
+  }
+
+  const handleSavePlan = () => {
+    const savedPlan = weeklyPlanStorage.save(weeklyPlan)
+    if (savedPlan) {
+      alert('Weekly plan saved successfully!')
+    }
+  }
 
   return (
     <div>
@@ -29,14 +52,43 @@ function WeeklyPlanner() {
           ) : (
             <div className="space-y-2">
               {weeklyPlan.meals.map((meal, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <span>{meal.name}</span>
-                  <button className="text-red-600 hover:text-red-800 text-sm">Remove</button>
+                <div key={meal.id || index} className="p-3 bg-gray-50 rounded">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium">{meal.name}</h4>
+                    <button
+                      onClick={() => handleRemoveMeal(meal.id)}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {meal.url && (
+                    <a
+                      href={meal.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 text-sm block mb-2"
+                    >
+                      View Recipe →
+                    </a>
+                  )}
+                  {meal.tags && meal.tags.length > 0 && (
+                    <div className="flex flex-wrap">
+                      {meal.tags.map(tag => (
+                        <span key={tag} className="tag text-xs">{tag}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
-          <button className="btn-primary mt-4">Select Meals</button>
+          <button
+            onClick={() => setIsRecipeSelectorOpen(true)}
+            className="btn-primary mt-4"
+          >
+            Select Meals
+          </button>
         </div>
 
         <div className="card">
@@ -47,9 +99,18 @@ function WeeklyPlanner() {
             placeholder="Add any notes about your meal plan..."
             className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <button className="btn-primary mt-4">Save Plan</button>
+          <button onClick={handleSavePlan} className="btn-primary mt-4">
+            Save Plan
+          </button>
         </div>
       </div>
+
+      <RecipeSelector
+        isOpen={isRecipeSelectorOpen}
+        onClose={() => setIsRecipeSelectorOpen(false)}
+        onSelectRecipes={handleSelectRecipes}
+        selectedMealIds={weeklyPlan.meals.map(meal => meal.id)}
+      />
     </div>
   )
 }
