@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { weeklyPlanStorage } from '../utils/localStorage'
+import { weeklyPlanService } from '../database/weeklyPlanService.js'
 
 function SavedPlans() {
   const [savedPlans, setSavedPlans] = useState([])
 
+  const loadPlans = async () => {
+    const plans = await weeklyPlanService.getAllWithRecipes()
+    setSavedPlans(plans)
+  }
+
   useEffect(() => {
-    const plans = weeklyPlanStorage.getAll()
-    // Sort by creation date, newest first
-    const sortedPlans = plans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    setSavedPlans(sortedPlans)
+    loadPlans()
   }, [])
 
   const formatDate = (dateString) => {
@@ -21,25 +23,16 @@ function SavedPlans() {
     })
   }
 
-  const handleDeletePlan = (planId) => {
+  const handleDeletePlan = async (planId) => {
     if (confirm('Are you sure you want to delete this plan?')) {
-      weeklyPlanStorage.delete(planId)
-      setSavedPlans(prev => prev.filter(plan => plan.id !== planId))
+      await weeklyPlanService.delete(planId)
+      loadPlans()
     }
   }
 
-  const handleSetAsCurrent = (plan) => {
-    // Save this plan as the current one
-    const currentPlan = {
-      meals: plan.meals,
-      notes: plan.notes
-    }
-    weeklyPlanStorage.save(currentPlan)
-
-    // Refresh the list to update the "current" indicators
-    const updatedPlans = weeklyPlanStorage.getAll()
-    const sortedPlans = updatedPlans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    setSavedPlans(sortedPlans)
+  const handleSetAsCurrent = async (planId) => {
+    await weeklyPlanService.setAsCurrent(planId)
+    loadPlans()
   }
 
   return (
@@ -64,9 +57,9 @@ function SavedPlans() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-lg font-semibold">
-                      Plan from {formatDate(plan.createdAt)}
+                      Plan from {formatDate(plan.created_at)}
                     </h3>
-                    {plan.isCurrent && (
+                    {plan.is_current && (
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                         Current
                       </span>
@@ -78,9 +71,9 @@ function SavedPlans() {
                 </div>
 
                 <div className="flex space-x-2">
-                  {!plan.isCurrent && (
+                  {!plan.is_current && (
                     <button
-                      onClick={() => handleSetAsCurrent(plan)}
+                      onClick={() => handleSetAsCurrent(plan.id)}
                       className="btn-secondary text-sm"
                     >
                       Set as Current

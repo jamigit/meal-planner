@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { recipeStorage } from '../utils/localStorage'
+import { recipeService } from '../database/recipeService.js'
 
 function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
@@ -9,18 +9,22 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
   useEffect(() => {
     if (isOpen) {
-      const allRecipes = recipeStorage.getAll()
-      setRecipes(allRecipes)
+      const loadRecipes = async () => {
+        const allRecipes = await recipeService.getAll()
+        setRecipes(allRecipes)
 
-      // Clear selection first, then pre-select if needed
-      if (selectedMealIds && selectedMealIds.length > 0) {
-        const alreadySelected = allRecipes.filter(recipe =>
-          selectedMealIds.includes(recipe.id)
-        )
-        setSelectedRecipes(alreadySelected)
-      } else {
-        setSelectedRecipes([])
+        // Clear selection first, then pre-select if needed
+        if (selectedMealIds && selectedMealIds.length > 0) {
+          const alreadySelected = allRecipes.filter(recipe =>
+            selectedMealIds.includes(recipe.id)
+          )
+          setSelectedRecipes(alreadySelected)
+        } else {
+          setSelectedRecipes([])
+        }
       }
+
+      loadRecipes()
 
       // Reset search and filters when opening
       setSearchTerm('')

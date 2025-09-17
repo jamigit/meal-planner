@@ -1,19 +1,33 @@
 import { useState, useEffect } from 'react'
-import { recipeStorage } from '../utils/localStorage'
+import { recipeService } from '../database/recipeService.js'
+import CSVUpload from './CSVUpload'
 
 function RecipeList() {
   const [recipes, setRecipes] = useState([])
 
-  useEffect(() => {
-    const loadedRecipes = recipeStorage.getAll()
+  const loadRecipes = async () => {
+    const loadedRecipes = await recipeService.getAll()
     setRecipes(loadedRecipes)
+  }
+
+  useEffect(() => {
+    loadRecipes()
   }, [])
+
+  const handleUploadComplete = (count) => {
+    loadRecipes()
+    console.log(`Imported ${count} recipes, refreshing list`)
+  }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Recipes</h2>
         <button className="btn-primary">Add Recipe</button>
+      </div>
+
+      <div className="mb-6">
+        <CSVUpload onUploadComplete={handleUploadComplete} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

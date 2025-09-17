@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { weeklyPlanStorage } from '../utils/localStorage'
+import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import RecipeSelector from './RecipeSelector'
 
 function WeeklyPlanner() {
@@ -10,13 +10,16 @@ function WeeklyPlanner() {
   const [isRecipeSelectorOpen, setIsRecipeSelectorOpen] = useState(false)
 
   useEffect(() => {
-    const currentPlan = weeklyPlanStorage.getCurrent()
-    if (currentPlan) {
-      setWeeklyPlan({
-        meals: currentPlan.meals || [],
-        notes: currentPlan.notes || ''
-      })
+    const loadCurrentPlan = async () => {
+      const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
+      if (currentPlan) {
+        setWeeklyPlan({
+          meals: currentPlan.meals || [],
+          notes: currentPlan.notes || ''
+        })
+      }
     }
+    loadCurrentPlan()
   }, [])
 
   const handleSelectRecipes = (selectedRecipes) => {
@@ -33,8 +36,8 @@ function WeeklyPlanner() {
     }))
   }
 
-  const handleSavePlan = () => {
-    const savedPlan = weeklyPlanStorage.save(weeklyPlan)
+  const handleSavePlan = async () => {
+    const savedPlan = await weeklyPlanService.save(weeklyPlan)
     if (savedPlan) {
       alert('Weekly plan saved successfully!')
     }
