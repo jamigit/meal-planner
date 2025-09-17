@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test AI Service</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .result { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+    pre { white-space: pre-wrap; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 AI Service Test</h1>
+  <p>Test the Mock AI Service directly:</p>
+
+  <button onclick="testAIService()">Test AI Suggestions</button>
+  <button onclick="clearResults()">Clear Results</button>
+
+  <div id="results"></div>
+
+  <script type="module">
+    import { mockAiService } from './src/services/mockAiService.js'
+
+    window.testAIService = async function() {
+      const resultsDiv = document.getElementById('results')
+      resultsDiv.innerHTML = '<p>🔄 Testing AI service...</p>'
+
+      try {
+        console.log('Testing Mock AI Service...')
+        const result = await mockAiService.generateMealSuggestions('feeling like healthy meals this week')
+
+        if (result.success) {
+          resultsDiv.innerHTML = `
+            <div class="result">
+              <h3>✅ Success!</h3>
+              <p><strong>Generated:</strong> ${result.data.length} suggestion sets</p>
+              <pre>${JSON.stringify(result, null, 2)}</pre>
+            </div>
+          `
+          console.log('✅ Test passed:', result)
+        } else {
+          resultsDiv.innerHTML = `
+            <div class="result">
+              <h3>❌ Error</h3>
+              <p><strong>Error:</strong> ${result.error}</p>
+              <pre>${JSON.stringify(result, null, 2)}</pre>
+            </div>
+          `
+          console.log('❌ Test failed:', result)
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <div class="result">
+            <h3>💥 Exception</h3>
+            <p><strong>Exception:</strong> ${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `
+        console.error('💥 Test exception:', error)
+      }
+    }
+
+    window.clearResults = function() {
+      document.getElementById('results').innerHTML = ''
+    }
+
+    // Auto-run test on load
+    setTimeout(() => {
+      console.log('Auto-running AI service test...')
+      window.testAIService()
+    }, 1000)
+  </script>
+</body>
+</html>
