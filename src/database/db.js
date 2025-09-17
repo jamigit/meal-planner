@@ -7,7 +7,8 @@ class MealPlannerDB extends Dexie {
 
     this.version(1).stores({
       recipes: '++id, name, url, tags, created_at, updated_at',
-      weeklyPlans: '++id, meal_ids, notes, is_current, created_at'
+      weeklyPlans: '++id, meal_ids, notes, is_current, created_at',
+      mealHistory: '++id, recipe_id, week_date, eaten_date, created_at'
     })
   }
 }

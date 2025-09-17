@@ -62,6 +62,66 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 }
 ```
 
+#### MealHistory (New for AI Features)
+```javascript
+{
+  id: string,           // Unique identifier
+  recipe_id: string,    // Reference to recipe
+  week_date: string,    // YYYY-MM-DD (Monday of week)
+  eaten_date: string,   // YYYY-MM-DD (actual consumption)
+  createdAt: string     // ISO timestamp
+}
+```
+
+### AI Meal Planning Features
+
+#### Overview
+The AI meal planning system analyzes meal history and user preferences to suggest personalized weekly meal plans using Claude API. The system enforces dietary restrictions and balances meal variety based on consumption patterns.
+
+#### Key Features
+- **Meal History Tracking**: Separate tracking of planned vs actual meals consumed
+- **Pattern Analysis**: 8-week historical analysis for frequency classification
+- **Dietary Restrictions**: Enforced gluten-free, no red meat/pork restrictions
+- **Smart Balancing**: 2 regular (eaten 3+ times) + 2 less regular (0-2 times) meals
+- **User Preferences**: Free-form text input for weekly preferences
+- **Multiple Options**: 3 different suggestion sets per request
+- **Meal Swapping**: Individual meal replacement within selected sets
+
+#### AI Suggestion Algorithm
+1. **Data Collection**:
+   - Load all available recipes with tags
+   - Analyze last 8 weeks of meal history
+   - Collect user preferences for current week
+
+2. **Recipe Classification**:
+   - **Regular Meals**: Eaten 3+ times in last 8 weeks
+   - **Less Regular Meals**: Eaten 0-2 times in last 8 weeks
+   - **Recent Avoidance**: Exclude meals from last 2 weeks
+
+3. **Constraint Application**:
+   - **Dietary**: Only gluten-free compatible recipes
+   - **Protein**: Fish, chicken, turkey, vegetarian only
+   - **Variety**: Avoid recent repetition
+
+4. **Suggestion Generation**:
+   - Generate 3 different suggestion sets
+   - Each set: 2 regular + 2 less regular meals
+   - Include reasoning for each selection
+   - Provide overall explanation per set
+
+#### User Experience Flow
+```
+1. User opens Weekly Planner
+2. User adds optional preference notes
+3. User clicks "Get AI Suggestions"
+4. System analyzes history + generates suggestions
+5. User views 3 suggestion sets with explanations
+6. User selects preferred set
+7. User can swap individual meals if desired
+8. User confirms and saves weekly plan
+9. System tracks as planned meals for future analysis
+```
+
 ### Tech Stack
 - **Frontend**: React + Vite + Tailwind CSS
 - **Data Storage**: localStorage → Database (SQLite planned)
@@ -96,17 +156,24 @@ Custom Tailwind component classes:
 ### ✅ Completed
 - [x] **Project Setup** - React + Vite + Tailwind CSS configured
 - [x] **Basic App Structure** - Navigation and routing
-- [x] **localStorage Utilities** - CRUD operations with error handling
+- [x] **Database Integration** - IndexedDB with Dexie for browser compatibility
 - [x] **Recipe Display** - Card-based layout with tags
 - [x] **Weekly Planning** - Recipe selection modal with 4-meal limit
 - [x] **Saved Plans** - View/manage all saved weekly plans
+- [x] **CSV Import** - Manual recipe upload functionality
 - [x] **Sample Data** - 4 sample recipes for testing
 
 ### 🔄 In Progress
-- [ ] **Database Integration** - Transition from localStorage to database
-- [ ] **CSV Import** - Manual recipe upload functionality
+- [ ] **AI Meal Planning** - Claude API integration for meal suggestions
+- [ ] **Meal History Tracking** - Track actual consumption vs planned meals
 
 ### 📋 Planned Features
+- [ ] **AI Meal Suggestions** - Personalized weekly meal recommendations
+  - [ ] Analyze 8 weeks of meal history
+  - [ ] Enforce dietary restrictions (gluten-free, no red meat/pork)
+  - [ ] Balance regular vs less regular meals (2+2 strategy)
+  - [ ] Multiple suggestion sets with meal swapping
+  - [ ] User preference notes integration
 - [ ] **Add/Edit Recipes** - Form-based recipe management
 - [ ] **Enhanced Search** - Advanced filtering and sorting
 - [ ] **Recipe Import** - Import from URLs
@@ -196,9 +263,14 @@ The goal is to get a working meal planner quickly, then enhance it iteratively b
 
 ## Future Enhancements
 
-### Phase 2: AI Integration
-- Claude API integration for recipe suggestions
-- Smart meal planning based on preferences and history
+### Phase 2: AI Integration ✅ In Progress
+- **AI-Powered Meal Suggestions**: Claude API integration for personalized weekly meal plans
+- **Meal History Analysis**: Track actual consumption patterns vs planned meals
+- **Dietary Restriction Enforcement**: Gluten-free only, no red meat/pork
+- **Smart Balancing**: 2 regular + 2 less regular meals per week
+- **User Preference Integration**: Free-form notes like "healthy", "have chicken in fridge"
+- **Multiple Suggestion Sets**: 3 different AI-generated options to choose from
+- **Meal Swapping**: Replace individual meals within selected suggestion set
 
 ### Phase 3: Enhanced Recipe Data
 - Full recipe details (ingredients, instructions, prep time)
