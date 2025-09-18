@@ -21,8 +21,6 @@ function WeeklyPlanner() {
   const [aiError, setAIError] = useState(null)
   const [weekPreferences, setWeekPreferences] = useState('')
 
-  // Meal tracking state
-  const [mealStats, setMealStats] = useState(null)
 
   // Shopping list state
   const [showShoppingList, setShowShoppingList] = useState(false)
@@ -40,17 +38,7 @@ function WeeklyPlanner() {
       }
     }
 
-    const loadMealStats = async () => {
-      try {
-        const stats = await mealHistoryService.getStatistics()
-        setMealStats(stats)
-      } catch (error) {
-        console.error('Failed to load meal stats:', error)
-      }
-    }
-
     loadCurrentPlan()
-    loadMealStats()
   }, [])
 
   const handleSelectRecipes = (selectedRecipes) => {
@@ -185,42 +173,6 @@ function WeeklyPlanner() {
         </button>
       </div>
 
-      {/* Meal Statistics Dashboard */}
-      {mealStats && (
-        <div className="card mb-6">
-          <h3 className="text-lg font-semibold mb-4">📊 Your Meal History</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{mealStats.totalMeals}</div>
-              <div className="text-sm text-gray-600">Total Meals</div>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{mealStats.uniqueRecipes}</div>
-              <div className="text-sm text-gray-600">Unique Recipes</div>
-            </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{mealStats.averagePerWeek}</div>
-              <div className="text-sm text-gray-600">Avg/Week</div>
-            </div>
-            <div className="bg-orange-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{mealStats.topRecipes?.[0]?.frequency || 0}</div>
-              <div className="text-sm text-gray-600">Most Made</div>
-            </div>
-          </div>
-          {mealStats.topRecipes && mealStats.topRecipes.length > 0 && (
-            <div className="mt-4">
-              <h4 className="font-medium text-gray-900 mb-2">Top Recipes:</h4>
-              <div className="flex flex-wrap gap-2">
-                {mealStats.topRecipes.slice(0, 5).map((recipe, index) => (
-                  <span key={recipe.id} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {recipe.name} ({recipe.frequency}x)
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div className="card">

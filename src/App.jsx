@@ -3,6 +3,7 @@ import Navigation from './components/Navigation'
 import RecipeList from './components/RecipeList'
 import WeeklyPlanner from './components/WeeklyPlanner'
 import SavedPlans from './components/SavedPlans'
+import MealHistory from './components/MealHistory'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<RecipeList />} />
             <Route path="/planner" element={<WeeklyPlanner />} />
             <Route path="/saved-plans" element={<SavedPlans />} />
+            <Route path="/meal-history" element={<MealHistory />} />
           </Routes>
         </main>
       </div>
