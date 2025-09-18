@@ -12,8 +12,8 @@ function App() {
         <Navigation />
         <main className="container mx-auto px-4 py-8">
           <Routes>
-            <Route path="/" element={<RecipeList />} />
-            <Route path="/planner" element={<WeeklyPlanner />} />
+            <Route path="/" element={<WeeklyPlanner />} />
+            <Route path="/recipes" element={<RecipeList />} />
             <Route path="/saved-plans" element={<SavedPlans />} />
             <Route path="/meal-history" element={<MealHistory />} />
           </Routes>

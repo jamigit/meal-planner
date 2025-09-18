@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
 import { claudeAiService } from '../services/claudeAiService.js'
@@ -8,6 +9,7 @@ import ShoppingList from './ShoppingList'
 import ShoppingListCard from './ShoppingListCard'
 
 function WeeklyPlanner() {
+  const navigate = useNavigate()
   const [weeklyPlan, setWeeklyPlan] = useState({
     meals: [],
     notes: ''
@@ -59,7 +61,14 @@ function WeeklyPlanner() {
     const savedPlan = await weeklyPlanService.save(weeklyPlan)
     if (savedPlan) {
       setCurrentPlanId(savedPlan.id)
+      // Clear the selected meals and notes
+      setWeeklyPlan({
+        meals: [],
+        notes: ''
+      })
       alert('Weekly plan saved successfully!')
+      // Navigate to saved plans page
+      navigate('/saved-plans')
     }
   }
 
@@ -160,7 +169,7 @@ function WeeklyPlanner() {
         <button
           onClick={handleGetAISuggestions}
           disabled={isLoadingAI}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoadingAI ? (
             <>
@@ -224,7 +233,7 @@ function WeeklyPlanner() {
           )}
           <button
             onClick={() => setIsRecipeSelectorOpen(true)}
-            className="btn-primary mt-4"
+            className="btn-secondary mt-4"
           >
             Select Meals
           </button>
@@ -238,9 +247,6 @@ function WeeklyPlanner() {
             placeholder="Add any notes about your meal plan..."
             className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <button onClick={handleSavePlan} className="btn-primary mt-4">
-            Save Plan
-          </button>
         </div>
 
         {/* Shopping List Card */}
@@ -266,6 +272,13 @@ function WeeklyPlanner() {
         isLoading={isLoadingAI}
         error={aiError}
       />
+
+      {/* Save Plan Button at Bottom */}
+      <div className="mt-8 text-center">
+        <button onClick={handleSavePlan} className="btn-primary">
+          Save Plan
+        </button>
+      </div>
 
     </div>
   )
