@@ -11,7 +11,12 @@ class RecipeService {
       const recipes = await this.db.recipes.orderBy('created_at').reverse().toArray()
       return recipes.map(recipe => ({
         ...recipe,
-        tags: recipe.tags || []
+        tags: recipe.tags || [],
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || [],
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        servings: recipe.servings || null
       }))
     } catch (error) {
       console.error('Failed to get recipes:', error)
@@ -27,7 +32,12 @@ class RecipeService {
 
       return {
         ...recipe,
-        tags: recipe.tags || []
+        tags: recipe.tags || [],
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || [],
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        servings: recipe.servings || null
       }
     } catch (error) {
       console.error('Failed to get recipe by ID:', error)
@@ -43,6 +53,11 @@ class RecipeService {
         name: recipe.name,
         url: recipe.url || null,
         tags: recipe.tags || [],
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || [],
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        servings: recipe.servings || null,
         created_at: now,
         updated_at: now
       })
@@ -61,6 +76,11 @@ class RecipeService {
         name: updates.name,
         url: updates.url || null,
         tags: updates.tags || [],
+        ingredients: updates.ingredients || [],
+        instructions: updates.instructions || [],
+        prep_time: updates.prep_time || null,
+        cook_time: updates.cook_time || null,
+        servings: updates.servings || null,
         updated_at: new Date().toISOString()
       }
 
@@ -96,6 +116,11 @@ class RecipeService {
         name: recipe.name,
         url: recipe.url || null,
         tags: recipe.tags || [],
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || [],
+        prep_time: recipe.prep_time || null,
+        cook_time: recipe.cook_time || null,
+        servings: recipe.servings || null,
         created_at: now,
         updated_at: now
       }))

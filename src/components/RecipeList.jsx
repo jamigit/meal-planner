@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { recipeService } from '../database/recipeService.js'
 import CSVUpload from './CSVUpload'
+import RecipeCard from './RecipeCard'
+import RecipeForm from './RecipeForm'
 
 function RecipeList() {
   const [recipes, setRecipes] = useState([])
+  const [showForm, setShowForm] = useState(false)
+  const [editingRecipe, setEditingRecipe] = useState(null)
 
   const loadRecipes = async () => {
     const loadedRecipes = await recipeService.getAll()
@@ -19,11 +23,54 @@ function RecipeList() {
     console.log(`Imported ${count} recipes, refreshing list`)
   }
 
+  const handleAddRecipe = () => {
+    setEditingRecipe(null)
+    setShowForm(true)
+  }
+
+  const handleEditRecipe = (recipe) => {
+    setEditingRecipe(recipe)
+    setShowForm(true)
+  }
+
+  const handleDeleteRecipe = async (id) => {
+    if (window.confirm('Are you sure you want to delete this recipe?')) {
+      try {
+        await recipeService.delete(id)
+        loadRecipes()
+      } catch (error) {
+        console.error('Failed to delete recipe:', error)
+        alert('Failed to delete recipe. Please try again.')
+      }
+    }
+  }
+
+  const handleSaveRecipe = async (recipeData) => {
+    try {
+      if (editingRecipe) {
+        await recipeService.update(editingRecipe.id, recipeData)
+      } else {
+        await recipeService.add(recipeData)
+      }
+      loadRecipes()
+      setShowForm(false)
+      setEditingRecipe(null)
+    } catch (error) {
+      console.error('Failed to save recipe:', error)
+      throw error
+    }
+  }
+
+  const handleCancelForm = () => {
+    setShowForm(false)
+    setEditingRecipe(null)
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Recipes</h2>
-        <button className="btn-primary">Add Recipe</button>
+        <button onClick={handleAddRecipe} className="btn-primary">Add Recipe</button>
       </div>
 
       <div className="mb-6">
@@ -37,27 +84,23 @@ function RecipeList() {
           </div>
         ) : (
           recipes.map((recipe) => (
-            <div key={recipe.id} className="card">
-              <h3 className="text-lg font-semibold mb-2">{recipe.name}</h3>
-              {recipe.url && (
-                <a
-                  href={recipe.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm mb-3 block"
-                >
-                  View Recipe →
-                </a>
-              )}
-              <div className="flex flex-wrap">
-                {recipe.tags?.map((tag) => (
-                  <span key={tag} className="tag">{tag}</span>
-                ))}
-              </div>
-            </div>
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onEdit={handleEditRecipe}
+              onDelete={handleDeleteRecipe}
+            />
           ))
         )}
       </div>
+
+      {/* Recipe Form Modal */}
+      <RecipeForm
+        recipe={editingRecipe}
+        isOpen={showForm}
+        onSave={handleSaveRecipe}
+        onCancel={handleCancelForm}
+      />
     </div>
   )
 }
