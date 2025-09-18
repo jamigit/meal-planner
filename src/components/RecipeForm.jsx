@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   const [formData, setFormData] = useState({
@@ -13,6 +13,36 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   })
 
   const [errors, setErrors] = useState({})
+
+  // Update form data when recipe prop changes
+  useEffect(() => {
+    if (recipe) {
+      setFormData({
+        name: recipe.name || '',
+        url: recipe.url || '',
+        tags: recipe.tags?.join(', ') || '',
+        ingredients: recipe.ingredients || [''],
+        instructions: recipe.instructions || [''],
+        prep_time: recipe.prep_time || '',
+        cook_time: recipe.cook_time || '',
+        servings: recipe.servings || ''
+      })
+    } else {
+      // Reset form for new recipe
+      setFormData({
+        name: '',
+        url: '',
+        tags: '',
+        ingredients: [''],
+        instructions: [''],
+        prep_time: '',
+        cook_time: '',
+        servings: ''
+      })
+    }
+    // Clear any existing errors
+    setErrors({})
+  }, [recipe])
 
   if (!isOpen) return null
 

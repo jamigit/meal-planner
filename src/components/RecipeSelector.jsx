@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react'
 import { recipeService } from '../database/recipeService.js'
+import { mealHistoryService } from '../database/mealHistoryService.js'
 
 function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
   const [selectedRecipes, setSelectedRecipes] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState('')
+  const [eatenCounts, setEatenCounts] = useState({})
 
   useEffect(() => {
     if (isOpen) {
       const loadRecipes = async () => {
         const allRecipes = await recipeService.getAll()
         setRecipes(allRecipes)
+
+        // Load eaten counts for all recipes
+        const recipeIds = allRecipes.map(recipe => recipe.id)
+        const counts = await mealHistoryService.getRecipeEatenCounts(recipeIds)
+        setEatenCounts(counts)
 
         // Clear selection first, then pre-select if needed
         if (selectedMealIds && selectedMealIds.length > 0) {
@@ -140,9 +147,16 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                   onClick={() => canSelect && toggleRecipeSelection(recipe)}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className={`font-semibold ${!canSelect ? 'text-gray-400' : ''}`}>
-                      {recipe.name}
-                    </h3>
+                    <div className="flex-1">
+                      <h3 className={`font-semibold ${!canSelect ? 'text-gray-400' : ''}`}>
+                        {recipe.name}
+                      </h3>
+                      {eatenCounts[recipe.id] !== undefined && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          Eaten {eatenCounts[recipe.id]} times in last 8 weeks
+                        </div>
+                      )}
+                    </div>
                     {isSelected && (
                       <span className="text-blue-600 text-xl">✓</span>
                     )}
