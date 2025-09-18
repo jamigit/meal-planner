@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
+import ShoppingListCard from './ShoppingListCard'
 
 function SavedPlans() {
   const [savedPlans, setSavedPlans] = useState([])
   const [eatenMeals, setEatenMeals] = useState(new Set()) // Track which meals are marked as eaten
+  const [activeTabs, setActiveTabs] = useState({}) // Track active tab for each plan (meals/list)
 
   const loadPlans = async () => {
     const plans = await weeklyPlanService.getAllWithRecipes()
@@ -62,6 +64,14 @@ function SavedPlans() {
     return eatenMeals.has(`${recipeId}-${planCreatedAt}`)
   }
 
+  const getActiveTab = (planId) => {
+    return activeTabs[planId] || 'meals'
+  }
+
+  const setActiveTab = (planId, tab) => {
+    setActiveTabs(prev => ({ ...prev, [planId]: tab }))
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -115,10 +125,33 @@ function SavedPlans() {
                 </div>
               </div>
 
-              {/* Meals */}
-              {plan.meals && plan.meals.length > 0 && (
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200 mb-4">
+                <button
+                  onClick={() => setActiveTab(plan.id, 'meals')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    getActiveTab(plan.id) === 'meals'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Meals ({plan.meals?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab(plan.id, 'shopping')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    getActiveTab(plan.id) === 'shopping'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Shopping List
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              {getActiveTab(plan.id) === 'meals' && plan.meals && plan.meals.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Meals:</h4>
                   <div className="grid grid-cols-1 gap-3">
                     {plan.meals.map((meal, index) => (
                       <div key={meal.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -161,6 +194,16 @@ function SavedPlans() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {getActiveTab(plan.id) === 'shopping' && (
+                <div className="mb-4">
+                  <ShoppingListCard
+                    recipes={plan.meals || []}
+                    weeklyPlanId={plan.id}
+                    className="border-0 p-0 shadow-none bg-transparent"
+                  />
                 </div>
               )}
 

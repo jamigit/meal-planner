@@ -4,6 +4,8 @@ import { mealHistoryService } from '../database/mealHistoryService.js'
 import { claudeAiService } from '../services/claudeAiService.js'
 import RecipeSelector from './RecipeSelector'
 import AISuggestionModal from './AISuggestionModal'
+import ShoppingList from './ShoppingList'
+import ShoppingListCard from './ShoppingListCard'
 
 function WeeklyPlanner() {
   const [weeklyPlan, setWeeklyPlan] = useState({
@@ -22,6 +24,10 @@ function WeeklyPlanner() {
   // Meal tracking state
   const [mealStats, setMealStats] = useState(null)
 
+  // Shopping list state
+  const [showShoppingList, setShowShoppingList] = useState(false)
+  const [currentPlanId, setCurrentPlanId] = useState(null)
+
   useEffect(() => {
     const loadCurrentPlan = async () => {
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
@@ -30,6 +36,7 @@ function WeeklyPlanner() {
           meals: currentPlan.meals || [],
           notes: currentPlan.notes || ''
         })
+        setCurrentPlanId(currentPlan.id)
       }
     }
 
@@ -63,8 +70,17 @@ function WeeklyPlanner() {
   const handleSavePlan = async () => {
     const savedPlan = await weeklyPlanService.save(weeklyPlan)
     if (savedPlan) {
+      setCurrentPlanId(savedPlan.id)
       alert('Weekly plan saved successfully!')
     }
+  }
+
+  const handleShowShoppingList = () => {
+    if (weeklyPlan.meals.length === 0) {
+      alert('Please add some meals to your weekly plan first.')
+      return
+    }
+    setShowShoppingList(true)
   }
 
   // AI Suggestion handlers
@@ -206,7 +222,7 @@ function WeeklyPlanner() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div className="card">
           <h3 className="text-lg font-semibold mb-4">Selected Meals</h3>
           {weeklyPlan.meals.length === 0 ? (
@@ -274,6 +290,13 @@ function WeeklyPlanner() {
             Save Plan
           </button>
         </div>
+
+        {/* Shopping List Card */}
+        <ShoppingListCard
+          recipes={weeklyPlan.meals}
+          weeklyPlanId={currentPlanId}
+          className="xl:col-span-1"
+        />
       </div>
 
       <RecipeSelector
@@ -291,6 +314,7 @@ function WeeklyPlanner() {
         isLoading={isLoadingAI}
         error={aiError}
       />
+
     </div>
   )
 }
