@@ -37,7 +37,12 @@ function CSVUpload({ onUploadComplete }) {
             .map(row => ({
               name: row.name?.trim() || '',
               url: row.url?.trim() || '',
-              tags: row.tags ? row.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
+              tags: row.tags ? row.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+              ingredients: row.ingredients ? row.ingredients.split('|').map(ing => ing.trim()).filter(Boolean) : [],
+              instructions: row.instructions ? row.instructions.split('|').map(inst => inst.trim()).filter(Boolean) : [],
+              prep_time: row.prep_time ? parseInt(row.prep_time) : null,
+              cook_time: row.cook_time ? parseInt(row.cook_time) : null,
+              servings: row.servings ? parseInt(row.servings) : null
             }))
 
           if (recipes.length === 0) {
@@ -82,10 +87,16 @@ function CSVUpload({ onUploadComplete }) {
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 mb-2">
-          CSV format: name, url, tags (comma-separated)
+          CSV format: name, url, tags, ingredients, instructions, prep_time, cook_time, servings
+        </p>
+        <p className="text-xs text-gray-500 mb-2">
+          • Tags: comma-separated (e.g., "pasta,italian,quick")
+        </p>
+        <p className="text-xs text-gray-500 mb-2">
+          • Ingredients: pipe-separated (e.g., "2 cups flour|1 tbsp oil|salt to taste")
         </p>
         <p className="text-xs text-gray-500">
-          Example: "Pasta Carbonara", "https://example.com/recipe", "pasta,italian,quick"
+          • Instructions: pipe-separated (e.g., "Preheat oven|Mix ingredients|Bake 30 min")
         </p>
       </div>
 
