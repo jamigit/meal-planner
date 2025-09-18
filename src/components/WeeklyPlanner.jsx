@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
-import { mockAiService } from '../services/mockAiService.js'
+import { claudeAiService } from '../services/claudeAiService.js'
 import RecipeSelector from './RecipeSelector'
 import AISuggestionModal from './AISuggestionModal'
 
@@ -76,7 +76,7 @@ function WeeklyPlanner() {
 
     try {
       console.log('🤖 Requesting AI suggestions with preferences:', weekPreferences)
-      const result = await mockAiService.generateMealSuggestions(weekPreferences)
+      const result = await claudeAiService.generateMealSuggestions(weekPreferences)
 
       if (result.success) {
         setAISuggestions(result.data)
