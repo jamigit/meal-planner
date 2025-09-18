@@ -32,8 +32,13 @@ function WeeklyPlanner() {
     const loadCurrentPlan = async () => {
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
       if (currentPlan) {
+        // Ensure each meal has a scaling factor
+        const mealsWithScaling = (currentPlan.meals || []).map(meal => ({
+          ...meal,
+          scaling: meal.scaling || 1
+        }))
         setWeeklyPlan({
-          meals: currentPlan.meals || [],
+          meals: mealsWithScaling,
           notes: currentPlan.notes || ''
         })
         setCurrentPlanId(currentPlan.id)
@@ -44,9 +49,14 @@ function WeeklyPlanner() {
   }, [])
 
   const handleSelectRecipes = (selectedRecipes) => {
+    // Add default scaling factor of 1 to each recipe
+    const mealsWithScaling = selectedRecipes.map(recipe => ({
+      ...recipe,
+      scaling: recipe.scaling || 1
+    }))
     setWeeklyPlan(prev => ({
       ...prev,
-      meals: selectedRecipes
+      meals: mealsWithScaling
     }))
   }
 
@@ -54,6 +64,17 @@ function WeeklyPlanner() {
     setWeeklyPlan(prev => ({
       ...prev,
       meals: prev.meals.filter(meal => meal.id !== mealId)
+    }))
+  }
+
+  const handleScalingChange = (mealId, newScaling) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      meals: prev.meals.map(meal =>
+        meal.id === mealId
+          ? { ...meal, scaling: parseInt(newScaling) }
+          : meal
+      )
     }))
   }
 
@@ -112,9 +133,14 @@ function WeeklyPlanner() {
 
   const handleSelectAIMeals = (selectedRecipes) => {
     console.log('🍽️ Selected AI meals:', selectedRecipes)
+    // Add default scaling factor of 1 to each recipe
+    const mealsWithScaling = selectedRecipes.map(recipe => ({
+      ...recipe,
+      scaling: recipe.scaling || 1
+    }))
     setWeeklyPlan(prev => ({
       ...prev,
-      meals: selectedRecipes
+      meals: mealsWithScaling
     }))
     setShowAIModal(false)
   }
@@ -193,7 +219,22 @@ function WeeklyPlanner() {
               {weeklyPlan.meals.map((meal) => (
                 <div key={meal.id} className="p-3 bg-gray-50 rounded">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium">{meal.name}</h4>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{meal.name}</h4>
+                      <div className="flex items-center mt-2">
+                        <label className="text-sm text-gray-600 mr-2">Servings:</label>
+                        <select
+                          value={meal.scaling || 1}
+                          onChange={(e) => handleScalingChange(meal.id, e.target.value)}
+                          className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                        >
+                          <option value={1}>1x</option>
+                          <option value={2}>2x</option>
+                          <option value={3}>3x</option>
+                          <option value={4}>4x</option>
+                        </select>
+                      </div>
+                    </div>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleMarkMealAsEaten(meal)}

@@ -66,10 +66,18 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
           if (!byRecipe[source.recipe]) {
             byRecipe[source.recipe] = []
           }
+
+          // Use scaled quantity if available, otherwise use original
+          const displayText = source.scaled
+            ? `${shoppingListService.formatQuantity(source.quantity, source.unit)} ${item.item} (${source.scaling}x)`
+            : source.original
+
           byRecipe[source.recipe].push({
             ...item,
-            displayText: source.original,
-            category
+            displayText,
+            category,
+            scaled: source.scaled,
+            scaling: source.scaling
           })
         }
       }

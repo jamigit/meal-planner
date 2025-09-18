@@ -25,6 +25,14 @@ class MealPlannerDB extends Dexie {
       mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
       shoppingLists: '++id, weekly_plan_id, items, created_at'
     })
+
+    // Version 4: Update weeklyPlans to store meal objects with scaling instead of just IDs
+    this.version(4).stores({
+      recipes: '++id, name, url, tags, ingredients, instructions, prep_time, cook_time, servings, created_at, updated_at',
+      weeklyPlans: '++id, meals, notes, is_current, created_at',
+      mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
+      shoppingLists: '++id, weekly_plan_id, items, created_at'
+    })
   }
 }
 
