@@ -420,7 +420,7 @@ function WeeklyPlanner() {
 
       {/* Recipe Sidebar */}
       {sidebarRecipe && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 border-l border-gray-200 flex flex-col">
+        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-60 border-l border-gray-200 flex flex-col">
           {/* Fixed Header */}
           <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-white">
             <div className="flex justify-between items-center">
