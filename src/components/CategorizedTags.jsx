@@ -19,34 +19,36 @@ function CategorizedTags({ recipe, className = '', showLegacy = false }) {
   }
 
   return (
-    <div className={`flex flex-wrap ${className}`}>
-      {/* Cuisine Tags */}
-      {cuisine_tags.map(tag => (
-        <span key={`cuisine-${tag}`} className="tag-cuisine">
-          {tag}
-        </span>
-      ))}
+    <div className={`flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 ${className}`}>
+      <div className="flex flex-nowrap gap-2 min-w-max">
+        {/* Cuisine Tags */}
+        {cuisine_tags.map(tag => (
+          <span key={`cuisine-${tag}`} className="tag-cuisine flex-shrink-0">
+            {tag}
+          </span>
+        ))}
 
-      {/* Ingredient Tags */}
-      {ingredient_tags.map(tag => (
-        <span key={`ingredient-${tag}`} className="tag-ingredients">
-          {tag}
-        </span>
-      ))}
+        {/* Ingredient Tags */}
+        {ingredient_tags.map(tag => (
+          <span key={`ingredient-${tag}`} className="tag-ingredients flex-shrink-0">
+            {tag}
+          </span>
+        ))}
 
-      {/* Convenience Tags */}
-      {convenience_tags.map(tag => (
-        <span key={`convenience-${tag}`} className="tag-convenience">
-          {tag}
-        </span>
-      ))}
+        {/* Convenience Tags */}
+        {convenience_tags.map(tag => (
+          <span key={`convenience-${tag}`} className="tag-convenience flex-shrink-0">
+            {tag}
+          </span>
+        ))}
 
-      {/* Legacy Tags */}
-      {showLegacy && tags.map(tag => (
-        <span key={`legacy-${tag}`} className="tag-legacy">
-          {tag}
-        </span>
-      ))}
+        {/* Legacy Tags */}
+        {showLegacy && tags.map(tag => (
+          <span key={`legacy-${tag}`} className="tag-legacy flex-shrink-0">
+            {tag}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
