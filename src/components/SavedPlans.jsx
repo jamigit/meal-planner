@@ -115,7 +115,7 @@ function SavedPlans() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-lg font-semibold">
-                      Plan from {formatDate(plan.created_at)}
+                      {plan.name || `Plan from ${formatDate(plan.created_at)}`}
                     </h3>
                     {plan.is_current && (
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
@@ -123,9 +123,14 @@ function SavedPlans() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">
-                    {plan.meals?.length || 0} meal{(plan.meals?.length || 0) !== 1 ? 's' : ''}
-                  </p>
+                  <div className="text-sm text-gray-500 space-y-1">
+                    <p>
+                      {plan.meals?.length || 0} meal{(plan.meals?.length || 0) !== 1 ? 's' : ''}
+                    </p>
+                    <p>
+                      Created: {formatDate(plan.created_at)}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex space-x-2">

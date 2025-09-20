@@ -13,7 +13,8 @@ function WeeklyPlanner() {
   const navigate = useNavigate()
   const [weeklyPlan, setWeeklyPlan] = useState({
     meals: [],
-    notes: ''
+    notes: '',
+    name: ''
   })
   const [isRecipeSelectorOpen, setIsRecipeSelectorOpen] = useState(false)
 
@@ -152,7 +153,8 @@ function WeeklyPlanner() {
       // Reset all weekly planner state
       setWeeklyPlan({
         meals: [],
-        notes: ''
+        notes: '',
+        name: ''
       })
       setWeekPreferences('')
       setMealEatenCounts({})
@@ -500,6 +502,21 @@ function WeeklyPlanner() {
           onChange={(e) => setWeeklyPlan(prev => ({ ...prev, notes: e.target.value }))}
           placeholder="Add any notes about your meal plan..."
           className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      {/* Meal Plan Name Section - Full Width */}
+      <div className="card">
+        <h3 className="text-lg font-semibold mb-4">Meal Plan Name (Optional)</h3>
+        <p className="text-gray-600 mb-4">
+          Give your meal plan a custom name. If left blank, it will use a default name with the creation date.
+        </p>
+        <input
+          type="text"
+          value={weeklyPlan.name}
+          onChange={(e) => setWeeklyPlan(prev => ({ ...prev, name: e.target.value }))}
+          placeholder="e.g., 'Healthy Week', 'Quick Meals', 'Family Favorites'"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 

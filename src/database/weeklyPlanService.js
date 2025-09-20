@@ -127,6 +127,7 @@ class WeeklyPlanService {
       const id = await this.db.weeklyPlans.add({
         meals: meals,
         notes: weeklyPlan.notes || null,
+        name: weeklyPlan.name || null,
         is_current: setAsCurrent ? 1 : 0,
         created_at: new Date().toISOString()
       })
