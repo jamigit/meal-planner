@@ -10,7 +10,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
           <Routes>
             <Route path="/" element={<WeeklyPlanner />} />
             <Route path="/recipes" element={<RecipeList />} />
