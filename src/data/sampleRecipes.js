@@ -1,4 +1,6 @@
 export const sampleRecipes = [
+
+  
   {
     name: "Honey Garlic Chicken Thighs",
     url: "https://example.com/honey-garlic-chicken",

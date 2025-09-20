@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { seedDatabase, clearAllRecipes, reseedDatabase } from '../utils/seedDatabase.js'
 import { migrateAllRecipes, analyzeExistingTags } from '../utils/tagMigration.js'
 import { recipeService } from '../database/recipeService.js'
-import DataMigration from './DataMigration.jsx'
 
 function DevUtils() {
   const [isOpen, setIsOpen] = useState(false)
@@ -148,10 +147,6 @@ function DevUtils() {
         </div>
       )}
 
-      {/* Data Migration Panel */}
-      <div className="fixed bottom-4 right-4 z-40">
-        <DataMigration />
-      </div>
     </div>
   )
 }

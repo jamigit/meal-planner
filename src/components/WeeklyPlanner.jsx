@@ -277,7 +277,9 @@ function WeeklyPlanner() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Weekly Planner</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        {weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
+      </h2>
 
       {/* AI Suggestion Section */}
       <div className="card mb-6">
@@ -411,7 +413,9 @@ function WeeklyPlanner() {
       {/* Selected Meals and Shopping List Section - Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="card">
-          <h3 className="text-lg font-semibold mb-4">Selected Meals</h3>
+          <h3 className="text-lg font-semibold mb-4">
+            {weeklyPlan.name ? `${weeklyPlan.name} - Selected Meals` : 'Selected Meals'}
+          </h3>
           {weeklyPlan.meals.length === 0 ? (
             <p className="text-gray-500">No meals selected yet.</p>
           ) : (

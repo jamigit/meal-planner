@@ -7,7 +7,6 @@ import WeeklyPlanner from './components/WeeklyPlanner'
 import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
-import DevUtils from './components/DevUtils'
 import RecipeSeeder from './components/RecipeSeeder'
 
 function AppContent() {
@@ -43,7 +42,6 @@ function AppContent() {
       </main>
 
       {/* Developer Utils - only in development */}
-          <DevUtils />
           <RecipeSeeder />
         </div>
       )
