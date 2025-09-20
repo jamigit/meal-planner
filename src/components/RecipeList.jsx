@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { serviceSelector } from '../services/serviceSelector.js'
 import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CSVUpload from './CSVUpload'
@@ -250,30 +251,49 @@ function RecipeList() {
       />
 
       {/* Import Recipes Sidebar */}
-      {showImportSidebar && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 overflow-y-auto border-l border-gray-200">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Import Recipes</h3>
-              <button
-                onClick={() => setShowImportSidebar(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                ×
-              </button>
+      <AnimatePresence>
+        {showImportSidebar && (
+          <motion.div 
+            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 overflow-y-auto border-l border-gray-200"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.4 
+            }}
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Import Recipes</h3>
+                <button
+                  onClick={() => setShowImportSidebar(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              <CSVUpload onUploadComplete={handleUploadComplete} />
             </div>
-            <CSVUpload onUploadComplete={handleUploadComplete} />
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sidebar Backdrop */}
-      {showImportSidebar && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setShowImportSidebar(false)}
-        ></div>
-      )}
+      <AnimatePresence>
+        {showImportSidebar && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowImportSidebar(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

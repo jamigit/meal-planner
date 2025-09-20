@@ -576,20 +576,36 @@ function WeeklyPlanner() {
       </div>
 
       {/* Sidebar Backdrop */}
-      {sidebarRecipe && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50"
-          style={{ zIndex: 1000 }}
-          onClick={() => setSidebarRecipe(null)}
-        ></div>
-      )}
+      <AnimatePresence>
+        {sidebarRecipe && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            style={{ zIndex: 1000 }}
+            onClick={() => setSidebarRecipe(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Recipe Sidebar */}
-      {sidebarRecipe && (
-        <div 
-          className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
-          style={{ zIndex: 1001 }}
-        >
+      <AnimatePresence>
+        {sidebarRecipe && (
+          <motion.div 
+            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+            style={{ zIndex: 1001 }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.4 
+            }}
+          >
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
             <div className="flex justify-between items-center">
@@ -611,8 +627,9 @@ function WeeklyPlanner() {
               showDetails={true}
             />
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   )
