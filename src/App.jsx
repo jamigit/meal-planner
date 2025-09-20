@@ -8,6 +8,7 @@ import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
 import DevUtils from './components/DevUtils'
+import RecipeSeeder from './components/RecipeSeeder'
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
@@ -42,19 +43,20 @@ function AppContent() {
       </main>
 
       {/* Developer Utils - only in development */}
-      <DevUtils />
-    </div>
-  )
-}
+          <DevUtils />
+          <RecipeSeeder />
+        </div>
+      )
+    }
 
-function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
-  )
-}
+    function App() {
+      return (
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      )
+    }
 
 export default App
