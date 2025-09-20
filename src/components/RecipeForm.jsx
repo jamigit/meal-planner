@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   TAG_CATEGORIES,
   CUISINE_TAGS,
@@ -212,21 +213,54 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {recipe ? 'Edit Recipe' : 'Add New Recipe'}
-            </h2>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
-            >
-              ×
-            </button>
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            style={{ zIndex: 1000 }}
+            onClick={onCancel}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+          
+          {/* Sidebar */}
+          <motion.div 
+            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+            style={{ zIndex: 1001 }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.4 
+            }}
+          >
+            {/* Fixed Header */}
+            <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {recipe ? 'Edit Recipe' : 'Add New Recipe'}
+                </h2>
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <span className="text-lg">×</span>
+                  <span className="text-sm font-medium">Close</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <form onSubmit={handleSubmit} className="space-y-6">
 
           {errors.submit && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
@@ -428,25 +462,28 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
             </div>
           </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-            >
-              {recipe ? 'Update Recipe' : 'Save Recipe'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+                {/* Form Actions */}
+                <div className="flex justify-end space-x-3 pt-6 border-t">
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                  >
+                    {recipe ? 'Update Recipe' : 'Save Recipe'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
 
