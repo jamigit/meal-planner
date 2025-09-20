@@ -34,18 +34,24 @@ function WeeklyPlanner() {
 
   useEffect(() => {
     const loadCurrentPlan = async () => {
+      console.log('🔄 Loading current plan...')
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
+      console.log('📋 Current plan found:', currentPlan)
+      
       if (currentPlan) {
         // Ensure each meal has a scaling factor
         const mealsWithScaling = (currentPlan.meals || []).map(meal => ({
           ...meal,
           scaling: meal.scaling || 1
         }))
+        console.log('🍽️ Setting meals:', mealsWithScaling)
         setWeeklyPlan({
           meals: mealsWithScaling,
           notes: currentPlan.notes || ''
         })
         setCurrentPlanId(currentPlan.id)
+      } else {
+        console.log('❌ No current plan found')
       }
     }
 
@@ -104,17 +110,53 @@ function WeeklyPlanner() {
   }
 
   const handleSavePlan = async () => {
-    const savedPlan = await weeklyPlanService.save(weeklyPlan)
+    console.log('🔄 Starting save process with plan:', weeklyPlan)
+    
+    // Clear any existing current plans first
+    await weeklyPlanService.clearCurrentPlans()
+    
+    // Save the plan but don't set it as current (so it doesn't reload)
+    const savedPlan = await weeklyPlanService.save(weeklyPlan, false)
+    console.log('💾 Saved plan result:', savedPlan)
+    
     if (savedPlan) {
-      setCurrentPlanId(savedPlan.id)
-      // Clear the selected meals and notes
+      console.log('✅ Plan saved successfully, resetting state...')
+      
+      // Reset all weekly planner state
       setWeeklyPlan({
         meals: [],
         notes: ''
       })
-      alert('Weekly plan saved successfully!')
-      // Navigate to saved plans page
-      navigate('/saved-plans')
+      setWeekPreferences('')
+      setMealEatenCounts({})
+      setSidebarRecipe(null)
+      setCurrentPlanId(null) // Clear current plan ID
+      
+      // Close any open modals
+      setIsRecipeSelectorOpen(false)
+      setShowAIModal(false)
+      setShowShoppingList(false)
+      
+      // Clear AI suggestion state
+      setAISuggestions([])
+      setAIError(null)
+      setIsLoadingAI(false)
+      
+      console.log('🧹 State reset complete, current state:', {
+        meals: [],
+        notes: '',
+        currentPlanId: null
+      })
+      
+      // Don't navigate immediately - let user see the reset
+      alert('Weekly plan saved successfully! The planner has been reset.')
+      
+      // Optional: Navigate after a short delay
+      setTimeout(() => {
+        navigate('/saved-plans')
+      }, 1000)
+    } else {
+      console.log('❌ Failed to save plan')
     }
   }
 

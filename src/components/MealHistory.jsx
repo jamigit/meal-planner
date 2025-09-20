@@ -82,8 +82,8 @@ function MealHistory() {
               <p className="text-gray-500 italic">No frequently eaten meals yet</p>
             ) : (
               <div className="space-y-3">
-                {mealStats.regular.map((meal) => (
-                  <div key={meal.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                {mealStats.regular.map((meal, index) => (
+                  <div key={`regular-${meal.id}-${index}`} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <h4 className="font-medium text-gray-900">{meal.name}</h4>
                       <CategorizedTags recipe={meal} className="mt-1" />
@@ -110,8 +110,8 @@ function MealHistory() {
               <p className="text-gray-500 italic">No occasional meals tracked</p>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {mealStats.lessRegular.map((meal) => (
-                  <div key={meal.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                {mealStats.lessRegular.map((meal, index) => (
+                  <div key={`less-regular-${meal.id}-${index}`} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <h4 className="font-medium text-gray-900">{meal.name}</h4>
                       <CategorizedTags recipe={meal} className="mt-1" />
@@ -147,7 +147,7 @@ function MealHistory() {
         ) : (
           <div className="space-y-3">
             {recentHistory.map((entry, index) => (
-              <div key={index} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
+              <div key={`${entry.id || entry.recipe_id}-${index}`} className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
                 <div>
                   <h4 className="font-medium text-gray-900">{entry.recipe_name}</h4>
                   <div className="text-sm text-gray-600 mt-1">

@@ -183,6 +183,37 @@ class MealHistoryService {
     }
   }
 
+  // Get recent meal history with full recipe details
+  async getRecentHistoryWithDetails(daysBack = 30) {
+    try {
+      const cutoffDate = new Date()
+      cutoffDate.setDate(cutoffDate.getDate() - daysBack)
+      const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
+
+      const historyEntries = await this.db.mealHistory
+        .where('eaten_date')
+        .aboveOrEqual(cutoffDateStr)
+        .reverse()
+        .sortBy('eaten_date')
+
+      const historyWithDetails = []
+      for (const entry of historyEntries) {
+        const recipe = await recipeService.getById(entry.recipe_id)
+        if (recipe) {
+          historyWithDetails.push({
+            ...entry,
+            recipe: recipe
+          })
+        }
+      }
+
+      return historyWithDetails
+    } catch (error) {
+      console.error('Failed to get recent history with details:', error)
+      return []
+    }
+  }
+
   // Delete meal history entry
   async delete(id) {
     try {

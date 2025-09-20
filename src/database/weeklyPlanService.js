@@ -40,6 +40,18 @@ class WeeklyPlanService {
     }
   }
 
+  // Clear all current plans (set all to not current)
+  async clearCurrentPlans() {
+    try {
+      const result = await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
+      console.log(`Cleared ${result} current plans`)
+      return result
+    } catch (error) {
+      console.error('Failed to clear current plans:', error)
+      return 0
+    }
+  }
+
   // Get current weekly plan with full recipe details
   async getCurrentWithRecipes() {
     try {
@@ -90,10 +102,12 @@ class WeeklyPlanService {
   }
 
   // Save new weekly plan
-  async save(weeklyPlan) {
+  async save(weeklyPlan, setAsCurrent = true) {
     try {
-      // First, set all existing plans to not current
-      await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
+      // First, set all existing plans to not current (only if setting as current)
+      if (setAsCurrent) {
+        await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
+      }
 
       // Store meal objects with scaling information
       const meals = weeklyPlan.meals ? weeklyPlan.meals.map(meal => ({
@@ -109,11 +123,11 @@ class WeeklyPlanService {
         scaling: meal.scaling || 1
       })) : []
 
-      // Insert new plan as current
+      // Insert new plan
       const id = await this.db.weeklyPlans.add({
         meals: meals,
         notes: weeklyPlan.notes || null,
-        is_current: 1,
+        is_current: setAsCurrent ? 1 : 0,
         created_at: new Date().toISOString()
       })
 

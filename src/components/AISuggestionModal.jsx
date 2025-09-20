@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CategorizedTags from './CategorizedTags'
+import { recipeService } from '../database/recipeService.js'
 
 function AISuggestionModal({
   isOpen,
@@ -13,18 +14,27 @@ function AISuggestionModal({
   const [swapModalOpen, setSwapModalOpen] = useState(false)
   const [swapIndex, setSwapIndex] = useState(null)
   const [availableRecipes, setAvailableRecipes] = useState([])
+  const [selectedMeals, setSelectedMeals] = useState([])
 
   if (!isOpen) return null
 
   const handleSelectSet = (suggestionSet) => {
     setSelectedSet(suggestionSet)
+    // Initialize all meals as selected by default
+    setSelectedMeals(suggestionSet.meals.map((_, index) => index))
   }
 
   const handleSwapMeal = async (index) => {
-    // For now, we'll implement a simple swap with other recipes
-    // In the future, this could be more sophisticated
     setSwapIndex(index)
-    setSwapModalOpen(true)
+    // Load all available recipes for swapping
+    try {
+      const recipes = await recipeService.getAll()
+      setAvailableRecipes(recipes)
+      setSwapModalOpen(true)
+    } catch (error) {
+      console.error('Failed to load recipes for swapping:', error)
+      alert('Failed to load recipes for swapping. Please try again.')
+    }
   }
 
   const handleConfirmSwap = (newRecipe) => {
@@ -40,10 +50,23 @@ function AISuggestionModal({
     setSwapIndex(null)
   }
 
+  const handleToggleMealSelection = (index) => {
+    setSelectedMeals(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index)
+      } else {
+        return [...prev, index]
+      }
+    })
+  }
+
   const handleConfirmSelection = () => {
-    if (selectedSet) {
-      const recipes = selectedSet.meals.map(meal => meal.recipe)
-      onSelectMeals(recipes)
+    if (selectedSet && selectedMeals.length > 0) {
+      // Only include selected meals
+      const selectedRecipes = selectedMeals
+        .map(index => selectedSet.meals[index])
+        .map(meal => meal.recipe)
+      onSelectMeals(selectedRecipes)
       onClose()
     }
   }
@@ -111,34 +134,59 @@ function AISuggestionModal({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {selectedSet.meals.map((meal, index) => (
-                    <div key={index} className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                      <div className="flex justify-between items-start mb-3">
-                        <h4 className="font-semibold text-gray-900">{meal.recipe.name}</h4>
-                        <button
-                          onClick={() => handleSwapMeal(index)}
-                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          Swap
-                        </button>
+                  {selectedSet.meals.map((meal, index) => {
+                    const isSelected = selectedMeals.includes(index)
+                    return (
+                      <div 
+                        key={index} 
+                        className={`border-2 rounded-lg p-4 transition-colors cursor-pointer ${
+                          isSelected 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => handleToggleMealSelection(index)}
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-start space-x-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleMealSelection(index)}
+                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <h4 className="font-semibold text-gray-900">{meal.recipe.name}</h4>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSwapMeal(index)
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Swap
+                          </button>
+                        </div>
+
+                        <p className="text-sm text-gray-600 mb-3 ml-7">{meal.reason}</p>
+
+                        {meal.recipe.url && (
+                          <a
+                            href={meal.recipe.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-sm text-blue-600 hover:text-blue-800 block mb-2 ml-7"
+                          >
+                            View Recipe →
+                          </a>
+                        )}
+
+                        <div className="ml-7">
+                          <CategorizedTags recipe={meal.recipe} />
+                        </div>
                       </div>
-
-                      <p className="text-sm text-gray-600 mb-3">{meal.reason}</p>
-
-                      {meal.recipe.url && (
-                        <a
-                          href={meal.recipe.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 block mb-2"
-                        >
-                          View Recipe →
-                        </a>
-                      )}
-
-                      <CategorizedTags recipe={meal.recipe} />
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>
@@ -210,13 +258,64 @@ function AISuggestionModal({
         {/* Footer Actions (only show when set is selected) */}
         {selectedSet && !isLoading && !error && (
           <div className="border-t p-6 bg-gray-50">
-            <div className="flex justify-end space-x-3">
-              <button onClick={handleBackToOptions} className="btn-secondary">
-                See Other Options
-              </button>
-              <button onClick={handleConfirmSelection} className="btn-primary">
-                Use This Plan ({selectedSet.meals.length} meals)
-              </button>
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-gray-600">
+                {selectedMeals.length} of {selectedSet.meals.length} meals selected
+              </div>
+              <div className="flex space-x-3">
+                <button onClick={handleBackToOptions} className="btn-secondary">
+                  See Other Options
+                </button>
+                <button 
+                  onClick={handleConfirmSelection} 
+                  className="btn-primary"
+                  disabled={selectedMeals.length === 0}
+                >
+                  Use Selected Meals ({selectedMeals.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Swap Modal */}
+        {swapModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-60">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
+              <div className="flex justify-between items-center p-6 border-b">
+                <h3 className="text-xl font-semibold">Choose Replacement Recipe</h3>
+                <button
+                  onClick={() => setSwapModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none"
+                >
+                  ×
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {availableRecipes.map((recipe) => (
+                    <div
+                      key={recipe.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors"
+                      onClick={() => handleConfirmSwap(recipe)}
+                    >
+                      <h4 className="font-semibold text-gray-900 mb-2">{recipe.name}</h4>
+                      <CategorizedTags recipe={recipe} />
+                      {recipe.url && (
+                        <a
+                          href={recipe.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 block mt-2"
+                        >
+                          View Recipe →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
