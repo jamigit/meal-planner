@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { mealHistoryService } from '../database/mealHistoryService.js'
+import CategorizedTags from './CategorizedTags'
 
 function MealHistory() {
   const [mealStats, setMealStats] = useState(null)
@@ -85,13 +86,7 @@ function MealHistory() {
                   <div key={meal.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <h4 className="font-medium text-gray-900">{meal.name}</h4>
-                      {meal.tags && meal.tags.length > 0 && (
-                        <div className="flex flex-wrap mt-1">
-                          {meal.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="tag text-xs">{tag}</span>
-                          ))}
-                        </div>
-                      )}
+                      <CategorizedTags recipe={meal} className="mt-1" />
                     </div>
                     <span className={`px-2 py-1 rounded-full text-sm font-medium ${getFrequencyColor(meal.frequency)}`}>
                       {meal.frequency}x
@@ -119,13 +114,7 @@ function MealHistory() {
                   <div key={meal.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <h4 className="font-medium text-gray-900">{meal.name}</h4>
-                      {meal.tags && meal.tags.length > 0 && (
-                        <div className="flex flex-wrap mt-1">
-                          {meal.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="tag text-xs">{tag}</span>
-                          ))}
-                        </div>
-                      )}
+                      <CategorizedTags recipe={meal} className="mt-1" />
                     </div>
                     <span className={`px-2 py-1 rounded-full text-sm font-medium ${getFrequencyColor(meal.frequency || 0)}`}>
                       {meal.frequency || 0}x
@@ -164,13 +153,7 @@ function MealHistory() {
                   <div className="text-sm text-gray-600 mt-1">
                     Eaten on {formatDate(entry.eaten_date)}
                   </div>
-                  {entry.tags && entry.tags.length > 0 && (
-                    <div className="flex flex-wrap mt-2">
-                      {entry.tags.slice(0, 4).map(tag => (
-                        <span key={tag} className="tag text-xs">{tag}</span>
-                      ))}
-                    </div>
-                  )}
+                  <CategorizedTags recipe={entry} className="mt-2" />
                 </div>
                 <div className="text-right text-sm text-gray-500">
                   {Math.floor((new Date() - new Date(entry.eaten_date)) / (1000 * 60 * 60 * 24))} days ago

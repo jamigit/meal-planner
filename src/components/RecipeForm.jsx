@@ -1,10 +1,21 @@
 import { useState, useEffect } from 'react'
+import {
+  TAG_CATEGORIES,
+  CUISINE_TAGS,
+  INGREDIENT_TAGS,
+  CONVENIENCE_TAGS,
+  getCategoryDisplayName,
+  getCategoryColorClasses
+} from '../constants/tagCategories.js'
 
 function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   const [formData, setFormData] = useState({
     name: recipe?.name || '',
     url: recipe?.url || '',
     tags: recipe?.tags?.join(', ') || '',
+    cuisine_tags: recipe?.cuisine_tags || [],
+    ingredient_tags: recipe?.ingredient_tags || [],
+    convenience_tags: recipe?.convenience_tags || [],
     ingredients: recipe?.ingredients && recipe?.ingredients.length > 0 ? recipe.ingredients : [''],
     instructions: recipe?.instructions && recipe?.instructions.length > 0 ? recipe.instructions : [''],
     prep_time: recipe?.prep_time || '',
@@ -21,6 +32,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
         name: recipe.name || '',
         url: recipe.url || '',
         tags: recipe.tags?.join(', ') || '',
+        cuisine_tags: recipe.cuisine_tags || [],
+        ingredient_tags: recipe.ingredient_tags || [],
+        convenience_tags: recipe.convenience_tags || [],
         ingredients: recipe.ingredients && recipe.ingredients.length > 0 ? recipe.ingredients : [''],
         instructions: recipe.instructions && recipe.instructions.length > 0 ? recipe.instructions : [''],
         prep_time: recipe.prep_time || '',
@@ -33,6 +47,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
         name: '',
         url: '',
         tags: '',
+        cuisine_tags: [],
+        ingredient_tags: [],
+        convenience_tags: [],
         ingredients: [''],
         instructions: [''],
         prep_time: '',
@@ -98,6 +115,52 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
     }
   }
 
+  // Categorized tag handlers
+  const handleTagToggle = (category, tag) => {
+    const categoryField = `${category}_tags`
+    const currentTags = formData[categoryField] || []
+
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter(t => t !== tag)
+      : [...currentTags, tag]
+
+    setFormData(prev => ({ ...prev, [categoryField]: newTags }))
+  }
+
+  const renderTagCategory = (category, availableTags) => {
+    const categoryField = `${category}_tags`
+    const selectedTags = formData[categoryField] || []
+
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          {getCategoryDisplayName(category)}
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {availableTags.map(tag => {
+            const isSelected = selectedTags.includes(tag)
+            const colorClasses = getCategoryColorClasses(category)
+
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleTagToggle(category, tag)}
+                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                  isSelected
+                    ? colorClasses
+                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                }`}
+              >
+                {tag}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   const validateForm = () => {
     const newErrors = {}
 
@@ -130,6 +193,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
       name: formData.name.trim(),
       url: formData.url.trim() || null,
       tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+      cuisine_tags: formData.cuisine_tags || [],
+      ingredient_tags: formData.ingredient_tags || [],
+      convenience_tags: formData.convenience_tags || [],
       ingredients: formData.ingredients.filter(ing => ing.trim()),
       instructions: formData.instructions.filter(inst => inst.trim()),
       prep_time: formData.prep_time ? parseInt(formData.prep_time) : null,
@@ -251,10 +317,10 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
               </div>
             </div>
 
-            {/* Tags */}
+            {/* Legacy Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tags (comma-separated)
+                Other Tags (comma-separated)
               </label>
               <input
                 type="text"
@@ -262,8 +328,22 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
                 value={formData.tags}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="chicken, quick, gluten-free"
+                placeholder="gluten-free, dairy-free, special occasions"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                For dietary restrictions, special occasions, or other tags not covered by the categories below
+              </p>
+            </div>
+
+            {/* Categorized Tags */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+                Recipe Categories
+              </h3>
+
+              {renderTagCategory(TAG_CATEGORIES.CUISINE, CUISINE_TAGS)}
+              {renderTagCategory(TAG_CATEGORIES.INGREDIENTS, INGREDIENT_TAGS)}
+              {renderTagCategory(TAG_CATEGORIES.CONVENIENCE, CONVENIENCE_TAGS)}
             </div>
 
             {/* Ingredients */}

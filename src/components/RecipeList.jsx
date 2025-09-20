@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react'
 import { recipeService } from '../database/recipeService.js'
+import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CSVUpload from './CSVUpload'
 import RecipeCard from './RecipeCard'
 import RecipeForm from './RecipeForm'
+import TagMigrationModal from './TagMigrationModal'
 
 function RecipeList() {
   const [recipes, setRecipes] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [editingRecipe, setEditingRecipe] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [showMigrationModal, setShowMigrationModal] = useState(false)
 
   const loadRecipes = async () => {
     const loadedRecipes = await recipeService.getAll()
@@ -66,6 +71,42 @@ function RecipeList() {
     setEditingRecipe(null)
   }
 
+  // Get categorized tags for filtering
+  const categorizedTags = {
+    [TAG_CATEGORIES.CUISINE]: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
+    [TAG_CATEGORIES.INGREDIENTS]: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
+    [TAG_CATEGORIES.CONVENIENCE]: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    legacy: [...new Set(recipes.flatMap(recipe => recipe.tags || []))].sort()
+  }
+
+  // Get all tags for filtering (fallback)
+  const allTags = [
+    ...categorizedTags[TAG_CATEGORIES.CUISINE],
+    ...categorizedTags[TAG_CATEGORIES.INGREDIENTS],
+    ...categorizedTags[TAG_CATEGORIES.CONVENIENCE],
+    ...categorizedTags.legacy
+  ]
+
+  // Filter recipes based on search and tag selection
+  const filteredRecipes = recipes.filter(recipe => {
+    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+
+    if (!selectedTag) return matchesSearch
+
+    // Check if tag matches any category
+    const matchesTag =
+      recipe.tags?.includes(selectedTag) ||
+      recipe.cuisine_tags?.includes(selectedTag) ||
+      recipe.ingredient_tags?.includes(selectedTag) ||
+      recipe.convenience_tags?.includes(selectedTag)
+
+    return matchesSearch && matchesTag
+  })
+
+  const handleMigrationComplete = () => {
+    setShowMigrationModal(false)
+    loadRecipes() // Reload to show updated tags
+  }
 
 
   return (
@@ -79,13 +120,89 @@ function RecipeList() {
         <CSVUpload onUploadComplete={handleUploadComplete} />
       </div>
 
+
+      {/* Search and Filter */}
+      <div className="mb-6 space-y-4">
+        <input
+          type="text"
+          placeholder="Search recipes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+
+        {/* Categorized Tag Filters */}
+        <div className="space-y-3">
+          {/* All Tags Button */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedTag('')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                !selectedTag
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Recipes ({recipes.length})
+            </button>
+          </div>
+
+          {/* Category Sections */}
+          {Object.entries(categorizedTags).map(([category, tags]) => {
+            if (tags.length === 0) return null
+
+            const isLegacy = category === 'legacy'
+            const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
+            const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
+
+            return (
+              <div key={category} className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
+                  {displayName} ({tags.length})
+                </h4>
+                <div className="flex flex-wrap gap-2 ml-5">
+                  {tags.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setSelectedTag(tag)}
+                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                        selectedTag === tag
+                          ? colorClasses
+                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {searchTerm || selectedTag ? (
+          <p className="text-sm text-gray-600">
+            Showing {filteredRecipes.length} of {recipes.length} recipes
+            {searchTerm && ` matching "${searchTerm}"`}
+            {selectedTag && ` tagged with "${selectedTag}"`}
+          </p>
+        ) : null}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recipes.length === 0 ? (
+        {filteredRecipes.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500">No recipes yet. Add your first recipe to get started!</p>
+            {recipes.length === 0 ? (
+              <p className="text-gray-500">No recipes yet. Add your first recipe to get started!</p>
+            ) : (
+              <p className="text-gray-500">
+                No recipes match your current filters. Try adjusting your search or tag selection.
+              </p>
+            )}
           </div>
         ) : (
-          recipes.map((recipe) => (
+          filteredRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
@@ -102,6 +219,13 @@ function RecipeList() {
         isOpen={showForm}
         onSave={handleSaveRecipe}
         onCancel={handleCancelForm}
+      />
+
+      {/* Tag Migration Modal */}
+      <TagMigrationModal
+        isOpen={showMigrationModal}
+        onClose={() => setShowMigrationModal(false)}
+        onMigrationComplete={handleMigrationComplete}
       />
     </div>
   )

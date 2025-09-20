@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CategorizedTags from './CategorizedTags'
 
 function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
   const [expanded, setExpanded] = useState(showDetails)
@@ -69,12 +70,8 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
         </a>
       )}
 
-      {/* Tags */}
-      <div className="flex flex-wrap mb-4">
-        {recipe.tags?.map((tag) => (
-          <span key={tag} className="tag">{tag}</span>
-        ))}
-      </div>
+      {/* Categorized Tags */}
+      <CategorizedTags recipe={recipe} className="mb-4" />
 
       {/* Expandable Details */}
       {(recipe.ingredients?.length > 0 || recipe.instructions?.length > 0) && (

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CategorizedTags from './CategorizedTags'
 
 function AISuggestionModal({
   isOpen,
@@ -135,13 +136,7 @@ function AISuggestionModal({
                         </a>
                       )}
 
-                      {meal.recipe.tags && meal.recipe.tags.length > 0 && (
-                        <div className="flex flex-wrap">
-                          {meal.recipe.tags.map((tag, i) => (
-                            <span key={i} className="tag text-xs mr-1 mb-1">{tag}</span>
-                          ))}
-                        </div>
-                      )}
+                      <CategorizedTags recipe={meal.recipe} />
                     </div>
                   ))}
                 </div>

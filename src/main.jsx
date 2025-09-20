@@ -5,103 +5,15 @@ import App from './App.jsx'
 import { initDatabase } from './database/db.js'
 import { recipeService } from './database/recipeService.js'
 import { mealHistoryService } from './database/mealHistoryService.js'
+import { seedDatabase } from './utils/seedDatabase.js'
 
 // Initialize database and seed sample data for development
 async function initializeApp() {
   try {
     await initDatabase()
 
-    // Check if we need to seed sample recipes
-    const existingRecipes = await recipeService.getAll()
-    if (existingRecipes.length === 0) {
-      console.log('Seeding sample recipes...')
-
-      const sampleRecipes = [
-        {
-          name: "Spaghetti Carbonara",
-          url: "https://www.bonappetit.com/recipe/simple-carbonara",
-          tags: ["pasta", "italian", "quick"]
-        },
-        {
-          name: "Chicken Tikka Masala",
-          url: "https://cafedelites.com/chicken-tikka-masala/",
-          tags: ["indian", "chicken", "curry", "gluten-free"]
-        },
-        {
-          name: "Caesar Salad",
-          url: "https://www.foodnetwork.com/recipes/emeril-lagasse/caesars-salad-recipe-1915068",
-          tags: ["salad", "vegetarian", "healthy", "gluten-free"]
-        },
-        {
-          name: "Grilled Salmon",
-          url: "https://example.com/grilled-salmon",
-          tags: ["fish", "healthy", "quick", "gluten-free"]
-        },
-        {
-          name: "Turkey Meatballs",
-          url: "https://example.com/turkey-meatballs",
-          tags: ["turkey", "protein", "italian", "gluten-free"]
-        },
-        {
-          name: "Vegetable Stir Fry",
-          url: "https://example.com/veggie-stir-fry",
-          tags: ["vegetarian", "healthy", "quick", "gluten-free"]
-        },
-        {
-          name: "Shrimp Pad Thai",
-          url: "https://example.com/shrimp-pad-thai",
-          tags: ["thai", "shrimp", "noodles", "spicy"]
-        },
-        {
-          name: "Quinoa Buddha Bowl",
-          url: "https://example.com/quinoa-bowl",
-          tags: ["vegetarian", "healthy", "quinoa", "gluten-free"]
-        },
-        {
-          name: "Chicken Fajitas",
-          url: "https://example.com/chicken-fajitas",
-          tags: ["mexican", "chicken", "peppers", "gluten-free"]
-        },
-        {
-          name: "Mushroom Risotto",
-          url: "https://example.com/mushroom-risotto",
-          tags: ["italian", "vegetarian", "rice", "gluten-free"]
-        },
-        {
-          name: "Fish Tacos",
-          url: "https://example.com/fish-tacos",
-          tags: ["mexican", "fish", "fresh", "quick"]
-        },
-        {
-          name: "Lemon Herb Roasted Chicken",
-          url: "https://example.com/roasted-chicken",
-          tags: ["chicken", "herbs", "roasted", "gluten-free"]
-        },
-        {
-          name: "Thai Green Curry",
-          url: "https://example.com/thai-green-curry",
-          tags: ["thai", "curry", "coconut", "spicy", "gluten-free"]
-        },
-        {
-          name: "Caprese Stuffed Portobello",
-          url: "https://example.com/caprese-portobello",
-          tags: ["vegetarian", "italian", "mushroom", "gluten-free"]
-        },
-        {
-          name: "Honey Garlic Glazed Salmon",
-          url: "https://example.com/honey-garlic-salmon",
-          tags: ["fish", "sweet", "garlic", "gluten-free"]
-        },
-        {
-          name: "Mediterranean Chickpea Salad",
-          url: "https://example.com/chickpea-salad",
-          tags: ["vegetarian", "mediterranean", "healthy", "gluten-free"]
-        }
-      ]
-
-      await recipeService.bulkInsert(sampleRecipes)
-      console.log('Sample recipes seeded successfully')
-    }
+    // Seed sample recipes with detailed information
+    await seedDatabase()
 
     // Check if we need to seed sample meal history
     const existingHistory = await mealHistoryService.getAll()

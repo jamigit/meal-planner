@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { recipeService } from '../database/recipeService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
+import CategorizedTags from './CategorizedTags'
 
 function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
@@ -9,7 +10,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   const [selectedTag, setSelectedTag] = useState('')
   const [eatenCounts, setEatenCounts] = useState({})
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false)
-  const [expandedRecipeTags, setExpandedRecipeTags] = useState(new Set())
+  // Removed expandedRecipeTags state as we're using CategorizedTags component now
 
   useEffect(() => {
     if (isOpen) {
@@ -57,11 +58,26 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     }
   }, [isOpen])
 
-  const allTags = [...new Set(recipes.flatMap(recipe => recipe.tags || []))]
+  // Get all tags from all categories
+  const allTags = [...new Set(recipes.flatMap(recipe => [
+    ...(recipe.tags || []),
+    ...(recipe.cuisine_tags || []),
+    ...(recipe.ingredient_tags || []),
+    ...(recipe.convenience_tags || [])
+  ]))]
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTag = !selectedTag || recipe.tags?.includes(selectedTag)
+
+    if (!selectedTag) return matchesSearch
+
+    // Check if tag matches any category
+    const matchesTag =
+      recipe.tags?.includes(selectedTag) ||
+      recipe.cuisine_tags?.includes(selectedTag) ||
+      recipe.ingredient_tags?.includes(selectedTag) ||
+      recipe.convenience_tags?.includes(selectedTag)
+
     return matchesSearch && matchesTag
   })
 
@@ -82,17 +98,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     })
   }
 
-  const toggleRecipeTags = (recipeId) => {
-    setExpandedRecipeTags(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(recipeId)) {
-        newSet.delete(recipeId)
-      } else {
-        newSet.add(recipeId)
-      }
-      return newSet
-    })
-  }
+  // Removed toggleRecipeTags function as we're using CategorizedTags component now
 
   const handleSave = () => {
     onSelectRecipes(selectedRecipes)
@@ -185,9 +191,6 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
               const cardClasses = `${baseClasses} ${specificClasses}`
 
-              const isTagsExpanded = expandedRecipeTags.has(recipe.id)
-              const hasMultipleTags = recipe.tags && recipe.tags.length > 2
-
               return (
                 <div
                   key={recipe.id}
@@ -222,48 +225,8 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                     </a>
                   )}
 
-                  {/* Tags Section */}
-                  {recipe.tags && recipe.tags.length > 0 && (
-                    <div>
-                      {/* Desktop: Show all tags, Mobile: Show limited tags with expand option */}
-                      <div className="hidden md:flex md:flex-wrap">
-                        {recipe.tags.map(tag => (
-                          <span key={tag} className="tag text-xs">{tag}</span>
-                        ))}
-                      </div>
-
-                      {/* Mobile: Limited tags with expand button */}
-                      <div className="md:hidden">
-                        <div className="flex flex-wrap">
-                          {(isTagsExpanded ? recipe.tags : recipe.tags.slice(0, 2)).map(tag => (
-                            <span key={tag} className="tag text-xs">{tag}</span>
-                          ))}
-                          {hasMultipleTags && !isTagsExpanded && recipe.tags.length > 2 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleRecipeTags(recipe.id)
-                              }}
-                              className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full mr-2 mb-2 hover:bg-blue-100"
-                            >
-                              +{recipe.tags.length - 2} more
-                            </button>
-                          )}
-                          {hasMultipleTags && isTagsExpanded && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                toggleRecipeTags(recipe.id)
-                              }}
-                              className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full mr-2 mb-2 hover:bg-gray-200"
-                            >
-                              show less
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {/* Categorized Tags */}
+                  <CategorizedTags recipe={recipe} />
                 </div>
               )
             })}
