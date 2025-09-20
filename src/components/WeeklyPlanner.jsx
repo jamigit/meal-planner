@@ -233,7 +233,8 @@ function WeeklyPlanner() {
       </div>
 
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      {/* Selected Meals and Shopping List Section - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="card">
           <h3 className="text-lg font-semibold mb-4">Selected Meals</h3>
           {weeklyPlan.meals.length === 0 ? (
@@ -302,21 +303,21 @@ function WeeklyPlanner() {
           </button>
         </div>
 
-        <div className="card">
-          <h3 className="text-lg font-semibold mb-4">Notes</h3>
-          <textarea
-            value={weeklyPlan.notes}
-            onChange={(e) => setWeeklyPlan(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder="Add any notes about your meal plan..."
-            className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
         {/* Shopping List Card */}
         <ShoppingListCard
           recipes={weeklyPlan.meals}
           weeklyPlanId={currentPlanId}
-          className="xl:col-span-1"
+        />
+      </div>
+
+      {/* Notes Section - Full Width */}
+      <div className="card">
+        <h3 className="text-lg font-semibold mb-4">Notes</h3>
+        <textarea
+          value={weeklyPlan.notes}
+          onChange={(e) => setWeeklyPlan(prev => ({ ...prev, notes: e.target.value }))}
+          placeholder="Add any notes about your meal plan..."
+          className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
 

@@ -5,8 +5,8 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
     name: recipe?.name || '',
     url: recipe?.url || '',
     tags: recipe?.tags?.join(', ') || '',
-    ingredients: recipe?.ingredients || [''],
-    instructions: recipe?.instructions || [''],
+    ingredients: recipe?.ingredients && recipe?.ingredients.length > 0 ? recipe.ingredients : [''],
+    instructions: recipe?.instructions && recipe?.instructions.length > 0 ? recipe.instructions : [''],
     prep_time: recipe?.prep_time || '',
     cook_time: recipe?.cook_time || '',
     servings: recipe?.servings || ''
@@ -21,8 +21,8 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
         name: recipe.name || '',
         url: recipe.url || '',
         tags: recipe.tags?.join(', ') || '',
-        ingredients: recipe.ingredients || [''],
-        instructions: recipe.instructions || [''],
+        ingredients: recipe.ingredients && recipe.ingredients.length > 0 ? recipe.ingredients : [''],
+        instructions: recipe.instructions && recipe.instructions.length > 0 ? recipe.instructions : [''],
         prep_time: recipe.prep_time || '',
         cook_time: recipe.cook_time || '',
         servings: recipe.servings || ''
