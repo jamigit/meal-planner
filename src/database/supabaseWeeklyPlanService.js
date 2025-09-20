@@ -16,13 +16,20 @@ class SupabaseWeeklyPlanService {
   async getAll() {
     try {
       const userId = await this.getUserId()
+      console.log('📋 Fetching all weekly plans for user:', userId)
+      
       const { data, error } = await supabase
         .from(this.tableName)
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Error fetching weekly plans:', error)
+        throw error
+      }
+      
+      console.log('📋 Retrieved weekly plans:', data?.length || 0, 'plans')
       return data || []
     } catch (error) {
       console.error('Failed to get weekly plans:', error)
@@ -103,9 +110,16 @@ class SupabaseWeeklyPlanService {
   async save(weeklyPlan, setAsCurrent = true) {
     try {
       const userId = await this.getUserId()
+      console.log('💾 Saving weekly plan to Supabase:', {
+        userId,
+        setAsCurrent,
+        mealsCount: weeklyPlan.meals?.length || 0,
+        notes: weeklyPlan.notes
+      })
 
       // Clear existing current plans if setting as current
       if (setAsCurrent) {
+        console.log('🔄 Clearing existing current plans...')
         await supabase
           .from(this.tableName)
           .update({ is_current: false })
@@ -126,6 +140,8 @@ class SupabaseWeeklyPlanService {
         scaling: meal.scaling || 1
       })) || []
 
+      console.log('🍽️ Prepared meals for saving:', meals)
+
       // Insert new plan
       const { data, error } = await supabase
         .from(this.tableName)
@@ -138,7 +154,12 @@ class SupabaseWeeklyPlanService {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Supabase insert error:', error)
+        throw error
+      }
+      
+      console.log('✅ Successfully saved weekly plan:', data)
       return data
     } catch (error) {
       console.error('Failed to save weekly plan:', error)
