@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
 import { claudeAiService } from '../services/claudeAiService.js'
@@ -8,6 +9,7 @@ import ShoppingList from './ShoppingList'
 import ShoppingListCard from './ShoppingListCard'
 
 function WeeklyPlanner() {
+  const navigate = useNavigate()
   const [weeklyPlan, setWeeklyPlan] = useState({
     meals: [],
     notes: ''
@@ -21,8 +23,6 @@ function WeeklyPlanner() {
   const [aiError, setAIError] = useState(null)
   const [weekPreferences, setWeekPreferences] = useState('')
 
-  // Meal tracking state
-  const [mealStats, setMealStats] = useState(null)
 
   // Shopping list state
   const [showShoppingList, setShowShoppingList] = useState(false)
@@ -32,31 +32,31 @@ function WeeklyPlanner() {
     const loadCurrentPlan = async () => {
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
       if (currentPlan) {
+        // Ensure each meal has a scaling factor
+        const mealsWithScaling = (currentPlan.meals || []).map(meal => ({
+          ...meal,
+          scaling: meal.scaling || 1
+        }))
         setWeeklyPlan({
-          meals: currentPlan.meals || [],
+          meals: mealsWithScaling,
           notes: currentPlan.notes || ''
         })
         setCurrentPlanId(currentPlan.id)
       }
     }
 
-    const loadMealStats = async () => {
-      try {
-        const stats = await mealHistoryService.getStatistics()
-        setMealStats(stats)
-      } catch (error) {
-        console.error('Failed to load meal stats:', error)
-      }
-    }
-
     loadCurrentPlan()
-    loadMealStats()
   }, [])
 
   const handleSelectRecipes = (selectedRecipes) => {
+    // Add default scaling factor of 1 to each recipe
+    const mealsWithScaling = selectedRecipes.map(recipe => ({
+      ...recipe,
+      scaling: recipe.scaling || 1
+    }))
     setWeeklyPlan(prev => ({
       ...prev,
-      meals: selectedRecipes
+      meals: mealsWithScaling
     }))
   }
 
@@ -67,11 +67,29 @@ function WeeklyPlanner() {
     }))
   }
 
+  const handleScalingChange = (mealId, newScaling) => {
+    setWeeklyPlan(prev => ({
+      ...prev,
+      meals: prev.meals.map(meal =>
+        meal.id === mealId
+          ? { ...meal, scaling: parseInt(newScaling) }
+          : meal
+      )
+    }))
+  }
+
   const handleSavePlan = async () => {
     const savedPlan = await weeklyPlanService.save(weeklyPlan)
     if (savedPlan) {
       setCurrentPlanId(savedPlan.id)
+      // Clear the selected meals and notes
+      setWeeklyPlan({
+        meals: [],
+        notes: ''
+      })
       alert('Weekly plan saved successfully!')
+      // Navigate to saved plans page
+      navigate('/saved-plans')
     }
   }
 
@@ -115,9 +133,14 @@ function WeeklyPlanner() {
 
   const handleSelectAIMeals = (selectedRecipes) => {
     console.log('🍽️ Selected AI meals:', selectedRecipes)
+    // Add default scaling factor of 1 to each recipe
+    const mealsWithScaling = selectedRecipes.map(recipe => ({
+      ...recipe,
+      scaling: recipe.scaling || 1
+    }))
     setWeeklyPlan(prev => ({
       ...prev,
-      meals: selectedRecipes
+      meals: mealsWithScaling
     }))
     setShowAIModal(false)
   }
@@ -172,7 +195,7 @@ function WeeklyPlanner() {
         <button
           onClick={handleGetAISuggestions}
           disabled={isLoadingAI}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoadingAI ? (
             <>
@@ -185,42 +208,6 @@ function WeeklyPlanner() {
         </button>
       </div>
 
-      {/* Meal Statistics Dashboard */}
-      {mealStats && (
-        <div className="card mb-6">
-          <h3 className="text-lg font-semibold mb-4">📊 Your Meal History</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{mealStats.totalMeals}</div>
-              <div className="text-sm text-gray-600">Total Meals</div>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{mealStats.uniqueRecipes}</div>
-              <div className="text-sm text-gray-600">Unique Recipes</div>
-            </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{mealStats.averagePerWeek}</div>
-              <div className="text-sm text-gray-600">Avg/Week</div>
-            </div>
-            <div className="bg-orange-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">{mealStats.topRecipes?.[0]?.frequency || 0}</div>
-              <div className="text-sm text-gray-600">Most Made</div>
-            </div>
-          </div>
-          {mealStats.topRecipes && mealStats.topRecipes.length > 0 && (
-            <div className="mt-4">
-              <h4 className="font-medium text-gray-900 mb-2">Top Recipes:</h4>
-              <div className="flex flex-wrap gap-2">
-                {mealStats.topRecipes.slice(0, 5).map((recipe, index) => (
-                  <span key={recipe.id} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                    {recipe.name} ({recipe.frequency}x)
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div className="card">
@@ -232,7 +219,22 @@ function WeeklyPlanner() {
               {weeklyPlan.meals.map((meal) => (
                 <div key={meal.id} className="p-3 bg-gray-50 rounded">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium">{meal.name}</h4>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{meal.name}</h4>
+                      <div className="flex items-center mt-2">
+                        <label className="text-sm text-gray-600 mr-2">Servings:</label>
+                        <select
+                          value={meal.scaling || 1}
+                          onChange={(e) => handleScalingChange(meal.id, e.target.value)}
+                          className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                        >
+                          <option value={1}>1x</option>
+                          <option value={2}>2x</option>
+                          <option value={3}>3x</option>
+                          <option value={4}>4x</option>
+                        </select>
+                      </div>
+                    </div>
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleMarkMealAsEaten(meal)}
@@ -272,7 +274,7 @@ function WeeklyPlanner() {
           )}
           <button
             onClick={() => setIsRecipeSelectorOpen(true)}
-            className="btn-primary mt-4"
+            className="btn-secondary mt-4"
           >
             Select Meals
           </button>
@@ -286,9 +288,6 @@ function WeeklyPlanner() {
             placeholder="Add any notes about your meal plan..."
             className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <button onClick={handleSavePlan} className="btn-primary mt-4">
-            Save Plan
-          </button>
         </div>
 
         {/* Shopping List Card */}
@@ -314,6 +313,13 @@ function WeeklyPlanner() {
         isLoading={isLoadingAI}
         error={aiError}
       />
+
+      {/* Save Plan Button at Bottom */}
+      <div className="mt-8 text-center">
+        <button onClick={handleSavePlan} className="btn-primary">
+          Save Plan
+        </button>
+      </div>
 
     </div>
   )

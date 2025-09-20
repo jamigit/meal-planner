@@ -225,6 +225,34 @@ class MealHistoryService {
     }
   }
 
+  // Get eaten count for a specific recipe
+  async getRecipeEatenCount(recipeId, weeksBack = 8) {
+    try {
+      const frequency = await this.getRecipeFrequency(weeksBack)
+      return frequency[recipeId] || 0
+    } catch (error) {
+      console.error('Failed to get recipe eaten count:', error)
+      return 0
+    }
+  }
+
+  // Get eaten counts for multiple recipes
+  async getRecipeEatenCounts(recipeIds, weeksBack = 8) {
+    try {
+      const frequency = await this.getRecipeFrequency(weeksBack)
+      const counts = {}
+
+      recipeIds.forEach(recipeId => {
+        counts[recipeId] = frequency[recipeId] || 0
+      })
+
+      return counts
+    } catch (error) {
+      console.error('Failed to get recipe eaten counts:', error)
+      return {}
+    }
+  }
+
   // Get statistics for debugging/analysis
   async getStatistics() {
     try {

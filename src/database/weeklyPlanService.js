@@ -12,7 +12,8 @@ class WeeklyPlanService {
       const plans = await this.db.weeklyPlans.orderBy('created_at').reverse().toArray()
       return plans.map(plan => ({
         ...plan,
-        meal_ids: plan.meal_ids || [],
+        meal_ids: plan.meal_ids || [], // Keep for backwards compatibility
+        meals: plan.meals || [], // New format
         is_current: Boolean(plan.is_current)
       }))
     } catch (error) {
@@ -29,7 +30,8 @@ class WeeklyPlanService {
 
       return {
         ...plan,
-        meal_ids: plan.meal_ids || [],
+        meal_ids: plan.meal_ids || [], // Keep for backwards compatibility
+        meals: plan.meals || [], // New format
         is_current: Boolean(plan.is_current)
       }
     } catch (error) {
@@ -42,7 +44,7 @@ class WeeklyPlanService {
   async getCurrentWithRecipes() {
     try {
       const currentPlan = await this.getCurrent()
-      if (!currentPlan || !currentPlan.meal_ids.length) {
+      if (!currentPlan) {
         return {
           meals: [],
           notes: '',
@@ -51,11 +53,23 @@ class WeeklyPlanService {
         }
       }
 
-      // Get full recipe details for each meal ID
-      const meals = []
-      for (const id of currentPlan.meal_ids) {
-        const recipe = await recipeService.getById(id)
-        if (recipe) meals.push(recipe)
+      let meals = []
+
+      // Handle new format (meals array with scaling)
+      if (currentPlan.meals && currentPlan.meals.length > 0) {
+        meals = currentPlan.meals
+      }
+      // Handle old format (meal_ids array) for backwards compatibility
+      else if (currentPlan.meal_ids && currentPlan.meal_ids.length > 0) {
+        for (const id of currentPlan.meal_ids) {
+          const recipe = await recipeService.getById(id)
+          if (recipe) {
+            meals.push({
+              ...recipe,
+              scaling: 1 // Default scaling for old format
+            })
+          }
+        }
       }
 
       return {
@@ -81,12 +95,23 @@ class WeeklyPlanService {
       // First, set all existing plans to not current
       await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
 
-      // Extract meal IDs from meal objects
-      const mealIds = weeklyPlan.meals ? weeklyPlan.meals.map(meal => meal.id) : []
+      // Store meal objects with scaling information
+      const meals = weeklyPlan.meals ? weeklyPlan.meals.map(meal => ({
+        id: meal.id,
+        name: meal.name,
+        url: meal.url,
+        tags: meal.tags,
+        ingredients: meal.ingredients,
+        instructions: meal.instructions,
+        prep_time: meal.prep_time,
+        cook_time: meal.cook_time,
+        servings: meal.servings,
+        scaling: meal.scaling || 1
+      })) : []
 
       // Insert new plan as current
       const id = await this.db.weeklyPlans.add({
-        meal_ids: mealIds,
+        meals: meals,
         notes: weeklyPlan.notes || null,
         is_current: 1,
         created_at: new Date().toISOString()
@@ -107,7 +132,8 @@ class WeeklyPlanService {
 
       return {
         ...plan,
-        meal_ids: plan.meal_ids || [],
+        meal_ids: plan.meal_ids || [], // Keep for backwards compatibility
+        meals: plan.meals || [], // New format
         is_current: Boolean(plan.is_current)
       }
     } catch (error) {
@@ -122,11 +148,23 @@ class WeeklyPlanService {
       const plan = await this.getById(id)
       if (!plan) return null
 
-      // Get full recipe details for each meal ID
-      const meals = []
-      for (const mealId of plan.meal_ids) {
-        const recipe = await recipeService.getById(mealId)
-        if (recipe) meals.push(recipe)
+      let meals = []
+
+      // Handle new format (meals array with scaling)
+      if (plan.meals && plan.meals.length > 0) {
+        meals = plan.meals
+      }
+      // Handle old format (meal_ids array) for backwards compatibility
+      else if (plan.meal_ids && plan.meal_ids.length > 0) {
+        for (const mealId of plan.meal_ids) {
+          const recipe = await recipeService.getById(mealId)
+          if (recipe) {
+            meals.push({
+              ...recipe,
+              scaling: 1 // Default scaling for old format
+            })
+          }
+        }
       }
 
       return {
@@ -180,10 +218,23 @@ class WeeklyPlanService {
 
       const plansWithRecipes = []
       for (const plan of plans) {
-        const meals = []
-        for (const mealId of plan.meal_ids) {
-          const recipe = await recipeService.getById(mealId)
-          if (recipe) meals.push(recipe)
+        let meals = []
+
+        // Handle new format (meals array with scaling)
+        if (plan.meals && plan.meals.length > 0) {
+          meals = plan.meals
+        }
+        // Handle old format (meal_ids array) for backwards compatibility
+        else if (plan.meal_ids && plan.meal_ids.length > 0) {
+          for (const mealId of plan.meal_ids) {
+            const recipe = await recipeService.getById(mealId)
+            if (recipe) {
+              meals.push({
+                ...recipe,
+                scaling: 1 // Default scaling for old format
+              })
+            }
+          }
         }
 
         plansWithRecipes.push({

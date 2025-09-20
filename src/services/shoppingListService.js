@@ -135,7 +135,9 @@ class ShoppingListService {
             recipe: ingredient.recipe,
             original: ingredient.original,
             quantity: ingredient.quantity,
-            unit: ingredient.unit
+            unit: ingredient.unit,
+            scaled: ingredient.scaled,
+            scaling: ingredient.scaling
           })
         } else {
           // Different units, keep separate entries
@@ -143,7 +145,9 @@ class ShoppingListService {
             recipe: ingredient.recipe,
             original: ingredient.original,
             quantity: ingredient.quantity,
-            unit: ingredient.unit
+            unit: ingredient.unit,
+            scaled: ingredient.scaled,
+            scaling: ingredient.scaling
           })
         }
       } else {
@@ -156,7 +160,9 @@ class ShoppingListService {
             recipe: ingredient.recipe,
             original: ingredient.original,
             quantity: ingredient.quantity,
-            unit: ingredient.unit
+            unit: ingredient.unit,
+            scaled: ingredient.scaled,
+            scaling: ingredient.scaling
           }]
         })
       }
@@ -255,9 +261,19 @@ class ShoppingListService {
       for (const recipe of recipes) {
         if (!recipe.ingredients || recipe.ingredients.length === 0) continue
 
+        const scaling = recipe.scaling || 1
+
         for (const ingredient of recipe.ingredients) {
           const parsed = this.parseIngredient(ingredient)
           parsed.recipe = recipe.name
+
+          // Apply scaling to quantity
+          if (parsed.quantity && scaling !== 1) {
+            parsed.quantity = parsed.quantity * scaling
+            parsed.originalQuantity = parsed.quantity / scaling
+            parsed.scaled = true
+            parsed.scaling = scaling
+          }
 
           // Skip pantry items if requested
           if (excludePantryItems && this.isPantryItem(parsed.item)) {
