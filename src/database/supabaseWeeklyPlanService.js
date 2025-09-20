@@ -41,6 +41,26 @@ class SupabaseWeeklyPlanService {
   async getCurrent() {
     try {
       const userId = await this.getUserId()
+      console.log('🔍 Looking for current plan for user:', userId)
+      
+      // First, let's try to get all plans to see what we have
+      const { data: allPlans, error: allError } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (allError) {
+        console.error('❌ Error fetching all plans:', allError)
+        throw allError
+      }
+
+      console.log('📋 All plans for user:', allPlans?.length || 0, 'plans')
+      if (allPlans && allPlans.length > 0) {
+        console.log('📋 Sample plan structure:', allPlans[0])
+      }
+
+      // Now try to get current plan
       const { data, error } = await supabase
         .from(this.tableName)
         .select('*')
@@ -48,7 +68,12 @@ class SupabaseWeeklyPlanService {
         .eq('is_current', true)
         .single()
 
-      if (error && error.code !== 'PGRST116') throw error
+      if (error && error.code !== 'PGRST116') {
+        console.error('❌ Error fetching current plan:', error)
+        throw error
+      }
+      
+      console.log('✅ Current plan result:', data)
       return data || null
     } catch (error) {
       console.error('Failed to get current weekly plan:', error)
