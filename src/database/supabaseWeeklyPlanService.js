@@ -110,25 +110,8 @@ class SupabaseWeeklyPlanService {
         }
       }
 
-      // Get recipe details for each meal
-      const mealIds = currentPlan.meals?.map(meal => meal.id).filter(Boolean) || []
-      let meals = []
-
-      if (mealIds.length > 0) {
-        const { data: recipes, error } = await supabase
-          .from('recipes')
-          .select('*')
-          .in('id', mealIds)
-          .eq('user_id', await this.getUserId())
-
-        if (error) throw error
-
-        // Map recipes to meals with scaling
-        meals = currentPlan.meals.map(meal => {
-          const recipe = recipes.find(r => r.id === meal.id)
-          return recipe ? { ...recipe, scaling: meal.scaling || 1 } : meal
-        })
-      }
+      // Use the stored meal data directly since it's already complete
+      const meals = currentPlan.meals || []
 
       return {
         id: currentPlan.id,
@@ -319,26 +302,8 @@ class SupabaseWeeklyPlanService {
       const plansWithRecipes = []
 
       for (const plan of plans) {
-        let meals = []
-
-        if (plan.meals && plan.meals.length > 0) {
-          const mealIds = plan.meals.map(meal => meal.id).filter(Boolean)
-          
-          if (mealIds.length > 0) {
-            const { data: recipes, error } = await supabase
-              .from('recipes')
-              .select('*')
-              .in('id', mealIds)
-              .eq('user_id', await this.getUserId())
-
-            if (error) throw error
-
-            meals = plan.meals.map(meal => {
-              const recipe = recipes.find(r => r.id === meal.id)
-              return recipe ? { ...recipe, scaling: meal.scaling || 1 } : meal
-            })
-          }
-        }
+        // Use the stored meal data directly since it's already complete
+        const meals = plan.meals || []
 
         plansWithRecipes.push({
           id: plan.id,
@@ -349,6 +314,7 @@ class SupabaseWeeklyPlanService {
         })
       }
 
+      console.log('📋 Retrieved plans with recipes:', plansWithRecipes.length, 'plans')
       return plansWithRecipes
     } catch (error) {
       console.error('Failed to get all weekly plans with recipes:', error)
