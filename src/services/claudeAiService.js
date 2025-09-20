@@ -4,7 +4,7 @@ import { recipeService } from '../database/recipeService.js'
 class ClaudeAiService {
   constructor() {
     this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
-    this.apiUrl = import.meta.env.DEV ? 'http://localhost:3001/api/claude' : '/api/claude'
+    this.apiUrl = 'https://api.anthropic.com/v1/messages'
     this.model = 'claude-3-5-sonnet-20241022'
     this.maxTokens = 1024
     
@@ -182,15 +182,23 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
         userNotes
       )
 
-      // Call Claude API via backend proxy
+      // Call Claude API directly
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-api-key': this.apiKey,
+          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          prompt: prompt,
-          userNotes: userNotes
+          model: this.model,
+          max_tokens: this.maxTokens,
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
         })
       })
 
