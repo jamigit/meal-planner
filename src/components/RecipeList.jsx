@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { recipeService } from '../database/recipeService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CSVUpload from './CSVUpload'
 import RecipeCard from './RecipeCard'
@@ -17,6 +17,7 @@ function RecipeList() {
   const [isFilterExpanded, setIsFilterExpanded] = useState(false)
 
   const loadRecipes = async () => {
+    const recipeService = await serviceSelector.getRecipeService()
     const loadedRecipes = await recipeService.getAll()
     setRecipes(loadedRecipes)
   }
@@ -44,6 +45,7 @@ function RecipeList() {
   const handleDeleteRecipe = async (id) => {
     if (window.confirm('Are you sure you want to delete this recipe?')) {
       try {
+        const recipeService = await serviceSelector.getRecipeService()
         await recipeService.delete(id)
         loadRecipes()
       } catch (error) {
@@ -55,6 +57,7 @@ function RecipeList() {
 
   const handleSaveRecipe = async (recipeData) => {
     try {
+      const recipeService = await serviceSelector.getRecipeService()
       if (editingRecipe) {
         await recipeService.update(editingRecipe.id, recipeData)
       } else {

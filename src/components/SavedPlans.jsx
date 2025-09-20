@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { weeklyPlanService } from '../database/weeklyPlanService.js'
-import { mealHistoryService } from '../database/mealHistoryService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 import ShoppingListCard from './ShoppingListCard'
 import RecipeCard from './RecipeCard'
 
@@ -11,6 +10,7 @@ function SavedPlans() {
   const [sidebarRecipe, setSidebarRecipe] = useState(null) // Recipe to show in sidebar
 
   const loadPlans = async () => {
+    const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
     const plans = await weeklyPlanService.getAllWithRecipes()
     setSavedPlans(plans)
   }
@@ -31,12 +31,14 @@ function SavedPlans() {
 
   const handleDeletePlan = async (planId) => {
     if (confirm('Are you sure you want to delete this plan?')) {
+      const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
       await weeklyPlanService.delete(planId)
       loadPlans()
     }
   }
 
   const handleSetAsCurrent = async (planId) => {
+    const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
     await weeklyPlanService.setAsCurrent(planId)
     loadPlans()
   }
@@ -46,6 +48,7 @@ function SavedPlans() {
       // Use plan creation date as the week reference
       const eatenDate = new Date().toISOString().split('T')[0] // Today
 
+      const mealHistoryService = await serviceSelector.getMealHistoryService()
       await mealHistoryService.addMealToHistory(recipe.id, eatenDate)
 
       // Add to eaten meals set for UI feedback

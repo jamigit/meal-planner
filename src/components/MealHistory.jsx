@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { mealHistoryService } from '../database/mealHistoryService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 import CategorizedTags from './CategorizedTags'
 
 function MealHistory() {
@@ -14,6 +14,8 @@ function MealHistory() {
   const loadMealHistory = async () => {
     setLoading(true)
     try {
+      const mealHistoryService = await serviceSelector.getMealHistoryService()
+      
       // Load meal statistics
       const { regular, lessRegular } = await mealHistoryService.categorizeRecipesByFrequency()
       const recentMealIds = await mealHistoryService.getRecentMeals(2)
