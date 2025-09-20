@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import CategorizedTags from './CategorizedTags'
-import { recipeService } from '../database/recipeService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 
 function AISuggestionModal({
   isOpen,
@@ -28,6 +28,7 @@ function AISuggestionModal({
     setSwapIndex(index)
     // Load all available recipes for swapping
     try {
+      const recipeService = await serviceSelector.getRecipeService()
       const recipes = await recipeService.getAll()
       setAvailableRecipes(recipes)
       setSwapModalOpen(true)

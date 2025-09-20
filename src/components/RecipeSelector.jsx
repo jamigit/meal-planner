@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { recipeService } from '../database/recipeService.js'
-import { mealHistoryService } from '../database/mealHistoryService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CategorizedTags from './CategorizedTags'
 
@@ -16,6 +15,9 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   useEffect(() => {
     if (isOpen) {
       const loadRecipes = async () => {
+        const recipeService = await serviceSelector.getRecipeService()
+        const mealHistoryService = await serviceSelector.getMealHistoryService()
+        
         const allRecipes = await recipeService.getAll()
         setRecipes(allRecipes)
 
