@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { weeklyPlanService } from '../database/weeklyPlanService.js'
-import { mealHistoryService } from '../database/mealHistoryService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
 import { claudeAiService } from '../services/claudeAiService.js'
 import RecipeSelector from './RecipeSelector'
 import AISuggestionModal from './AISuggestionModal'
@@ -35,6 +34,7 @@ function WeeklyPlanner() {
   useEffect(() => {
     const loadCurrentPlan = async () => {
       console.log('🔄 Loading current plan...')
+      const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
       console.log('📋 Current plan found:', currentPlan)
       
@@ -62,6 +62,7 @@ function WeeklyPlanner() {
   useEffect(() => {
     const loadEatenCounts = async () => {
       if (weeklyPlan.meals.length > 0) {
+        const mealHistoryService = await serviceSelector.getMealHistoryService()
         const mealIds = weeklyPlan.meals.map(meal => meal.id)
         const counts = await mealHistoryService.getRecipeEatenCounts(mealIds)
         setMealEatenCounts(counts)
@@ -111,6 +112,8 @@ function WeeklyPlanner() {
 
   const handleSavePlan = async () => {
     console.log('🔄 Starting save process with plan:', weeklyPlan)
+    
+    const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
     
     // Clear any existing current plans first
     await weeklyPlanService.clearCurrentPlans()
@@ -224,6 +227,7 @@ function WeeklyPlanner() {
   // Mark meal as eaten from current plan
   const handleMarkMealAsEaten = async (meal) => {
     try {
+      const mealHistoryService = await serviceSelector.getMealHistoryService()
       const eatenDate = new Date().toISOString().split('T')[0] // Today
       await mealHistoryService.addMealToHistory(meal.id, eatenDate)
 

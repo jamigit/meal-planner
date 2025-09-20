@@ -1,9 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { isSupabaseConfigured } from '../lib/supabase.js'
 
 function Navigation() {
   const location = useLocation()
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
+  const { signOut } = useAuth()
+  const supabaseConfigured = isSupabaseConfigured()
+
+  const handleLogout = async () => {
+    await signOut()
+  }
 
   const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history'
 
@@ -14,7 +22,7 @@ function Navigation() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <h1 className="text-xl font-bold text-gray-900">Meal Planner</h1>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 items-center">
               <Link
                 to="/"
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
@@ -55,6 +63,14 @@ function Navigation() {
               >
                 Meal History
               </Link>
+              {supabaseConfigured && (
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>

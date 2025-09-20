@@ -1,6 +1,6 @@
 # Meal Planner MVP
 
-A personal meal planning tool built with React + Vite + Tailwind CSS for managing recipes and weekly meal selection.
+A personal meal planning tool built with React + Vite + Tailwind CSS + Supabase for managing recipes and weekly meal selection with real-time cloud sync and secure authentication.
 
 ## Product Requirements Document (PRD)
 
@@ -15,7 +15,10 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 - **Recipe Management**: Store recipes with name, URL, and tags
 - **Weekly Meal Selection**: Choose 4 recipes for the week with notes
 - **Saved Plans**: View and manage all previous weekly plans
-- **Data Persistence**: Everything stored locally/database with proper error handling
+- **Cloud Data Sync**: Real-time synchronization across all devices
+- **Secure Authentication**: Password-protected access with Supabase
+- **Data Migration**: Seamless migration from local to cloud storage
+- **AI Integration**: Claude API for intelligent meal suggestions
 
 ### Success Criteria
 - ✅ Reduce weekly meal planning time to under 10 minutes
@@ -239,6 +242,9 @@ Custom Tailwind component classes:
 - ✅ Mobile-responsive design across all breakpoints (320px to 1024px+)
 - ✅ Complete recipe management with ingredients, instructions, and timing
 - ✅ Enhanced user experience with modal improvements and state management
+- ✅ **NEW**: Real-time cloud sync across all devices with Supabase
+- ✅ **NEW**: Secure password-based authentication
+- ✅ **NEW**: Seamless data migration from local to cloud storage
 
 ### 🚀 **Latest Improvements (Today's Session)**
 1. **✅ AI Suggestion Modal Enhancements** - Complete overhaul of meal selection experience:
@@ -442,6 +448,29 @@ This is a personal project, but suggestions and improvements are welcome:
 2. Create a feature branch
 3. Make your changes
 4. Submit a pull request
+
+## 🌐 **Supabase Integration**
+
+### **What's New with Supabase**
+- **Real-time Sync**: Your meal plans sync instantly across all devices
+- **Secure Authentication**: Password-protected access with user management
+- **Cloud Storage**: All data stored securely in PostgreSQL database
+- **Data Migration**: Seamless migration from local IndexedDB to cloud
+- **Offline Support**: Falls back to local storage when offline
+
+### **Setup Instructions**
+1. **Create Supabase Project**: Follow `SUPABASE_SETUP.md` for detailed setup
+2. **Configure Environment**: Add Supabase credentials to `.env`
+3. **Run Database Setup**: Execute the SQL schema in Supabase
+4. **Create User Account**: Set up authentication in Supabase dashboard
+5. **Migrate Data**: Use the built-in migration tool to sync local data
+
+### **Architecture Benefits**
+- **Scalable**: Handles multiple users and large datasets
+- **Secure**: Row-level security ensures data isolation
+- **Reliable**: Built on PostgreSQL with automatic backups
+- **Fast**: Real-time updates with minimal latency
+- **Maintainable**: No server management required
 
 ## License
 

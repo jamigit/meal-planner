@@ -12,6 +12,7 @@
     "dev:full": "concurrently \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "dexie": "^4.2.0",
     "papaparse": "^5.5.3",
     "react": "^19.1.1",
