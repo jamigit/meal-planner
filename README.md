@@ -316,7 +316,7 @@ The goal is to get a working meal planner quickly, then enhance it iteratively b
 - **AI-Powered Meal Suggestions**: Claude API integration for personalized weekly meal plans
 - **Meal History Analysis**: Track actual consumption patterns vs planned meals
 - **Dietary Restriction Enforcement**: Gluten-free only, no red meat/pork
-- **Smart Balancing**: 2 regular + 2 less regular meals per week
+- **Smart Balancing**: 2 regular + 2 less reg\ular meals per week
 - **User Preference Integration**: Free-form notes like "healthy", "have chicken in fridge"
 - **Multiple Suggestion Sets**: 3 different AI-generated options to choose from
 - **Meal Swapping**: Replace individual meals within selected suggestion set

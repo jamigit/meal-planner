@@ -8,6 +8,8 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState('')
   const [eatenCounts, setEatenCounts] = useState({})
+  const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false)
+  const [expandedRecipeTags, setExpandedRecipeTags] = useState(new Set())
 
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +41,22 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     }
   }, [isOpen, selectedMealIds])
 
+  // Lock/unlock body scroll when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Lock body scroll
+      document.body.style.overflow = 'hidden'
+    } else {
+      // Unlock body scroll
+      document.body.style.overflow = 'unset'
+    }
+
+    // Cleanup function to ensure scroll is unlocked when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   const allTags = [...new Set(recipes.flatMap(recipe => recipe.tags || []))]
 
   const filteredRecipes = recipes.filter(recipe => {
@@ -61,6 +79,18 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
         }
         return [...prev, recipe]
       }
+    })
+  }
+
+  const toggleRecipeTags = (recipeId) => {
+    setExpandedRecipeTags(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(recipeId)) {
+        newSet.delete(recipeId)
+      } else {
+        newSet.add(recipeId)
+      }
+      return newSet
     })
   }
 
@@ -94,26 +124,41 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
-          <div className="flex flex-wrap gap-2">
+          {/* Tag Filter - Desktop: Always shown, Mobile: Expandable */}
+          <div>
+            {/* Mobile Tag Toggle Button */}
             <button
-              onClick={() => setSelectedTag('')}
-              className={`px-3 py-1 rounded-full text-sm ${
-                !selectedTag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-              }`}
+              onClick={() => setIsTagFilterExpanded(!isTagFilterExpanded)}
+              className="md:hidden w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2"
             >
-              All Tags
+              <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
+              <span className="text-lg">{isTagFilterExpanded ? '▼' : '▶'}</span>
             </button>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  selectedTag === tag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+
+            {/* Tag Filter - Always visible on desktop, toggle on mobile */}
+            <div className={`${isTagFilterExpanded ? 'block' : 'hidden'} md:block`}>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedTag('')}
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    !selectedTag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  All Tags
+                </button>
+                {allTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedTag(tag)}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      selectedTag === tag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -139,6 +184,9 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
               }
 
               const cardClasses = `${baseClasses} ${specificClasses}`
+
+              const isTagsExpanded = expandedRecipeTags.has(recipe.id)
+              const hasMultipleTags = recipe.tags && recipe.tags.length > 2
 
               return (
                 <div
@@ -174,11 +222,48 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                     </a>
                   )}
 
-                  <div className="flex flex-wrap">
-                    {recipe.tags?.map(tag => (
-                      <span key={tag} className="tag text-xs">{tag}</span>
-                    ))}
-                  </div>
+                  {/* Tags Section */}
+                  {recipe.tags && recipe.tags.length > 0 && (
+                    <div>
+                      {/* Desktop: Show all tags, Mobile: Show limited tags with expand option */}
+                      <div className="hidden md:flex md:flex-wrap">
+                        {recipe.tags.map(tag => (
+                          <span key={tag} className="tag text-xs">{tag}</span>
+                        ))}
+                      </div>
+
+                      {/* Mobile: Limited tags with expand button */}
+                      <div className="md:hidden">
+                        <div className="flex flex-wrap">
+                          {(isTagsExpanded ? recipe.tags : recipe.tags.slice(0, 2)).map(tag => (
+                            <span key={tag} className="tag text-xs">{tag}</span>
+                          ))}
+                          {hasMultipleTags && !isTagsExpanded && recipe.tags.length > 2 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleRecipeTags(recipe.id)
+                              }}
+                              className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full mr-2 mb-2 hover:bg-blue-100"
+                            >
+                              +{recipe.tags.length - 2} more
+                            </button>
+                          )}
+                          {hasMultipleTags && isTagsExpanded && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                toggleRecipeTags(recipe.id)
+                              }}
+                              className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full mr-2 mb-2 hover:bg-gray-200"
+                            >
+                              show less
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}

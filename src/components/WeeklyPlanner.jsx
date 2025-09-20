@@ -27,6 +27,7 @@ function WeeklyPlanner() {
   // Shopping list state
   const [showShoppingList, setShowShoppingList] = useState(false)
   const [currentPlanId, setCurrentPlanId] = useState(null)
+  const [mealEatenCounts, setMealEatenCounts] = useState({})
 
   useEffect(() => {
     const loadCurrentPlan = async () => {
@@ -48,6 +49,21 @@ function WeeklyPlanner() {
     loadCurrentPlan()
   }, [])
 
+  // Load eaten counts whenever meals change
+  useEffect(() => {
+    const loadEatenCounts = async () => {
+      if (weeklyPlan.meals.length > 0) {
+        const mealIds = weeklyPlan.meals.map(meal => meal.id)
+        const counts = await mealHistoryService.getRecipeEatenCounts(mealIds)
+        setMealEatenCounts(counts)
+      } else {
+        setMealEatenCounts({})
+      }
+    }
+
+    loadEatenCounts()
+  }, [weeklyPlan.meals])
+
   const handleSelectRecipes = (selectedRecipes) => {
     // Add default scaling factor of 1 to each recipe
     const mealsWithScaling = selectedRecipes.map(recipe => ({
@@ -58,6 +74,8 @@ function WeeklyPlanner() {
       ...prev,
       meals: mealsWithScaling
     }))
+    // Clear currentPlanId since this is now a new unsaved selection
+    setCurrentPlanId(null)
   }
 
   const handleRemoveMeal = (mealId) => {
@@ -65,6 +83,8 @@ function WeeklyPlanner() {
       ...prev,
       meals: prev.meals.filter(meal => meal.id !== mealId)
     }))
+    // Clear currentPlanId since this modifies the plan
+    setCurrentPlanId(null)
   }
 
   const handleScalingChange = (mealId, newScaling) => {
@@ -76,6 +96,8 @@ function WeeklyPlanner() {
           : meal
       )
     }))
+    // Clear currentPlanId since this modifies the plan
+    setCurrentPlanId(null)
   }
 
   const handleSavePlan = async () => {
@@ -142,6 +164,8 @@ function WeeklyPlanner() {
       ...prev,
       meals: mealsWithScaling
     }))
+    // Clear currentPlanId since this is now a new unsaved selection
+    setCurrentPlanId(null)
     setShowAIModal(false)
   }
 
@@ -221,6 +245,11 @@ function WeeklyPlanner() {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h4 className="font-medium">{meal.name}</h4>
+                      {mealEatenCounts[meal.id] !== undefined && (
+                        <div className="text-sm text-gray-500 mt-1">
+                          Eaten {mealEatenCounts[meal.id]} times in last 8 weeks
+                        </div>
+                      )}
                       <div className="flex items-center mt-2">
                         <label className="text-sm text-gray-600 mr-2">Servings:</label>
                         <select
@@ -235,14 +264,7 @@ function WeeklyPlanner() {
                         </select>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleMarkMealAsEaten(meal)}
-                        className="text-green-600 hover:text-green-800 text-sm px-2 py-1 bg-green-100 rounded"
-                        title="Mark as eaten"
-                      >
-                        ✓ Eaten
-                      </button>
+                    <div className="flex justify-between items-center">
                       <button
                         onClick={() => handleRemoveMeal(meal.id)}
                         className="text-red-600 hover:text-red-800 text-sm"
