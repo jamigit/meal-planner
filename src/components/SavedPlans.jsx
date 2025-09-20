@@ -234,14 +234,18 @@ function SavedPlans() {
       {/* Sidebar Backdrop */}
       {sidebarRecipe && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50"
+          style={{ zIndex: 1000 }}
           onClick={() => setSidebarRecipe(null)}
         ></div>
       )}
 
       {/* Recipe Sidebar */}
       {sidebarRecipe && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-60 border-l border-gray-200 flex flex-col">
+        <div 
+          className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+          style={{ zIndex: 1001 }}
+        >
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
             <div className="flex justify-between items-center">
