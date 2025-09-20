@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { serviceSelector } from '../services/serviceSelector.js'
 import { claudeAiService } from '../services/claudeAiService.js'
 import RecipeSelector from './RecipeSelector'
@@ -308,13 +309,16 @@ function WeeklyPlanner() {
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Healthy Toggle */}
-            <button
+            <motion.button
               onClick={() => handleToggleChange('healthy')}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.healthy
                   ? 'border-green-500 bg-green-50 text-green-700'
                   : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 aiToggles.healthy
@@ -326,16 +330,19 @@ function WeeklyPlanner() {
                 )}
               </div>
               <span className="text-sm font-medium">🥗 Healthy</span>
-            </button>
+            </motion.button>
 
             {/* Easy Toggle */}
-            <button
+            <motion.button
               onClick={() => handleToggleChange('easy')}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.easy
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 aiToggles.easy
@@ -347,16 +354,19 @@ function WeeklyPlanner() {
                 )}
               </div>
               <span className="text-sm font-medium">⚡ Easy</span>
-            </button>
+            </motion.button>
 
             {/* Spice It Up Toggle */}
-            <button
+            <motion.button
               onClick={() => handleToggleChange('spiceItUp')}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.spiceItUp
                   ? 'border-orange-500 bg-orange-50 text-orange-700'
                   : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 aiToggles.spiceItUp
@@ -368,16 +378,19 @@ function WeeklyPlanner() {
                 )}
               </div>
               <span className="text-sm font-medium">🌶️ Spice It Up</span>
-            </button>
+            </motion.button>
 
             {/* More Toggle */}
-            <button
+            <motion.button
               onClick={() => handleToggleChange('more')}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.more
                   ? 'border-purple-500 bg-purple-50 text-purple-700'
                   : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
               }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 aiToggles.more
@@ -389,14 +402,17 @@ function WeeklyPlanner() {
                 )}
               </div>
               <span className="text-sm font-medium">➕ More</span>
-            </button>
+            </motion.button>
           </div>
         </div>
 
-        <button
+        <motion.button
           onClick={handleGetAISuggestions}
           disabled={isLoadingAI}
           className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
           {isLoadingAI ? (
             <>
@@ -406,7 +422,7 @@ function WeeklyPlanner() {
           ) : (
             <>🤖 Get AI Suggestions</>
           )}
-        </button>
+        </motion.button>
       </div>
 
 
@@ -420,8 +436,19 @@ function WeeklyPlanner() {
             <p className="text-gray-500">No meals selected yet.</p>
           ) : (
             <div className="space-y-2">
-              {weeklyPlan.meals.map((meal) => (
-                <div key={meal.id} className="p-3 bg-gray-50 rounded">
+              <AnimatePresence>
+                {weeklyPlan.meals.map((meal, index) => (
+                  <motion.div 
+                    key={meal.id} 
+                    className="p-3 bg-gray-50 rounded"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ 
+                      duration: 0.3,
+                      delay: index * 0.1 
+                    }}
+                  >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h4 className="font-medium">{meal.name}</h4>
@@ -479,8 +506,9 @@ function WeeklyPlanner() {
                       </a>
                     )}
                   </div>
-                </div>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
           <button

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import CategorizedTags from './CategorizedTags'
 import { serviceSelector } from '../services/serviceSelector.js'
 
@@ -77,8 +78,29 @@ function AISuggestionModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+        >
+          <motion.div 
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.3 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
 
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
@@ -98,11 +120,27 @@ function AISuggestionModal({
           {isLoading ? (
             // Loading State
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"></div>
-              <h3 className="text-lg font-semibold mb-2">Generating Personalized Suggestions</h3>
-              <p className="text-gray-600">
+              <motion.div 
+                className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <motion.h3 
+                className="text-lg font-semibold mb-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Generating Personalized Suggestions
+              </motion.h3>
+              <motion.p 
+                className="text-gray-600"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
                 Analyzing your meal history and preferences...
-              </p>
+              </motion.p>
             </div>
           ) : error ? (
             // Error State
@@ -320,8 +358,10 @@ function AISuggestionModal({
             </div>
           </div>
         )}
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 

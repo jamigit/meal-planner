@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
 import { isSupabaseConfigured } from './lib/supabase.js'
 import Navigation from './components/Navigation'
@@ -12,6 +13,20 @@ import RecipeSeeder from './components/RecipeSeeder'
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
   const supabaseConfigured = isSupabaseConfigured()
+  const location = useLocation()
+
+  // Page transition variants
+  const pageVariants = {
+    initial: { opacity: 0, x: -20 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: 20 }
+  }
+
+  const pageTransition = {
+    type: "tween",
+    ease: "easeInOut",
+    duration: 0.3
+  }
 
   if (loading) {
     return (
@@ -33,12 +48,54 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
-        <Routes>
-          <Route path="/" element={<WeeklyPlanner />} />
-          <Route path="/recipes" element={<RecipeList />} />
-          <Route path="/saved-plans" element={<SavedPlans />} />
-          <Route path="/meal-history" element={<MealHistory />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <WeeklyPlanner />
+              </motion.div>
+            } />
+            <Route path="/recipes" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <RecipeList />
+              </motion.div>
+            } />
+            <Route path="/saved-plans" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <SavedPlans />
+              </motion.div>
+            } />
+            <Route path="/meal-history" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <MealHistory />
+              </motion.div>
+            } />
+          </Routes>
+        </AnimatePresence>
       </main>
 
       {/* Developer Utils - only in development */}

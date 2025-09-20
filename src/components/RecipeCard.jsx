@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import CategorizedTags from './CategorizedTags'
 
 function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
@@ -13,7 +14,17 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
   }
 
   return (
-    <div className="card">
+    <motion.div 
+      className="card"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+      }}
+      whileTap={{ scale: 0.98 }}
+    >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-lg font-semibold flex-1">{recipe.name}</h3>
@@ -120,7 +131,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
           )}
         </>
       )}
-    </div>
+    </motion.div>
   )
 }
 
