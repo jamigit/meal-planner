@@ -422,7 +422,7 @@ function WeeklyPlanner() {
       {sidebarRecipe && (
         <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-60 border-l border-gray-200 flex flex-col">
           {/* Fixed Header */}
-          <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-white">
+          <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Recipe Details</h3>
               <button
@@ -448,7 +448,7 @@ function WeeklyPlanner() {
       {/* Sidebar Backdrop */}
       {sidebarRecipe && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 z-70"
           onClick={() => setSidebarRecipe(null)}
         ></div>
       )}
