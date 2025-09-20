@@ -118,8 +118,8 @@ function WeeklyPlanner() {
     // Clear any existing current plans first
     await weeklyPlanService.clearCurrentPlans()
     
-    // Save the plan but don't set it as current (so it doesn't reload)
-    const savedPlan = await weeklyPlanService.save(weeklyPlan, false)
+    // Save the plan and set it as current
+    const savedPlan = await weeklyPlanService.save(weeklyPlan, true)
     console.log('💾 Saved plan result:', savedPlan)
     
     if (savedPlan) {

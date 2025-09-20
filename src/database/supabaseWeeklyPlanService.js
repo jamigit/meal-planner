@@ -60,21 +60,37 @@ class SupabaseWeeklyPlanService {
         console.log('📋 Sample plan structure:', allPlans[0])
       }
 
-      // Now try to get current plan
-      const { data, error } = await supabase
-        .from(this.tableName)
-        .select('*')
-        .eq('user_id', userId)
-        .eq('is_current', true)
-        .single()
+      // Now try to get current plan - handle the case where is_current column might not exist
+      let currentPlan = null
+      try {
+        const { data, error } = await supabase
+          .from(this.tableName)
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_current', true)
+          .single()
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('❌ Error fetching current plan:', error)
-        throw error
+        if (error && error.code !== 'PGRST116') {
+          console.warn('⚠️ Error fetching current plan (is_current column issue):', error)
+          // Fallback: get the most recent plan
+          if (allPlans && allPlans.length > 0) {
+            currentPlan = allPlans[0] // Most recent plan
+            console.log('🔄 Using most recent plan as current:', currentPlan)
+          }
+        } else {
+          currentPlan = data
+        }
+      } catch (err) {
+        console.warn('⚠️ Exception fetching current plan:', err)
+        // Fallback: get the most recent plan
+        if (allPlans && allPlans.length > 0) {
+          currentPlan = allPlans[0] // Most recent plan
+          console.log('🔄 Using most recent plan as current:', currentPlan)
+        }
       }
       
-      console.log('✅ Current plan result:', data)
-      return data || null
+      console.log('✅ Current plan result:', currentPlan)
+      return currentPlan || null
     } catch (error) {
       console.error('Failed to get current weekly plan:', error)
       return null
