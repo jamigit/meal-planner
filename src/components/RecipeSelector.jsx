@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { recipeService } from '../database/recipeService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
+import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CategorizedTags from './CategorizedTags'
 
 function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = [] }) {
@@ -58,13 +59,13 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     }
   }, [isOpen])
 
-  // Get all tags from all categories
-  const allTags = [...new Set(recipes.flatMap(recipe => [
-    ...(recipe.tags || []),
-    ...(recipe.cuisine_tags || []),
-    ...(recipe.ingredient_tags || []),
-    ...(recipe.convenience_tags || [])
-  ]))]
+  // Get categorized tags for filtering
+  const categorizedTags = {
+    [TAG_CATEGORIES.CUISINE]: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
+    [TAG_CATEGORIES.INGREDIENTS]: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
+    [TAG_CATEGORIES.CONVENIENCE]: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    legacy: [...new Set(recipes.flatMap(recipe => recipe.tags || []))].sort()
+  }
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -142,28 +143,53 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
             </button>
 
             {/* Tag Filter - Always visible on desktop, toggle on mobile */}
-            <div className={`${isTagFilterExpanded ? 'block' : 'hidden'} md:block`}>
-              <div className="flex flex-wrap gap-2">
+            <div className={`${isTagFilterExpanded ? 'block' : 'hidden'} md:block space-y-3`}>
+              {/* All Tags Button */}
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedTag('')}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    !selectedTag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    !selectedTag
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  All Tags
+                  All Recipes
                 </button>
-                {allTags.map(tag => (
-                  <button
-                    key={tag}
-                    onClick={() => setSelectedTag(tag)}
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      selectedTag === tag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
               </div>
+
+              {/* Category Sections */}
+              {Object.entries(categorizedTags).map(([category, tags]) => {
+                if (tags.length === 0) return null
+
+                const isLegacy = category === 'legacy'
+                const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
+                const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
+
+                return (
+                  <div key={category} className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
+                      {displayName}
+                    </h4>
+                    <div className="flex flex-wrap gap-2 ml-5">
+                      {tags.map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => setSelectedTag(tag)}
+                          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                            selectedTag === tag
+                              ? colorClasses
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
