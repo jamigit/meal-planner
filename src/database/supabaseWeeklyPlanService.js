@@ -207,17 +207,31 @@ class SupabaseWeeklyPlanService {
     }
   }
 
+  // Clear all current plans
+  async clearCurrentPlans() {
+    try {
+      const userId = await this.getUserId()
+      const { error } = await supabase
+        .from(this.tableName)
+        .update({ is_current: false })
+        .eq('user_id', userId)
+        .eq('is_current', true)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Failed to clear current plans:', error)
+      throw error
+    }
+  }
+
   // Set plan as current
   async setAsCurrent(id) {
     try {
       const userId = await this.getUserId()
 
       // Clear all current plans
-      await supabase
-        .from(this.tableName)
-        .update({ is_current: false })
-        .eq('user_id', userId)
-        .eq('is_current', true)
+      await this.clearCurrentPlans()
 
       // Set this plan as current
       const { data, error } = await supabase

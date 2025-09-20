@@ -23,22 +23,39 @@ class ServiceSelector {
     console.log('🔧 Service selector:', this.useSupabase ? 'Using Supabase' : 'Using IndexedDB')
   }
 
+  // Method to update service selection when auth state changes
+  updateServiceSelection() {
+    this.checkSupabaseAvailability()
+  }
+
   async getRecipeService() {
-    if (this.useSupabase && authService.isAuthenticated()) {
+    // Always check current auth status
+    const shouldUseSupabase = isSupabaseConfigured() && authService.isAuthenticated()
+    console.log('🔧 Recipe service:', shouldUseSupabase ? 'Using Supabase' : 'Using IndexedDB')
+    
+    if (shouldUseSupabase) {
       return supabaseRecipeService
     }
     return recipeService
   }
 
   async getWeeklyPlanService() {
-    if (this.useSupabase && authService.isAuthenticated()) {
+    // Always check current auth status
+    const shouldUseSupabase = isSupabaseConfigured() && authService.isAuthenticated()
+    console.log('🔧 Weekly plan service:', shouldUseSupabase ? 'Using Supabase' : 'Using IndexedDB')
+    
+    if (shouldUseSupabase) {
       return supabaseWeeklyPlanService
     }
     return weeklyPlanService
   }
 
   async getMealHistoryService() {
-    if (this.useSupabase && authService.isAuthenticated()) {
+    // Always check current auth status
+    const shouldUseSupabase = isSupabaseConfigured() && authService.isAuthenticated()
+    console.log('🔧 Meal history service:', shouldUseSupabase ? 'Using Supabase' : 'Using IndexedDB')
+    
+    if (shouldUseSupabase) {
       return supabaseMealHistoryService
     }
     return mealHistoryService
