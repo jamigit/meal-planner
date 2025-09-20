@@ -75,7 +75,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
           href={recipe.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-3 block"
+          className="text-blue-600 hover:text-blue-800 text-sm mb-3 inline-block"
         >
           View Original Recipe →
         </a>

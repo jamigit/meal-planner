@@ -214,7 +214,7 @@ function AISuggestionModal({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-sm text-blue-600 hover:text-blue-800 block mb-2 ml-7"
+                            className="text-sm text-blue-600 hover:text-blue-800 inline-block mb-2 ml-7"
                           >
                             View Recipe →
                           </a>
@@ -346,7 +346,7 @@ function AISuggestionModal({
                           href={recipe.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 block mt-2"
+                          className="text-sm text-blue-600 hover:text-blue-800 inline-block mt-2"
                         >
                           View Recipe →
                         </a>

@@ -250,7 +250,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       href={recipe.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm block mb-2"
+                      className="text-blue-600 hover:text-blue-800 text-sm inline-block mb-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       View Recipe →
