@@ -14,6 +14,7 @@ function RecipeList() {
   const [selectedTag, setSelectedTag] = useState('')
   const [showMigrationModal, setShowMigrationModal] = useState(false)
   const [showImportSidebar, setShowImportSidebar] = useState(false)
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false)
 
   const loadRecipes = async () => {
     const loadedRecipes = await recipeService.getAll()
@@ -134,54 +135,68 @@ function RecipeList() {
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
 
-        {/* Categorized Tag Filters */}
-        <div className="space-y-3">
-          {/* All Tags Button */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedTag('')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                !selectedTag
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All Recipes ({recipes.length})
-            </button>
-          </div>
+        {/* Filter Accordion */}
+        <div>
+          {/* Filter Toggle Button */}
+          <button
+            onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+            className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2 hover:bg-gray-100 transition-colors"
+          >
+            <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
+            <span className="text-lg">{isFilterExpanded ? '▼' : '▶'}</span>
+          </button>
 
-          {/* Category Sections */}
-          {Object.entries(categorizedTags).map(([category, tags]) => {
-            if (tags.length === 0) return null
-
-            const isLegacy = category === 'legacy'
-            const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
-            const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
-
-            return (
-              <div key={category} className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
-                  {displayName} ({tags.length})
-                </h4>
-                <div className="flex flex-wrap gap-2 ml-5">
-                  {tags.map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => setSelectedTag(tag)}
-                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                        selectedTag === tag
-                          ? colorClasses
-                          : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
+          {/* Categorized Tag Filters - Collapsible */}
+          {isFilterExpanded && (
+            <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-white">
+              {/* All Tags Button */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedTag('')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    !selectedTag
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  All Recipes ({recipes.length})
+                </button>
               </div>
-            )
-          })}
+
+              {/* Category Sections */}
+              {Object.entries(categorizedTags).map(([category, tags]) => {
+                if (tags.length === 0) return null
+
+                const isLegacy = category === 'legacy'
+                const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
+                const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
+
+                return (
+                  <div key={category} className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
+                      {displayName} ({tags.length})
+                    </h4>
+                    <div className="flex flex-wrap gap-2 ml-5">
+                      {tags.map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => setSelectedTag(tag)}
+                          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                            selectedTag === tag
+                              ? colorClasses
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {searchTerm || selectedTag ? (

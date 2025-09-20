@@ -189,17 +189,35 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
                         ({items.length})
                       </span>
                     </h4>
-                    <div className="space-y-1">
-                      {items.map((item, index) => (
-                        <div key={index} className="text-xs">
-                          <div className="font-medium text-gray-900">
-                            {shoppingListService.formatQuantity(item.quantity, item.unit)} {item.item}
+                    <div className="space-y-2">
+                      {items.map((item, index) => {
+                        const showSources = item.sources.length > 1
+
+                        return (
+                          <div key={index} className="text-xs">
+                            <div className="font-medium text-gray-900 flex">
+                              <span className="mr-2">•</span>
+                              <div>
+                                {shoppingListService.formatQuantity(item.quantity, item.unit)} {item.item}
+                                {showSources && (
+                                  <div className="text-gray-500 text-xs mt-1">
+                                    ({item.sources.map(source => {
+                                      // Extract amount from original string or use item name if no amount
+                                      const match = source.original.match(/^([\d\/\.\s]+(?:cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|ounce|oz|can|bottle|jar|bag|bunch|head|clove|cloves)?)\s*/i)
+                                      if (match && match[1].trim()) {
+                                        return match[1].trim()
+                                      } else {
+                                        // If no amount found, use the item name
+                                        return item.item
+                                      }
+                                    }).join(' | ')})
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-gray-500 text-xs">
-                            {item.sources.map(s => s.original).join(', ')}
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </div>
                 )
