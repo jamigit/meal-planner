@@ -22,6 +22,14 @@ function WeeklyPlanner() {
   const [aiSuggestions, setAISuggestions] = useState([])
   const [isLoadingAI, setIsLoadingAI] = useState(false)
   const [aiError, setAIError] = useState(null)
+  
+  // AI Toggle options
+  const [aiToggles, setAiToggles] = useState({
+    healthy: false,
+    easy: false,
+    spiceItUp: false,
+    more: false
+  })
   const [weekPreferences, setWeekPreferences] = useState('')
 
 
@@ -187,6 +195,14 @@ function WeeklyPlanner() {
     setShowShoppingList(true)
   }
 
+  // Toggle handler
+  const handleToggleChange = (toggleName) => {
+    setAiToggles(prev => ({
+      ...prev,
+      [toggleName]: !prev[toggleName]
+    }))
+  }
+
   // AI Suggestion handlers
   const handleGetAISuggestions = async () => {
     setIsLoadingAI(true)
@@ -195,8 +211,8 @@ function WeeklyPlanner() {
     setAISuggestions([])
 
     try {
-      console.log('🤖 Requesting AI suggestions with preferences:', weekPreferences)
-      const result = await claudeAiService.generateMealSuggestions(weekPreferences)
+      console.log('🤖 Requesting AI suggestions with preferences:', weekPreferences, 'toggles:', aiToggles)
+      const result = await claudeAiService.generateMealSuggestions(weekPreferences, aiToggles)
 
       if (result.success) {
         setAISuggestions(result.data)
@@ -279,6 +295,98 @@ function WeeklyPlanner() {
             rows="3"
             placeholder="Any preferences for this week? (e.g., 'feeling like healthy meals', 'have chicken in fridge', 'want something quick')"
           />
+        </div>
+
+        {/* AI Toggle Options */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Customize Suggestions
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Healthy Toggle */}
+            <button
+              onClick={() => handleToggleChange('healthy')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                aiToggles.healthy
+                  ? 'border-green-500 bg-green-50 text-green-700'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                aiToggles.healthy
+                  ? 'border-green-500 bg-green-500'
+                  : 'border-gray-300'
+              }`}>
+                {aiToggles.healthy && (
+                  <span className="text-white text-xs">✓</span>
+                )}
+              </div>
+              <span className="text-sm font-medium">🥗 Healthy</span>
+            </button>
+
+            {/* Easy Toggle */}
+            <button
+              onClick={() => handleToggleChange('easy')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                aiToggles.easy
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                aiToggles.easy
+                  ? 'border-blue-500 bg-blue-500'
+                  : 'border-gray-300'
+              }`}>
+                {aiToggles.easy && (
+                  <span className="text-white text-xs">✓</span>
+                )}
+              </div>
+              <span className="text-sm font-medium">⚡ Easy</span>
+            </button>
+
+            {/* Spice It Up Toggle */}
+            <button
+              onClick={() => handleToggleChange('spiceItUp')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                aiToggles.spiceItUp
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                aiToggles.spiceItUp
+                  ? 'border-orange-500 bg-orange-500'
+                  : 'border-gray-300'
+              }`}>
+                {aiToggles.spiceItUp && (
+                  <span className="text-white text-xs">✓</span>
+                )}
+              </div>
+              <span className="text-sm font-medium">🌶️ Spice It Up</span>
+            </button>
+
+            {/* More Toggle */}
+            <button
+              onClick={() => handleToggleChange('more')}
+              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
+                aiToggles.more
+                  ? 'border-purple-500 bg-purple-50 text-purple-700'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                aiToggles.more
+                  ? 'border-purple-500 bg-purple-500'
+                  : 'border-gray-300'
+              }`}>
+                {aiToggles.more && (
+                  <span className="text-white text-xs">✓</span>
+                )}
+              </div>
+              <span className="text-sm font-medium">➕ More</span>
+            </button>
+          </div>
         </div>
 
         <button

@@ -44,12 +44,26 @@ class ClaudeAiService {
   }
 
   // Create the prompt for Claude API
-  createMealSuggestionPrompt(recipes, regularMeals, lessRegularMeals, recentMealIds, userNotes) {
+  createMealSuggestionPrompt(recipes, regularMeals, lessRegularMeals, recentMealIds, userNotes, toggles = {}) {
     const recentMealNames = recipes
       .filter(r => recentMealIds.includes(r.id))
       .map(r => r.name)
 
-    return `You are a meal planning assistant. Generate 3 different weekly meal suggestion sets based on the user's meal history and preferences.
+    // Build toggle-specific instructions
+    const toggleInstructions = []
+    const numSuggestions = toggles.more ? 5 : 3
+    
+    if (toggles.healthy) {
+      toggleInstructions.push("- HEALTHY MODE: Prioritize recipes with 'Gluten-Free', 'Low-Carb', 'Vegetarian' tags, and avoid heavy/rich meals")
+    }
+    if (toggles.easy) {
+      toggleInstructions.push("- EASY MODE: Only select recipes tagged as 'Quick', 'Beginner', 'Short-Prep', 'One-Pot', or 'No-Cook'")
+    }
+    if (toggles.spiceItUp) {
+      toggleInstructions.push("- SPICE IT UP MODE: Focus on less regular meals and try to include more diverse cuisines and unique recipes")
+    }
+
+    return `You are a meal planning assistant. Generate ${numSuggestions} different weekly meal suggestion sets based on the user's meal history and preferences.
 
 **User's Recipe Collection:**
 ${recipes.map(r => `- ${r.name} (tags: ${r.tags?.join(', ') || 'none'})`).join('\n')}
@@ -66,13 +80,17 @@ ${recipes.map(r => `- ${r.name} (tags: ${r.tags?.join(', ') || 'none'})`).join('
 **User Preferences for This Week:**
 "${userNotes || 'No specific preferences'}"
 
+**Customization Options:**
+${toggleInstructions.length > 0 ? toggleInstructions.join('\n') : '- No specific customization options selected'}
+
 **Requirements:**
-1. Generate exactly 3 different suggestion sets
+1. Generate exactly ${numSuggestions} different suggestion sets
 2. Each set should have exactly 4 meals
 3. Each set should have 2 regular meals + 2 less regular meals (adjust if not enough available)
 4. Avoid meals eaten in the last 2 weeks
 5. Consider user preferences when selecting meals
-6. Provide reasoning for each meal selection
+6. Follow customization options if specified
+7. Provide reasoning for each meal selection
 
 **Response Format (JSON):**
 {
@@ -146,7 +164,7 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
   }
 
   // Main function to generate meal suggestions using Claude API
-  async generateMealSuggestions(userNotes = '') {
+  async generateMealSuggestions(userNotes = '', toggles = {}) {
     try {
       if (!this.isConfigured()) {
         console.error('❌ Claude API not configured:', {
@@ -179,7 +197,8 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
         validRegular,
         validLessRegular,
         recentMealIds,
-        userNotes
+        userNotes,
+        toggles
       )
 
       // Call Claude API via Netlify function
