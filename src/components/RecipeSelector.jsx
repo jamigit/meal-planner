@@ -10,12 +10,6 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   const [selectedTag, setSelectedTag] = useState('')
   const [eatenCounts, setEatenCounts] = useState({})
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false)
-  const [expandedCategories, setExpandedCategories] = useState({
-    [TAG_CATEGORIES.CUISINE]: false,
-    [TAG_CATEGORIES.INGREDIENTS]: false,
-    [TAG_CATEGORIES.CONVENIENCE]: false,
-    legacy: false
-  })
   // Removed expandedRecipeTags state as we're using CategorizedTags component now
 
   useEffect(() => {
@@ -109,21 +103,6 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
   // Removed toggleRecipeTags function as we're using CategorizedTags component now
 
-  const toggleCategoryExpansion = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }))
-  }
-
-  const toggleAllCategories = () => {
-    const allExpanded = Object.values(expandedCategories).every(Boolean)
-    const newState = {}
-    Object.keys(expandedCategories).forEach(category => {
-      newState[category] = !allExpanded
-    })
-    setExpandedCategories(newState)
-  }
 
   const handleSave = () => {
     onSelectRecipes(selectedRecipes)
@@ -155,89 +134,68 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
-          {/* Tag Filter - Desktop: Always shown, Mobile: Expandable */}
+          {/* Filter Accordion */}
           <div>
-            {/* Mobile Tag Toggle Button */}
+            {/* Filter Toggle Button */}
             <button
               onClick={() => setIsTagFilterExpanded(!isTagFilterExpanded)}
-              className="md:hidden w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2"
+              className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2 hover:bg-gray-100 transition-colors"
             >
               <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
               <span className="text-lg">{isTagFilterExpanded ? '▼' : '▶'}</span>
             </button>
 
-            {/* Tag Filter - Always visible on desktop, toggle on mobile */}
-            <div className={`${isTagFilterExpanded ? 'block' : 'hidden'} md:block space-y-3`}>
-              {/* All Tags Button and Expand/Collapse Controls */}
-              <div className="flex items-center justify-between gap-2">
-                <button
-                  onClick={() => setSelectedTag('')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    !selectedTag
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  All Recipes
-                </button>
-                <button
-                  onClick={toggleAllCategories}
-                  className="px-3 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-300 rounded hover:bg-gray-50"
-                >
-                  {Object.values(expandedCategories).every(Boolean) ? 'Collapse All' : 'Expand All'}
-                </button>
-              </div>
+            {/* Categorized Tag Filters - Collapsible */}
+            {isTagFilterExpanded && (
+              <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-white">
+                {/* All Tags Button */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setSelectedTag('')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                      !selectedTag
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    All Recipes ({recipes.length})
+                  </button>
+                </div>
 
-              {/* Category Accordions */}
-              {Object.entries(categorizedTags).map(([category, tags]) => {
-                if (tags.length === 0) return null
+                {/* Category Sections */}
+                {Object.entries(categorizedTags).map(([category, tags]) => {
+                  if (tags.length === 0) return null
 
-                const isLegacy = category === 'legacy'
-                const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
-                const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
-                const isExpanded = expandedCategories[category]
+                  const isLegacy = category === 'legacy'
+                  const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
+                  const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
 
-                return (
-                  <div key={category} className="border border-gray-200 rounded-lg">
-                    {/* Accordion Header */}
-                    <button
-                      onClick={() => toggleCategoryExpansion(category)}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
+                  return (
+                    <div key={category} className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
-                        <span className="text-sm font-medium text-gray-700">{displayName}</span>
-                        <span className="text-xs text-gray-500">({tags.length})</span>
+                        {displayName} ({tags.length})
+                      </h4>
+                      <div className="flex flex-wrap gap-2 ml-5">
+                        {tags.map(tag => (
+                          <button
+                            key={tag}
+                            onClick={() => setSelectedTag(tag)}
+                            className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                              selectedTag === tag
+                                ? colorClasses
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        ))}
                       </div>
-                      <span className={`text-lg transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                        ▼
-                      </span>
-                    </button>
-
-                    {/* Accordion Content */}
-                    {isExpanded && (
-                      <div className="px-3 pb-3 border-t border-gray-100">
-                        <div className="flex flex-wrap gap-2 pt-3">
-                          {tags.map(tag => (
-                            <button
-                              key={tag}
-                              onClick={() => setSelectedTag(tag)}
-                              className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                                selectedTag === tag
-                                  ? colorClasses
-                                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                              }`}
-                            >
-                              {tag}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
