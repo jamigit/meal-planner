@@ -31,6 +31,22 @@ function WeeklyPlanner() {
   const [mealEatenCounts, setMealEatenCounts] = useState({})
   const [sidebarRecipe, setSidebarRecipe] = useState(null) // Recipe to show in sidebar
 
+  // Lock/unlock body scroll when sidebar opens/closes
+  useEffect(() => {
+    if (sidebarRecipe) {
+      // Lock body scroll
+      document.body.style.overflow = 'hidden'
+    } else {
+      // Unlock body scroll
+      document.body.style.overflow = 'unset'
+    }
+
+    // Cleanup function to ensure scroll is unlocked when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [sidebarRecipe])
+
   useEffect(() => {
     const loadCurrentPlan = async () => {
       console.log('🔄 Loading current plan...')
@@ -404,17 +420,23 @@ function WeeklyPlanner() {
 
       {/* Recipe Sidebar */}
       {sidebarRecipe && (
-        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 overflow-y-auto border-l border-gray-200">
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
+        <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 border-l border-gray-200 flex flex-col">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-white">
+            <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                ×
+                <span className="text-lg">×</span>
+                <span className="text-sm font-medium">Close</span>
               </button>
             </div>
+          </div>
+          
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4">
             <RecipeCard
               recipe={sidebarRecipe}
               showDetails={true}
@@ -426,7 +448,7 @@ function WeeklyPlanner() {
       {/* Sidebar Backdrop */}
       {sidebarRecipe && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black bg-opacity-50 z-50"
           onClick={() => setSidebarRecipe(null)}
         ></div>
       )}
