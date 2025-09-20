@@ -7,6 +7,13 @@ class ClaudeAiService {
     this.apiUrl = import.meta.env.DEV ? 'http://localhost:3001/api/claude' : '/api/claude'
     this.model = 'claude-3-5-sonnet-20241022'
     this.maxTokens = 1024
+    
+    // Log configuration status for debugging
+    console.log('🔧 Claude AI Service Configuration:', {
+      hasApiKey: !!this.apiKey,
+      apiUrl: this.apiUrl,
+      isDev: import.meta.env.DEV
+    })
   }
 
   // Check if the service is properly configured
@@ -142,6 +149,11 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
   async generateMealSuggestions(userNotes = '') {
     try {
       if (!this.isConfigured()) {
+        console.error('❌ Claude API not configured:', {
+          hasApiKey: !!this.apiKey,
+          envVar: import.meta.env.VITE_CLAUDE_API_KEY ? 'Set' : 'Not set',
+          isDev: import.meta.env.DEV
+        })
         throw new Error('Claude API key not configured. Please set VITE_CLAUDE_API_KEY environment variable.')
       }
 
