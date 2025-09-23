@@ -149,7 +149,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
               {/* Categorized Tag Filters - Collapsible */}
               {isTagFilterExpanded && (
-                <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-white">
+                <div className="space-y-3 p-4 border-2 border-gray-300 rounded-lg bg-white">
                   {/* All Tags Button */}
                   <div className="flex items-center gap-2">
                     <button

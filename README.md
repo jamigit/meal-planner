@@ -314,6 +314,48 @@ The tag system was restructured from a single `tags` array to three categorized 
 3. **Export capabilities** - PDF/CSV export for meal plans and shopping lists
 4. **Production deployment** - Deploy to Vercel with proper environment setup
 
+### 📦 Recipe URL Import — Delivery Plan
+
+This plan adds a consistent “Paste URL → Scrape → Autofill form” flow.
+
+#### 1) Backend: Scrape API and Hardening
+- [ ] Add POST `/api/scrape-recipe` (body: `{ url }`) on Express server
+- [ ] Validate URL: http/https only; block private/local IPs; resolve DNS per-request
+- [ ] Network controls: 10s timeout, 3 redirects max, 1–2 MB max body, custom User-Agent
+- [ ] Rate limiting: 5/min per IP and simple global cap; return 429 on exceed
+- [ ] Small in-memory cache (LRU, ~100–500 entries, 15 min TTL) by normalized URL
+
+#### 2) Parsing & Normalization (Server)
+- [ ] Extract JSON-LD `schema.org/Recipe` (handle arrays and `@graph`)
+- [ ] Fallback: Microdata/RDFa (`itemtype*="schema.org/Recipe"`)
+- [ ] Fallback: Readability (`jsdom` + `@mozilla/readability`) + conservative selectors
+- [ ] Normalize fields: `name`, `ingredients[]`, `instructions[]`, `prep_time`, `cook_time`, `servings`, `image_url`
+- [ ] Convert ISO 8601 durations (e.g., `PT30M`) → minutes; sanitize strings; strip HTML
+
+#### 3) Client: RecipeForm Integration
+- [ ] Add URL input and “Scrape” button to `RecipeForm`
+- [ ] Show spinner; disable controls during request; support cancel
+- [ ] Autofill behavior: fill empty fields by default; optional “Replace existing” toggle
+- [ ] Highlight changed fields; show non-blocking toast on success/error
+
+#### 4) Errors, Logging, Observability
+- [ ] Structured errors with codes: `INVALID_URL`, `BLOCKED_HOST`, `TIMEOUT`, `FETCH_ERROR`, `PARSING_FAILED`, `NO_RECIPE_FOUND`, `RATE_LIMITED`
+- [ ] Structured logs: request id, host, duration, cache hit, parse method, response size
+- [ ] Basic metrics counters (success/fail by host, parse path)
+
+#### 5) Testing Matrix
+- [ ] Fixture tests across major sites (Allrecipes, BBC, SeriousEats, BonAppetit, Minimalist Baker, Pinch of Yum, etc.)
+- [ ] Include at least one non-English site and a JS-heavy page
+- [ ] Snapshot normalized outputs for stability
+
+#### 6) Compliance & Ops
+- [ ] Decide/document `robots.txt` policy and Terms stance (user-initiated import)
+- [ ] Backoff on 403/429; friendly User-Agent; expose `X-Request-ID`
+
+#### 7) Optional (Feature-flagged)
+- [ ] Spoonacular “Recipe Extract” fallback behind env flag and API key
+
+
 ## Installation & Setup
 
 ### Prerequisites
@@ -341,6 +383,12 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run preview      # Preview production build
 npm run lint         # Run ESLint
+```
+
+API base URL config (optional for scraping):
+```
+# .env
+VITE_API_BASE=http://localhost:3002
 ```
 
 ### Project Structure

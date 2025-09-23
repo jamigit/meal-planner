@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { scrapeRecipeFromUrl } from '../services/recipeScraperService.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   TAG_CATEGORIES,
@@ -25,6 +26,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   })
 
   const [errors, setErrors] = useState({})
+  const [isScraping, setIsScraping] = useState(false)
+  const [scrapeError, setScrapeError] = useState(null)
+  const abortRef = useRef(null)
 
   // Update form data when recipe prop changes
   useEffect(() => {
@@ -73,6 +77,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }))
+    }
+    if (name === 'url') {
+      setScrapeError(null)
     }
   }
 
@@ -181,6 +188,42 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const autofillFromScrape = (data) => {
+    setFormData(prev => ({
+      ...prev,
+      name: prev.name?.trim() ? prev.name : (data.name || ''),
+      // Only fill ingredients/instructions if currently empty or single empty row
+      ingredients: (prev.ingredients && prev.ingredients.filter(i => i.trim()).length > 0)
+        ? prev.ingredients
+        : (Array.isArray(data.ingredients) && data.ingredients.length > 0 ? data.ingredients : ['']),
+      instructions: (prev.instructions && prev.instructions.filter(i => i.trim()).length > 0)
+        ? prev.instructions
+        : (Array.isArray(data.instructions) && data.instructions.length > 0 ? data.instructions : ['']),
+      prep_time: prev.prep_time || (data.prep_time ?? ''),
+      cook_time: prev.cook_time || (data.cook_time ?? ''),
+      servings: prev.servings || (data.servings ?? '')
+    }))
+  }
+
+  const handleScrape = async () => {
+    if (!formData.url || !/^https?:\/\//i.test(formData.url)) {
+      setScrapeError('Enter a valid http(s) URL')
+      return
+    }
+    try {
+      setScrapeError(null)
+      setIsScraping(true)
+      if (abortRef.current) abortRef.current.abort()
+      abortRef.current = new AbortController()
+      const result = await scrapeRecipeFromUrl(formData.url, abortRef.current.signal)
+      autofillFromScrape(result)
+    } catch (err) {
+      setScrapeError(err?.message || 'Failed to scrape recipe')
+    } finally {
+      setIsScraping(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -300,6 +343,19 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="https://example.com/recipe"
                 />
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleScrape}
+                    disabled={isScraping}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isScraping ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    {isScraping ? 'Scraping…' : 'Scrape'}
+                  </button>
+                  {scrapeError && (
+                    <span className="text-red-600 text-sm">{scrapeError}</span>
+                  )}
+                </div>
               </div>
             </div>
 

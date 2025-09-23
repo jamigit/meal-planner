@@ -115,8 +115,8 @@ function SavedPlans() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold">
-                      {plan.name || `Plan from ${formatDate(plan.created_at)}`}
+                    <h3 className="text-lg font-semibold break-words whitespace-normal">
+                      {plan.name?.toString().trim() || `Plan from ${formatDate(plan.created_at)}`}
                     </h3>
                     {plan.is_current && (
                       <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
@@ -152,28 +152,26 @@ function SavedPlans() {
                 </div>
               </div>
 
-              {/* Tabs */}
-              <div className="flex border-b border-gray-200 mb-4">
-                <button
-                  onClick={() => setActiveTab(plan.id, 'meals')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    getActiveTab(plan.id) === 'meals'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Meals ({plan.meals?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab(plan.id, 'shopping')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    getActiveTab(plan.id) === 'shopping'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Shopping List
-                </button>
+              {/* Toggle Tabs */}
+              <div className="mb-4">
+                <div className="relative inline-flex bg-sky-600 rounded-full p-1">
+                  <button
+                    onClick={() => setActiveTab(plan.id, 'meals')}
+                    className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                      getActiveTab(plan.id) === 'meals' ? 'bg-white text-sky-700 shadow' : 'text-white'
+                    }`}
+                  >
+                    Meals ({plan.meals?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab(plan.id, 'shopping')}
+                    className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                      getActiveTab(plan.id) === 'shopping' ? 'bg-white text-sky-700 shadow' : 'text-white'
+                    }`}
+                  >
+                    Shopping List
+                  </button>
+                </div>
               </div>
 
               {/* Tab Content */}
@@ -182,11 +180,11 @@ function SavedPlans() {
                   <div className="grid grid-cols-1 gap-3">
                     {plan.meals.map((meal, index) => (
                       <div key={meal.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <span className="font-medium">{meal.name}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                          <span className="font-medium break-words whitespace-normal">{meal.name}</span>
                           <button
                             onClick={() => setSidebarRecipe(meal)}
-                            className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap text-blue-600 hover:text-blue-800 text-sm px-2 py-1 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
                           >
                             View Recipe
                           </button>
