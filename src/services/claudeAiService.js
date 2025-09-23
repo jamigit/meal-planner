@@ -4,7 +4,8 @@ import { recipeService } from '../database/recipeService.js'
 class ClaudeAiService {
   constructor() {
     this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
-    this.apiUrl = import.meta.env.DEV ? 'http://localhost:3001/api/claude' : '/.netlify/functions/claude'
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:3002'
+    this.apiUrl = `${apiBase}/api/claude`
     this.model = 'claude-3-5-sonnet-20241022'
     this.maxTokens = 1024
     

@@ -7,7 +7,7 @@ import { URL } from 'url'
 dotenv.config()
 
 const app = express()
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3002
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001
 
 // Middleware
 app.use(cors())
