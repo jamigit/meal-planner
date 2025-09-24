@@ -47,7 +47,7 @@ function MealHistory() {
 
   const getFrequencyColor = (frequency) => {
     if (frequency >= 5) return 'text-green-600 bg-green-100'
-    if (frequency >= 3) return 'text-blue-600 bg-blue-100'
+  if (frequency >= 3) return 'text-green-700 bg-green-100'
     if (frequency >= 1) return 'text-yellow-600 bg-yellow-100'
     return 'text-gray-600 bg-gray-100'
   }

@@ -13,8 +13,32 @@ const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001
 app.use(cors())
 app.use(express.json())
 
+// ===== Simple in-memory rate limit and cache =====
+const RATE_LIMIT_WINDOW_MS = 60_000
+const RATE_LIMIT_MAX = 10 // per IP per minute
+const rateState = new Map() // ip -> { count, windowStart }
+
+function rateLimit(req, res, next) {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+  const now = Date.now()
+  const state = rateState.get(ip) || { count: 0, windowStart: now }
+  if (now - state.windowStart > RATE_LIMIT_WINDOW_MS) {
+    state.count = 0
+    state.windowStart = now
+  }
+  state.count += 1
+  rateState.set(ip, state)
+  if (state.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({ code: 'RATE_LIMITED', error: 'Too many requests. Please try again shortly.' })
+  }
+  next()
+}
+
+const CACHE_TTL_MS = 15 * 60_000
+const scrapeCache = new Map() // url -> { data, ts }
+
 // Claude API proxy endpoint
-app.post('/api/claude', async (req, res) => {
+app.post('/api/claude', rateLimit, async (req, res) => {
   try {
     const { prompt, userNotes } = req.body
 
@@ -175,11 +199,17 @@ function isHttpUrlSafe(raw) {
 }
 
 // Recipe scrape endpoint (JSON-LD first)
-app.post('/api/scrape-recipe', async (req, res) => {
+app.post('/api/scrape-recipe', rateLimit, async (req, res) => {
   try {
     const { url } = req.body || {}
     if (!url || !isHttpUrlSafe(url)) {
       return res.status(400).json({ code: 'INVALID_URL', error: 'Invalid or unsupported URL' })
+    }
+
+    // Serve from cache if fresh
+    const cached = scrapeCache.get(url)
+    if (cached && (Date.now() - cached.ts) < CACHE_TTL_MS) {
+      return res.json({ source_url: url, ...cached.data })
     }
 
     // Fetch page with timeout and headers
@@ -252,9 +282,28 @@ app.post('/api/scrape-recipe', async (req, res) => {
     }
 
     if (!normalized || !normalized.name) {
+      // Optional Spoonacular fallback
+      const spoonEnabled = String(process.env.ENABLE_SPOONACULAR || '').toLowerCase() === 'true'
+      const spoonKey = process.env.SPOONACULAR_API_KEY || process.env.VITE_SPOONACULAR_API_KEY
+      if (spoonEnabled && spoonKey) {
+        try {
+          const extUrl = `https://api.spoonacular.com/recipes/extract?apiKey=${encodeURIComponent(spoonKey)}&url=${encodeURIComponent(url)}`
+          const sRes = await fetch(extUrl)
+          if (sRes.ok) {
+            const sData = await sRes.json()
+            const sNorm = normalizeSpoonacular(sData)
+            if (sNorm && sNorm.name) {
+              scrapeCache.set(url, { data: sNorm, ts: Date.now() })
+              return res.json({ source_url: url, provider: 'spoonacular', ...sNorm })
+            }
+          }
+        } catch (_) { /* ignore and fall through */ }
+      }
       return res.status(422).json({ code: 'NO_RECIPE_FOUND', error: 'Could not extract recipe from page' })
     }
 
+    // Cache and return
+    scrapeCache.set(url, { data: normalized, ts: Date.now() })
     return res.json({ source_url: url, ...normalized })
 
   } catch (error) {
@@ -383,6 +432,27 @@ function extractHeuristicRecipe(html) {
   } catch (_) {
     return null
   }
+}
+
+// Spoonacular normalizer
+function normalizeSpoonacular(data) {
+  if (!data) return null
+  const name = (data.title || '').toString().trim()
+  const ingredients = Array.isArray(data.extendedIngredients)
+    ? data.extendedIngredients.map(i => (i.original || i.originalName || i.name || '').toString().trim()).filter(Boolean)
+    : (Array.isArray(data.ingredients) ? data.ingredients.map(x => (x || '').toString().trim()).filter(Boolean) : [])
+  let instructions = []
+  if (Array.isArray(data.analyzedInstructions) && data.analyzedInstructions.length > 0) {
+    const steps = data.analyzedInstructions[0].steps || []
+    instructions = steps.map(s => (s.step || '').toString().trim()).filter(Boolean)
+  } else if (typeof data.instructions === 'string') {
+    instructions = data.instructions.split(/\n+|\r+/).map(s => s.trim()).filter(Boolean)
+  }
+  const prep_time = Number.isFinite(data.preparationMinutes) ? data.preparationMinutes : null
+  const cook_time = Number.isFinite(data.cookingMinutes) ? data.cookingMinutes : null
+  const servings = Number.isFinite(data.servings) ? data.servings : null
+  const image_url = data.image || null
+  return { name, ingredients, instructions, prep_time, cook_time, servings, image_url }
 }
 
 app.listen(port, () => {

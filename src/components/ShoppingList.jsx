@@ -84,7 +84,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Shopping List</h2>
+            <h2 className="font-heading text-display-2 uppercase text-gray-900">Shopping List</h2>
             {!loading && (
               <p className="text-gray-600 mt-1">
                 {getTotalItems()} items from {recipes?.length || 0} recipes
@@ -126,10 +126,10 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
           <button
             onClick={handleCopyToClipboard}
             disabled={loading || getTotalItems() === 0}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 transition-colors ${
               copySuccess
                 ? 'bg-green-600 text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-300 disabled:cursor-not-allowed'
+                : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed'
             }`}
           >
             {copySuccess ? '✓ Copied!' : '📋 Copy All'}
@@ -137,7 +137,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-brand-surface">
           {loading ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

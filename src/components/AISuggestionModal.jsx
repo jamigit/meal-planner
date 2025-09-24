@@ -148,7 +148,7 @@ function AISuggestionModal({
               <div className="text-red-600 text-6xl mb-4">⚠️</div>
               <h3 className="text-lg font-semibold mb-2 text-red-800">Unable to Generate Suggestions</h3>
               <p className="text-red-600 mb-4">{error}</p>
-              <button onClick={onClose} className="btn-secondary">
+              <button onClick={onClose} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700">
                 Close
               </button>
             </div>
@@ -157,7 +157,7 @@ function AISuggestionModal({
             <div>
               <button
                 onClick={handleBackToOptions}
-                className="btn-secondary mb-6"
+                className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700 mb-6"
               >
                 ← Back to Options
               </button>
@@ -180,7 +180,7 @@ function AISuggestionModal({
                         key={index} 
                         className={`border-2 rounded-lg p-4 transition-colors cursor-pointer ${
                           isSelected 
-                            ? 'border-blue-500 bg-blue-50' 
+                            ? 'border-blue-500 bg-brand-surface' 
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         onClick={() => handleToggleMealSelection(index)}
@@ -195,12 +195,12 @@ function AISuggestionModal({
                             />
                             <h4 className="font-semibold text-gray-900">{meal.recipe.name}</h4>
                           </div>
-                          <button
-                            onClick={(e) => {
+                        <button
+                          onClick={(e) => {
                               e.stopPropagation()
                               handleSwapMeal(index)
                             }}
-                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-3 py-1 bg-green-600 text-white hover:bg-green-700"
                           >
                             Swap
                           </button>
@@ -214,7 +214,7 @@ function AISuggestionModal({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-sm text-blue-600 hover:text-blue-800 inline-block mb-2 ml-7"
+                            className="text-sm text-green-700 hover:text-green-800 inline-block mb-2 ml-7"
                           >
                             View Recipe →
                           </a>
@@ -273,7 +273,7 @@ function AISuggestionModal({
                         ))}
                       </div>
 
-                      <button className="btn-primary w-full">
+                      <button className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700 w-full">
                         Select This Plan →
                       </button>
                     </div>
@@ -302,12 +302,12 @@ function AISuggestionModal({
                 {selectedMeals.length} of {selectedSet.meals.length} meals selected
               </div>
               <div className="flex space-x-3">
-                <button onClick={handleBackToOptions} className="btn-secondary">
+                <button onClick={handleBackToOptions} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700">
                   See Other Options
                 </button>
                 <button 
                   onClick={handleConfirmSelection} 
-                  className="btn-primary"
+                  className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700"
                   disabled={selectedMeals.length === 0}
                 >
                   Use Selected Meals ({selectedMeals.length})

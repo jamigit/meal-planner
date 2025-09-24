@@ -44,7 +44,7 @@ class ClaudeAiService {
     })
   }
 
-  // Create the prompt for Claude API
+  // Create the prompt for Claude API (now requests categorized tags)
   createMealSuggestionPrompt(recipes, regularMeals, lessRegularMeals, recentMealIds, userNotes, toggles = {}) {
     const recentMealNames = recipes
       .filter(r => recentMealIds.includes(r.id))
@@ -93,6 +93,13 @@ ${toggleInstructions.length > 0 ? toggleInstructions.join('\n') : '- No specific
 6. Follow customization options if specified
 7. Provide reasoning for each meal selection
 
+**Allowed Tag Vocabularies:**
+- cuisine_tags: Italian, Thai, Mexican, Indian, Japanese, Chinese, Greek, Mediterranean, French, Middle Eastern, Korean, Vietnamese, American
+- ingredient_tags: Chicken, Fish, Beef, Pork, Turkey, Vegetables, Tofu, Legumes, Pasta, Rice, Eggs
+- convenience_tags: Quick, Beginner, One-Pot, No-Cook, Make-Ahead, Air-Fryer, Sheet-Pan, Slow-Cooker, Gluten-Free
+
+Only use tags from these lists; if none fit, return an empty array.
+
 **Response Format (JSON):**
 {
   "suggestions": [
@@ -102,7 +109,10 @@ ${toggleInstructions.length > 0 ? toggleInstructions.join('\n') : '- No specific
       "meals": [
         {
           "recipe_name": "exact recipe name from collection",
-          "reason": "why this meal was selected"
+          "reason": "why this meal was selected",
+          "cuisine_tags": ["Italian"],
+          "ingredient_tags": ["Chicken"],
+          "convenience_tags": ["Quick"]
         }
       ]
     }
@@ -142,7 +152,12 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
 
           if (recipe) {
             meals.push({
-              recipe,
+              recipe: {
+                ...recipe,
+                cuisine_tags: Array.isArray(meal.cuisine_tags) ? meal.cuisine_tags : (recipe.cuisine_tags || []),
+                ingredient_tags: Array.isArray(meal.ingredient_tags) ? meal.ingredient_tags : (recipe.ingredient_tags || []),
+                convenience_tags: Array.isArray(meal.convenience_tags) ? meal.convenience_tags : (recipe.convenience_tags || [])
+              },
               reason: meal.reason
             })
           }

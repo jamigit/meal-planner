@@ -32,7 +32,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
           {onEdit && (
             <button
               onClick={() => onEdit(recipe)}
-              className="text-gray-500 hover:text-blue-600 transition-colors"
+            className="text-gray-500 hover:text-green-700 transition-colors"
               title="Edit recipe"
             >
               ✏️
@@ -75,7 +75,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
           href={recipe.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-3 inline-block"
+          className="text-green-700 hover:text-green-800 text-sm mb-3 inline-block"
         >
           View Original Recipe →
         </a>

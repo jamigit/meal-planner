@@ -97,7 +97,7 @@ function SavedPlans() {
   return (
     <div className="relative">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Saved Plans</h2>
+        <h2 className="font-heading text-display-2 uppercase text-gray-900">Saved Plans</h2>
         <p className="text-gray-600">{savedPlans.length} saved plan{savedPlans.length !== 1 ? 's' : ''}</p>
       </div>
 
@@ -184,7 +184,7 @@ function SavedPlans() {
                           <span className="font-medium break-words whitespace-normal">{meal.name}</span>
                           <button
                             onClick={() => setSidebarRecipe(meal)}
-                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap text-blue-600 hover:text-blue-800 text-sm px-2 py-1 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap text-green-700 hover:text-green-800 text-sm px-2 py-1 bg-green-50 rounded hover:bg-green-100 transition-colors"
                           >
                             View Recipe
                           </button>

@@ -148,7 +148,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
       </div>
 
       {/* Content */}
-      <div className="max-h-96 overflow-y-auto">
+      <div className="max-h-96 overflow-y-auto bg-brand-surface p-3 space-y-6">
         {loading ? (
           <div className="text-center py-6">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
@@ -163,7 +163,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
             {groupByRecipe ? (
               // Recipe-based view
               Object.entries(getRecipeBasedView()).map(([recipe, items]) => (
-                <div key={recipe} className="bg-gray-50 rounded-lg p-3">
+                <div key={recipe} className="bg-brand-surface rounded-lg p-3">
                   <h4 className="font-medium text-gray-900 text-sm mb-2">{recipe}</h4>
                   <div className="space-y-1">
                     {items.map((item, index) => (

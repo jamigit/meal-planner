@@ -278,13 +278,13 @@ function WeeklyPlanner() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+      <h2 className="font-heading text-display-2 uppercase text-gray-900 mb-6">
         {weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
       </h2>
 
       {/* AI Suggestion Section */}
       <div className="card mb-6">
-        <h3 className="text-lg font-semibold mb-4">🤖 AI-Powered Meal Suggestions</h3>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><span className="material-symbols-rounded text-[28px]">robot_2</span> AI-Powered Meal Suggestions</h3>
         <p className="text-gray-600 mb-4">
           Get personalized meal recommendations based on your history and preferences
         </p>
@@ -435,12 +435,12 @@ function WeeklyPlanner() {
           {weeklyPlan.meals.length === 0 ? (
             <p className="text-gray-500">No meals selected yet.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-6">
               <AnimatePresence>
                 {weeklyPlan.meals.map((meal, index) => (
                   <motion.div 
                     key={meal.id} 
-                    className="p-3 bg-gray-50 rounded"
+                  className="p-5 bg-brand-surface rounded"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
@@ -451,7 +451,7 @@ function WeeklyPlanner() {
                   >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h4 className="font-medium">{meal.name}</h4>
+                      <h4 className="font-black text-[14px] md:text-[16px]">{meal.name}</h4>
                       {mealEatenCounts[meal.id] !== undefined && (
                         <div className="text-sm text-gray-500 mt-1">
                           Eaten {mealEatenCounts[meal.id]} times in last 8 weeks
@@ -474,8 +474,9 @@ function WeeklyPlanner() {
                     <div className="flex justify-between items-center">
                       <button
                         onClick={() => handleRemoveMeal(meal.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                        className="inline-flex items-center gap-1 text-stone-900 hover:text-stone-800 text-sm"
                       >
+                        <span className="material-symbols-rounded text-base text-stone-900">close</span>
                         Remove
                       </button>
                     </div>
@@ -485,10 +486,10 @@ function WeeklyPlanner() {
 
                   {/* Recipe Links */}
                   <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => setSidebarRecipe(meal)}
-                      className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
-                    >
+                      <button
+                        onClick={() => setSidebarRecipe(meal)}
+                        className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[18px] px-3 py-1 bg-stone-800 text-white hover:bg-stone-900 transition-colors"
+                      >
                       View Recipe
                     </button>
                     {meal.url && (

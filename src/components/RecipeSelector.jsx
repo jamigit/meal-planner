@@ -115,7 +115,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Select Meals ({selectedRecipes.length}/4)</h2>
+          <h2 className="font-heading text-display-2 uppercase">Select Meals ({selectedRecipes.length}/4)</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -156,7 +156,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       onClick={() => setSelectedTag('')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium ${
                         !selectedTag
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-green-600 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -214,7 +214,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
               let specificClasses = ''
 
               if (isSelected) {
-                specificClasses = 'border-blue-500 bg-blue-50'
+                specificClasses = 'border-green-600 bg-green-50'
               } else if (canSelect) {
                 specificClasses = 'border-gray-200 hover:border-gray-300 bg-white'
               } else {
@@ -241,7 +241,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       )}
                     </div>
                     {isSelected && (
-                      <span className="text-blue-600 text-xl">✓</span>
+                      <span className="text-green-700 text-xl">✓</span>
                     )}
                   </div>
 
@@ -250,7 +250,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       href={recipe.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm inline-block mb-2"
+                      className="text-green-700 hover:text-green-800 text-sm inline-block mb-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       View Recipe →

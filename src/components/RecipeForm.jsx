@@ -220,7 +220,15 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
       const result = await scrapeRecipeFromUrl(formData.url, abortRef.current.signal)
       autofillFromScrape(result)
     } catch (err) {
-      setScrapeError(err?.message || 'Failed to scrape recipe')
+      const code = err?.code || 'SCRAPE_ERROR'
+      const friendly = (
+        code === 'INVALID_URL' ? 'That URL looks invalid.' :
+        code === 'RATE_LIMITED' ? 'Too many requests. Please wait a moment and try again.' :
+        code === 'NO_RECIPE_FOUND' ? 'Could not find a recipe on that page.' :
+        code === 'TIMEOUT' ? 'The site took too long to respond.' :
+        'Failed to scrape recipe.'
+      )
+      setScrapeError(friendly)
     } finally {
       setIsScraping(false)
     }
@@ -249,6 +257,23 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
 
     try {
       await onSave(recipeData)
+      // After successful save, clear fields when adding a new recipe
+      if (!recipe) {
+        setFormData({
+          name: '',
+          url: '',
+          tags: '',
+          cuisine_tags: [],
+          ingredient_tags: [],
+          convenience_tags: [],
+          ingredients: [''],
+          instructions: [''],
+          prep_time: '',
+          cook_time: '',
+          servings: ''
+        })
+        setErrors({})
+      }
     } catch (error) {
       console.error('Failed to save recipe:', error)
       setErrors({ submit: 'Failed to save recipe. Please try again.' })
@@ -348,7 +373,7 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
                     type="button"
                     onClick={handleScrape}
                     disabled={isScraping}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${isScraping ? 'bg-gray-200 text-gray-500' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    className={`inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-3 py-2 transition-colors ${isScraping ? 'bg-gray-200 text-gray-500' : 'bg-green-600 text-white hover:bg-green-700'}`}
                   >
                     {isScraping ? 'Scraping…' : 'Scrape'}
                   </button>
@@ -523,13 +548,13 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
                   <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                    className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="btn-primary"
+                    className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-stone-800 text-white hover:bg-stone-900 transition-colors"
                   >
                     {recipe ? 'Update Recipe' : 'Save Recipe'}
                   </button>

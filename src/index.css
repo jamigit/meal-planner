@@ -4,25 +4,76 @@
 
 @layer base {
   body {
-    @apply bg-yellow-100 text-stone-800;
+    font-family: 'Nunito', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+    background-color: #fef9c2;
+    @apply text-stone-800;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cabinet Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-weight: 900;
+    font-size: 48px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    @apply font-heading !font-black !text-[56px] !leading-[1.25] uppercase;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    @apply font-heading !font-black !text-[24px] !leading-[1.35];
+  }
+
+  h4 {
+    font-weight: 900;
+    font-size: 26px;
+    line-height: 1.35;
+  }
+
+  h5 {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  h6 {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: 'Cabinet Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    background-color: #ffdd60;
+    @apply rounded-lg shadow-sm p-6;
   }
 
   .btn-primary {
-    @apply bg-stone-800 text-white px-4 py-2 rounded-lg hover:bg-stone-900 transition-colors;
+    @apply bg-stone-800 text-white px-4 py-2 rounded-lg hover:bg-stone-900 transition-colors font-heading font-black uppercase text-[20px];
   }
 
   .btn-secondary {
-    @apply bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors;
+    @apply bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors font-heading font-black uppercase text-[20px];
   }
 
   .btn-tertiary {
-    @apply bg-white text-black px-4 py-2 rounded-lg border border-black hover:bg-gray-50 transition-colors;
+    @apply bg-white text-black px-4 py-2 rounded-lg border border-black hover:bg-gray-50 transition-colors font-heading font-black uppercase text-[20px];
   }
 
   .tag {

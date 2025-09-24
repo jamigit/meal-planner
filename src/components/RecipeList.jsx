@@ -119,12 +119,12 @@ function RecipeList() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Recipes</h2>
+        <h2 className="font-heading text-display-2 uppercase text-gray-900">Recipes</h2>
         <div className="flex gap-3">
-          <button onClick={() => setShowImportSidebar(true)} className="btn-secondary">
+          <button onClick={() => setShowImportSidebar(true)} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-sky-500 text-white hover:bg-sky-600">
             Import Recipes
           </button>
-          <button onClick={handleAddRecipe} className="btn-primary">Add Recipe</button>
+          <button onClick={handleAddRecipe} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-stone-800 text-white hover:bg-stone-900">Add Recipe</button>
         </div>
       </div>
 
@@ -158,8 +158,8 @@ function RecipeList() {
                 <button
                   onClick={() => setSelectedTag('')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    !selectedTag
-                      ? 'bg-blue-600 text-white'
+                  !selectedTag
+                      ? 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >

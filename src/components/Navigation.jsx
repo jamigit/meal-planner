@@ -18,7 +18,7 @@ function Navigation() {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:block bg-stone-900 text-white shadow-sm border-b border-stone-800 sticky top-0 z-50">
+      <nav className="hidden">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div />
@@ -76,10 +76,11 @@ function Navigation() {
         </div>
       </nav>
 
-      {/* Mobile Header removed per design */}
+      {/* Header removed per design */}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-stone-900 border-t border-stone-800 z-50 rounded-t-2xl">
+      {/* Sticky Bottom Navigation (mobile + desktop) */}
+      <div className="fixed bottom-0 left-0 right-0 md:bottom-4 z-50 flex justify-center pointer-events-none">
+        <div className="inline-flex bg-stone-900 border border-stone-800 rounded-t-2xl md:rounded-2xl shadow-lg px-3 md:px-3 py-3 md:py-3 pointer-events-auto font-heading uppercase">
         {/* More Menu Overlay */}
         {isMoreMenuOpen && (
           <div className="absolute bottom-full left-0 right-0 bg-stone-900 border-t border-stone-800 shadow-lg z-50">
@@ -93,7 +94,7 @@ function Navigation() {
                 }`}
                 onClick={() => setIsMoreMenuOpen(false)}
               >
-                <span className="mr-3 text-lg">📚</span>
+                <span className="material-symbols-rounded mr-3 text-lg" aria-hidden>menu_book</span>
                 Recipes
               </Link>
               <Link
@@ -105,7 +106,7 @@ function Navigation() {
                 }`}
                 onClick={() => setIsMoreMenuOpen(false)}
               >
-                <span className="mr-3 text-lg">📊</span>
+                <span className="material-symbols-rounded mr-3 text-lg" aria-hidden>history</span>
                 Meal History
               </Link>
             </div>
@@ -113,14 +114,14 @@ function Navigation() {
         )}
 
         {/* Bottom Nav Tabs */}
-        <div className="flex divide-x divide-stone-800">
+        <div className="flex items-center justify-center gap-2">
           {/* Weekly Planner */}
           <Link
             to="/"
-            className={`flex-1 flex flex-col items-center py-2 px-1 text-xs font-medium transition-colors rounded-xl mx-1 ${
+            className={`flex flex-col items-center justify-center w-14 h-14 md:w-16 md:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/'
-                ? 'text-white'
-                : 'text-stone-300 hover:text-white'
+                ? 'bg-white/10 text-white'
+                : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             <span className="mb-1" aria-hidden>
@@ -134,10 +135,10 @@ function Navigation() {
           {/* Saved Plans */}
           <Link
             to="/saved-plans"
-            className={`flex-1 flex flex-col items-center py-2 px-1 text-xs font-medium transition-colors rounded-xl mx-1 ${
+            className={`flex flex-col items-center justify-center w-14 h-14 md:w-16 md:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/saved-plans'
-                ? 'text-white'
-                : 'text-stone-300 hover:text-white'
+                ? 'bg-white/10 text-white'
+                : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             <span className="mb-1" aria-hidden>
@@ -148,13 +149,43 @@ function Navigation() {
             <span>Plans</span>
           </Link>
 
-          {/* More Menu */}
+          {/* Recipes (desktop shown; mobile hidden to save space) */}
+          <Link
+            to="/recipes"
+            className={`hidden md:flex flex-col items-center justify-center w-16 h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+              location.pathname === '/recipes' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="mb-1" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 4h9a2 2 0 0 1 2 2v12h1a1 1 0 1 1 0 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v12h9V6H6Zm2 2h5v2H8V8Zm0 4h5v2H8v-2Z"/>
+              </svg>
+            </span>
+            <span>Recipes</span>
+          </Link>
+
+          {/* History (desktop shown; mobile hidden) */}
+          <Link
+            to="/meal-history"
+            className={`hidden md:flex flex-col items-center justify-center w-16 h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+              location.pathname === '/meal-history' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="mb-1" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 8a1 1 0 0 1 1 1v3.586l2.121 2.121a1 1 0 0 1-1.414 1.414l-2.414-2.414A2 2 0 0 1 10 12V9a1 1 0 0 1 1-1Zm0-6a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/>
+              </svg>
+            </span>
+            <span>History</span>
+          </Link>
+
+          {/* More Menu (mobile) */}
           <button
             onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-            className={`flex-1 flex flex-col items-center py-2 px-1 text-xs font-medium transition-colors rounded-xl mx-1 ${
+            className={`md:hidden flex flex-col items-center justify-center w-14 h-14 p-2 text-[10px] font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               isMoreActive || isMoreMenuOpen
-                ? 'text-white'
-                : 'text-stone-300 hover:text-white'
+                ? 'bg-white/10 text-white'
+                : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             <span className="mb-1" aria-hidden>
@@ -170,6 +201,7 @@ function Navigation() {
             </span>
             <span>More</span>
           </button>
+        </div>
         </div>
       </div>
     </>

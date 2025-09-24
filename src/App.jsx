@@ -9,6 +9,7 @@ import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
 import RecipeSeeder from './components/RecipeSeeder'
+import Styleguide from './components/Styleguide'
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
@@ -30,7 +31,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -45,9 +46,9 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Navigation />
-      <main className="container mx-auto px-4 py-8 pb-20 md:pb-8">
+      <main className="container mx-auto max-w-[1000px] px-4 py-8 pb-20 md:pb-8">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={
@@ -92,6 +93,17 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <MealHistory />
+              </motion.div>
+            } />
+            <Route path="/styleguide" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <Styleguide />
               </motion.div>
             } />
           </Routes>
