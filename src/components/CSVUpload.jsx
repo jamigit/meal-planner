@@ -106,7 +106,7 @@ function CSVUpload({ onUploadComplete }) {
         accept=".csv"
         onChange={handleFileSelect}
         disabled={isUploading}
-        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
+        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50"
       />
 
       {uploadStatus && (
@@ -115,11 +115,11 @@ function CSVUpload({ onUploadComplete }) {
             ? 'bg-green-50 text-green-800'
             : uploadStatus.includes('Failed')
             ? 'bg-red-50 text-red-800'
-            : 'bg-blue-50 text-blue-800'
+            : 'bg-green-50 text-green-800'
         }`}>
           {isUploading && (
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
               {uploadStatus}
             </div>
           )}

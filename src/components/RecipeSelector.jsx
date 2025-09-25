@@ -115,7 +115,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="font-heading text-display-2 uppercase">Select Meals ({selectedRecipes.length}/4)</h2>
+          <h2 className="font-heading text-[32px] uppercase">Select Meals ({selectedRecipes.length}/4)</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -141,15 +141,15 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
               {/* Filter Toggle Button */}
               <button
                 onClick={() => setIsTagFilterExpanded(!isTagFilterExpanded)}
-                className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2 hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black mb-2 hover:bg-gray-50 transition-colors font-tag border-2 border-black"
               >
                 <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
-                <span className="text-lg">{isTagFilterExpanded ? '▼' : '▶'}</span>
+                <span className="material-symbols-rounded text-[20px]">{isTagFilterExpanded ? 'expand_less' : 'expand_more'}</span>
               </button>
 
               {/* Categorized Tag Filters - Collapsible */}
               {isTagFilterExpanded && (
-                <div className="space-y-3 p-4 border-2 border-gray-300 rounded-lg bg-white">
+                <div className="space-y-3 p-4 border-2 border-black rounded-lg bg-white">
                   {/* All Tags Button */}
                   <div className="flex items-center gap-2">
                     <button
@@ -174,7 +174,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
                     return (
                       <div key={category} className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-black flex items-center gap-2 font-tag">
                           <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
                           {displayName} ({tags.length})
                         </h4>
@@ -214,7 +214,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
               let specificClasses = ''
 
               if (isSelected) {
-                specificClasses = 'border-green-600 bg-green-50'
+                specificClasses = 'bg-[rgb(22,163,74)] text-white'
               } else if (canSelect) {
                 specificClasses = 'border-gray-200 hover:border-gray-300 bg-white'
               } else {
@@ -241,7 +241,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       )}
                     </div>
                     {isSelected && (
-                      <span className="text-green-700 text-xl">✓</span>
+                      <span className="text-white text-xl">✓</span>
                     )}
                   </div>
 

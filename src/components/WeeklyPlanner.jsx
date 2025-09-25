@@ -277,20 +277,27 @@ function WeeklyPlanner() {
   }
 
   return (
-    <div>
-      <h2 className="font-heading text-display-2 uppercase text-gray-900 mb-6">
-        {weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
-      </h2>
+    <div className="mt-16 md:mt-24 relative">
+      <img
+        src="/images/kiwi-hero.png"
+        alt="Kiwi hero"
+        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-0 max-[500px]:-right-20 md:-right-20 w-72 h-72 md:w-96 md:h-96 object-contain transform -scale-x-100 z-[-1]"
+      />
+      <div className="mt-16 mb-10 relative z-10">
+        <h2 className="font-heading text-display-2 uppercase text-black">
+          {weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
+        </h2>
+      </div>
 
       {/* AI Suggestion Section */}
       <div className="card mb-6">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><span className="material-symbols-rounded text-[28px]">robot_2</span> AI-Powered Meal Suggestions</h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-black mb-4">
           Get personalized meal recommendations based on your history and preferences
         </p>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-black mb-2">
             Weekly Preferences (optional)
           </label>
           <textarea
@@ -304,7 +311,7 @@ function WeeklyPlanner() {
 
         {/* AI Toggle Options */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-medium text-black mb-3">
             Customize Suggestions
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -314,7 +321,7 @@ function WeeklyPlanner() {
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.healthy
                   ? 'border-green-500 bg-green-50 text-green-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                  : 'border-gray-200 bg-white text-black hover:border-gray-300'
               }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -337,8 +344,8 @@ function WeeklyPlanner() {
               onClick={() => handleToggleChange('easy')}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.easy
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                  ? 'border-green-600 bg-green-50 text-green-700'
+                  : 'border-gray-200 bg-white text-black hover:border-gray-300'
               }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -346,7 +353,7 @@ function WeeklyPlanner() {
             >
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 aiToggles.easy
-                  ? 'border-blue-500 bg-blue-500'
+                  ? 'border-green-600 bg-green-600'
                   : 'border-gray-300'
               }`}>
                 {aiToggles.easy && (
@@ -362,7 +369,7 @@ function WeeklyPlanner() {
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.spiceItUp
                   ? 'border-orange-500 bg-orange-50 text-orange-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                  : 'border-gray-200 bg-white text-black hover:border-gray-300'
               }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -386,7 +393,7 @@ function WeeklyPlanner() {
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-all ${
                 aiToggles.more
                   ? 'border-purple-500 bg-purple-50 text-purple-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                  : 'border-gray-200 bg-white text-black hover:border-gray-300'
               }`}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -420,7 +427,7 @@ function WeeklyPlanner() {
               Generating Suggestions...
             </>
           ) : (
-            <>🤖 Get AI Suggestions</>
+            <>Get AI Suggestions</>
           )}
         </motion.button>
       </div>
@@ -433,7 +440,7 @@ function WeeklyPlanner() {
             {weeklyPlan.name ? `${weeklyPlan.name} - Selected Meals` : 'Selected Meals'}
           </h3>
           {weeklyPlan.meals.length === 0 ? (
-            <p className="text-gray-500">No meals selected yet.</p>
+            <p className="text-black">No meals selected yet.</p>
           ) : (
             <div className="space-y-6">
               <AnimatePresence>
@@ -451,14 +458,14 @@ function WeeklyPlanner() {
                   >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h4 className="font-black text-[14px] md:text-[16px]">{meal.name}</h4>
+                      <h4 className="font-black text-[20px]">{meal.name}</h4>
                       {mealEatenCounts[meal.id] !== undefined && (
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className="text-sm text-black mt-1">
                           Eaten {mealEatenCounts[meal.id]} times in last 8 weeks
                         </div>
                       )}
                       <div className="flex items-center mt-2">
-                        <label className="text-sm text-gray-600 mr-2">Servings:</label>
+                        <label className="text-sm text-black mr-2">Servings:</label>
                         <select
                           value={meal.scaling || 1}
                           onChange={(e) => handleScalingChange(meal.id, e.target.value)}
@@ -474,9 +481,9 @@ function WeeklyPlanner() {
                     <div className="flex justify-between items-center">
                       <button
                         onClick={() => handleRemoveMeal(meal.id)}
-                        className="inline-flex items-center gap-1 text-stone-900 hover:text-stone-800 text-sm"
+                        className="inline-flex items-center gap-1 text-black bg-transparent border-2 border-black rounded px-2 py-1 text-sm transition-colors hover:bg-transparent"
                       >
-                        <span className="material-symbols-rounded text-base text-stone-900">close</span>
+                        <span className="material-symbols-rounded text-base text-black">close</span>
                         Remove
                       </button>
                     </div>
@@ -488,16 +495,17 @@ function WeeklyPlanner() {
                   <div className="flex items-center space-x-3">
                       <button
                         onClick={() => setSidebarRecipe(meal)}
-                        className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[18px] px-3 py-1 bg-stone-800 text-white hover:bg-stone-900 transition-colors"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg font-heading font-black uppercase text-[14px] px-3 py-1 border-2 border-black text-black hover:bg-gray-50 transition-colors"
                       >
                       View Recipe
+                      <span className="material-symbols-rounded text-base">arrow_forward</span>
                     </button>
                     {meal.url && (
                       <a
                         href={meal.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-800 text-sm flex items-center gap-1"
+                        className="text-black hover:text-black/80 text-sm flex items-center gap-1"
                         title="Open original recipe in new window"
                       >
                         Open Original
@@ -521,14 +529,17 @@ function WeeklyPlanner() {
         </div>
 
         {/* Shopping List Card */}
-        <ShoppingListCard
-          recipes={weeklyPlan.meals}
-          weeklyPlanId={currentPlanId}
-        />
+        <div>
+          <ShoppingListCard
+            recipes={weeklyPlan.meals}
+            weeklyPlanId={currentPlanId}
+            showTitle={true}
+          />
+        </div>
       </div>
 
       {/* Notes Section - Full Width */}
-      <div className="card">
+      <div className="card mb-6">
         <h3 className="text-lg font-semibold mb-4">Notes</h3>
         <textarea
           value={weeklyPlan.notes}
@@ -541,7 +552,7 @@ function WeeklyPlanner() {
       {/* Meal Plan Name Section - Full Width */}
       <div className="card">
         <h3 className="text-lg font-semibold mb-4">Meal Plan Name (Optional)</h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-black mb-4">
           Give your meal plan a custom name. If left blank, it will use a default name with the creation date.
         </p>
         <input
@@ -595,7 +606,7 @@ function WeeklyPlanner() {
       <AnimatePresence>
         {sidebarRecipe && (
           <motion.div 
-            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+            className="fixed inset-y-0 right-0 w-96 bg-brand-surface shadow-xl border-l border-gray-200 flex flex-col"
             style={{ zIndex: 1001 }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -608,12 +619,12 @@ function WeeklyPlanner() {
             }}
           >
           {/* Fixed Header */}
-          <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
+          <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Recipe Details</h3>
+              <h3 className="text-[24px] font-semibold text-black">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <span className="text-lg">×</span>
                 <span className="text-sm font-medium">Close</span>

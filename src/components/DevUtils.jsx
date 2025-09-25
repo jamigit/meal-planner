@@ -104,7 +104,7 @@ function DevUtils() {
             <button
               onClick={() => handleAction(migrateAllRecipes, 'Migrate Tags')}
               disabled={loading}
-              className="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded border border-blue-200 text-sm disabled:opacity-50"
+            className="w-full bg-green-50 text-green-700 hover:bg-green-100 px-3 py-2 rounded border border-green-200 text-sm disabled:opacity-50"
             >
               🏷️ Migrate to Categorized Tags
             </button>

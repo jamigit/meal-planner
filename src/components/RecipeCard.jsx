@@ -19,11 +19,6 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ 
-        scale: 1.02,
-        boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
-      }}
-      whileTap={{ scale: 0.98 }}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
@@ -32,39 +27,42 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
           {onEdit && (
             <button
               onClick={() => onEdit(recipe)}
-            className="text-gray-500 hover:text-green-700 transition-colors"
+              className="text-black hover:text-green-700 transition-colors"
               title="Edit recipe"
             >
-              ✏️
+              <span className="material-symbols-rounded text-[20px]">edit</span>
             </button>
           )}
           {onDelete && (
             <button
               onClick={() => onDelete(recipe.id)}
-              className="text-gray-500 hover:text-red-600 transition-colors"
+              className="text-black hover:text-red-600 transition-colors"
               title="Delete recipe"
             >
-              🗑️
+              <span className="material-symbols-rounded text-[20px]">delete</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Quick Info */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
+      <div className="flex flex-wrap gap-4 text-sm text-black mb-3">
         {recipe.prep_time && (
           <span className="flex items-center gap-1">
-            ⏱️ Prep: {formatTime(recipe.prep_time)}
+            <span className="material-symbols-rounded text-[18px] align-middle">timer</span>
+            <span>Prep: {formatTime(recipe.prep_time)}</span>
           </span>
         )}
         {recipe.cook_time && (
           <span className="flex items-center gap-1">
-            🔥 Cook: {formatTime(recipe.cook_time)}
+            <span className="material-symbols-rounded text-[18px] align-middle">local_fire_department</span>
+            <span>Cook: {formatTime(recipe.cook_time)}</span>
           </span>
         )}
         {recipe.servings && (
           <span className="flex items-center gap-1">
-            👥 Serves: {recipe.servings}
+            <span className="material-symbols-rounded text-[18px] align-middle">group</span>
+            <span>Serves: {recipe.servings}</span>
           </span>
         )}
       </div>
@@ -89,20 +87,21 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
         <>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="w-full text-left text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors mb-3"
+            className="w-full text-left text-sm font-medium text-black transition-colors mb-3 flex items-center gap-2 border-2 border-black rounded-lg px-3 py-2 bg-transparent hover:bg-transparent"
           >
-            {expanded ? '▼ Hide Details' : '▶ Show Recipe Details'}
+            <span className="material-symbols-rounded text-[18px]">{expanded ? 'expand_less' : 'expand_more'}</span>
+            <span>{expanded ? 'Hide Details' : 'Show Recipe Details'}</span>
           </button>
 
           {expanded && (
-            <div className="border-t pt-4 space-y-4">
+            <div className="pt-4 space-y-4">
               {/* Ingredients */}
               {recipe.ingredients?.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Ingredients</h4>
+                  <h4 className="font-semibold text-black mb-2">Ingredients</h4>
                   <ul className="space-y-1">
                     {recipe.ingredients.map((ingredient, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex">
+                      <li key={index} className="text-sm text-black flex">
                         <span className="mr-2">•</span>
                         <span>{ingredient}</span>
                       </li>
@@ -114,11 +113,11 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
               {/* Instructions */}
               {recipe.instructions?.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Instructions</h4>
+                  <h4 className="font-semibold text-black mb-2">Instructions</h4>
                   <ol className="space-y-2">
                     {recipe.instructions.map((step, index) => (
-                      <li key={index} className="text-sm text-gray-700 flex">
-                        <span className="font-medium text-gray-500 mr-3 flex-shrink-0">
+                      <li key={index} className="text-sm text-black flex">
+                        <span className="font-medium text-black mr-3 flex-shrink-0">
                           {index + 1}.
                         </span>
                         <span>{step}</span>

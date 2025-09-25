@@ -118,7 +118,7 @@ function Navigation() {
           {/* Weekly Planner */}
           <Link
             to="/"
-            className={`flex flex-col items-center justify-center w-14 h-14 md:w-16 md:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+            className={`flex flex-col items-center justify-center w-14 h-14 min-[500px]:w-16 min-[500px]:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/'
                 ? 'bg-white/10 text-white'
                 : 'text-stone-200 hover:bg-white/10 hover:text-white'
@@ -135,7 +135,7 @@ function Navigation() {
           {/* Saved Plans */}
           <Link
             to="/saved-plans"
-            className={`flex flex-col items-center justify-center w-14 h-14 md:w-16 md:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+            className={`flex flex-col items-center justify-center w-14 h-14 min-[500px]:w-16 min-[500px]:h-16 p-2 text-[10px] md:text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/saved-plans'
                 ? 'bg-white/10 text-white'
                 : 'text-stone-200 hover:bg-white/10 hover:text-white'
@@ -149,10 +149,10 @@ function Navigation() {
             <span>Plans</span>
           </Link>
 
-          {/* Recipes (desktop shown; mobile hidden to save space) */}
+          {/* Recipes (show until viewport < 400px) */}
           <Link
             to="/recipes"
-            className={`hidden md:flex flex-col items-center justify-center w-16 h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+            className={`flex max-[400px]:hidden flex-col items-center justify-center w-14 h-14 min-[500px]:w-16 min-[500px]:h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/recipes' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -164,10 +164,10 @@ function Navigation() {
             <span>Recipes</span>
           </Link>
 
-          {/* History (desktop shown; mobile hidden) */}
+          {/* History (show until viewport < 400px) */}
           <Link
             to="/meal-history"
-            className={`hidden md:flex flex-col items-center justify-center w-16 h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+            className={`flex max-[400px]:hidden flex-col items-center justify-center w-14 h-14 min-[500px]:w-16 min-[500px]:h-16 p-2 text-xs font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               location.pathname === '/meal-history' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -179,10 +179,10 @@ function Navigation() {
             <span>History</span>
           </Link>
 
-          {/* More Menu (mobile) */}
+          {/* More Menu (only under 400px) */}
           <button
             onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-            className={`md:hidden flex flex-col items-center justify-center w-14 h-14 p-2 text-[10px] font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
+            className={`hidden max-[400px]:flex flex-col items-center justify-center w-14 h-14 p-2 text-[10px] font-medium transition-colors rounded-lg mx-1 border border-white/30 ${
               isMoreActive || isMoreMenuOpen
                 ? 'bg-white/10 text-white'
                 : 'text-stone-200 hover:bg-white/10 hover:text-white'

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { shoppingListService } from '../services/shoppingListService.js'
 
-function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
+function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = false }) {
   const [shoppingList, setShoppingList] = useState({})
   const [loading, setLoading] = useState(false)
   const [groupByRecipe, setGroupByRecipe] = useState(false)
@@ -89,10 +89,12 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
   if (!recipes || recipes.length === 0) {
     return (
       <div className={`card ${className}`}>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          🛒 Shopping List
-        </h3>
-        <div className="text-center py-8 text-gray-500">
+        {showTitle && (
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-black">Shopping List</h3>
+          </div>
+        )}
+        <div className="text-center py-8 text-black">
           Add meals to generate shopping list
         </div>
       </div>
@@ -101,40 +103,31 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
 
   return (
     <div className={`card ${className}`}>
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-          🛒 Shopping List
-          {!loading && getTotalItems() > 0 && (
-            <span className="ml-2 text-sm font-normal text-gray-500">
-              ({getTotalItems()} items)
-            </span>
-          )}
-        </h3>
-        <button
-          onClick={handleCopyToClipboard}
-          disabled={loading || getTotalItems() === 0}
-          className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-            copySuccess
-              ? 'bg-green-100 text-green-700'
-              : 'bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed'
-          }`}
-        >
-          {copySuccess ? '✓ Copied!' : '📋 Copy'}
-        </button>
-      </div>
+      {showTitle && (
+        <div className="mb-2">
+          <h3 className="text-lg font-semibold text-black">Shopping List</h3>
+        </div>
+      )}
 
       {/* Controls */}
-      <div className="flex flex-wrap gap-3 mb-4 text-sm">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={groupByRecipe}
-            onChange={(e) => setGroupByRecipe(e.target.checked)}
-            className="mr-1 scale-75"
-          />
-          <span>By recipe</span>
-        </label>
+      <div className="flex flex-wrap gap-3 mb-4 text-sm items-center">
+        {/* View toggle */}
+        <div className="inline-flex items-center rounded-full border-2 border-black overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setGroupByRecipe(true)}
+            className={`px-3 py-1 text-xs font-medium ${groupByRecipe ? 'bg-black text-white' : 'bg-white text-black'}`}
+          >
+            By recipe
+          </button>
+          <button
+            type="button"
+            onClick={() => setGroupByRecipe(false)}
+            className={`px-3 py-1 text-xs font-medium border-l-2 border-black ${!groupByRecipe ? 'bg-black text-white' : 'bg-white text-black'}`}
+          >
+            By item
+          </button>
+        </div>
 
         <label className="flex items-center">
           <input
@@ -145,18 +138,32 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
           />
           <span>Hide pantry</span>
         </label>
+
+        <button
+          onClick={handleCopyToClipboard}
+          disabled={loading || getTotalItems() === 0}
+          className={`ml-auto px-3 py-1 text-sm rounded-md font-medium transition-colors border-2 border-black bg-white text-black disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${
+            copySuccess ? 'opacity-80' : 'hover:bg-gray-50'
+          }`}
+        >
+          {copySuccess ? (
+            '✓ Copied!'
+          ) : (
+            <span className="inline-flex items-center gap-1"><span className="material-symbols-rounded text-sm">content_copy</span>Copy</span>
+          )}
+        </button>
       </div>
 
       {/* Content */}
-      <div className="max-h-96 overflow-y-auto bg-brand-surface p-3 space-y-6">
+      <div className="max-h-96 overflow-y-auto bg-brand-surface p-3 space-y-6 rounded-lg">
         {loading ? (
           <div className="text-center py-6">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600 text-sm mt-2">Generating list...</p>
+            <p className="text-black text-sm mt-2">Generating list...</p>
           </div>
         ) : getTotalItems() === 0 ? (
           <div className="text-center py-6">
-            <p className="text-gray-500 text-sm">No ingredients found.</p>
+            <p className="text-black text-sm">No ingredients found.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -164,10 +171,10 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
               // Recipe-based view
               Object.entries(getRecipeBasedView()).map(([recipe, items]) => (
                 <div key={recipe} className="bg-brand-surface rounded-lg p-3">
-                  <h4 className="font-medium text-gray-900 text-sm mb-2">{recipe}</h4>
+                  <h4 className="font-medium text-black text-sm mb-2">{recipe}</h4>
                   <div className="space-y-1">
                     {items.map((item, index) => (
-                      <div key={index} className="text-xs text-gray-700 flex">
+                      <div key={index} className="text-xs text-black flex">
                         <span className="mr-1">•</span>
                         <span>{item.displayText}</span>
                       </div>
@@ -182,10 +189,10 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
 
                 return (
                   <div key={category} className="border-b border-gray-200 last:border-b-0 pb-3 last:pb-0">
-                    <h4 className="font-medium text-gray-900 text-sm mb-2 flex items-center">
+                    <h4 className="font-medium text-black text-sm mb-2 flex items-center">
                       <span className="mr-1 text-xs">{getCategoryIcon(category)}</span>
                       {category}
-                      <span className="ml-1 text-xs font-normal text-gray-500">
+                      <span className="ml-1 text-xs font-normal text-black">
                         ({items.length})
                       </span>
                     </h4>
@@ -195,12 +202,12 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '' }) {
 
                         return (
                           <div key={index} className="text-xs">
-                            <div className="font-medium text-gray-900 flex">
+                            <div className="font-medium text-black flex">
                               <span className="mr-2">•</span>
                               <div>
                                 {shoppingListService.formatQuantity(item.quantity, item.unit)} {item.item}
                                 {showSources && (
-                                  <div className="text-gray-500 text-xs mt-1">
+                                  <div className="text-black text-xs mt-1">
                                     ({item.sources.map(source => {
                                       // Extract amount from original string or use item name if no amount
                                       const match = source.original.match(/^([\d\/\.\s]+(?:cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|ounce|oz|can|bottle|jar|bag|bunch|head|clove|cloves)?)\s*/i)

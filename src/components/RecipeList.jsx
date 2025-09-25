@@ -118,13 +118,11 @@ function RecipeList() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="font-heading text-display-2 uppercase text-gray-900">Recipes</h2>
-        <div className="flex gap-3">
-          <button onClick={() => setShowImportSidebar(true)} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-sky-500 text-white hover:bg-sky-600">
-            Import Recipes
-          </button>
-          <button onClick={handleAddRecipe} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-stone-800 text-white hover:bg-stone-900">Add Recipe</button>
+      <div className="mb-6">
+        <h2 className="font-heading text-display-2 uppercase text-black">Recipes</h2>
+        <div className="flex gap-3 mt-3">
+          <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
+          <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
         </div>
       </div>
 
@@ -144,15 +142,15 @@ function RecipeList() {
           {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-            className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 mb-2 hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black mb-2 hover:bg-gray-50 transition-colors font-tag border-2 border-black"
           >
             <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
-            <span className="text-lg">{isFilterExpanded ? '▼' : '▶'}</span>
+            <span className="material-symbols-rounded text-[20px]">{isFilterExpanded ? 'expand_less' : 'expand_more'}</span>
           </button>
 
           {/* Categorized Tag Filters - Collapsible */}
           {isFilterExpanded && (
-            <div className="space-y-3 p-4 border-2 border-gray-300 rounded-lg bg-white">
+            <div className="space-y-3 p-4 border-2 border-black rounded-lg bg-white">
               {/* All Tags Button */}
               <div className="flex items-center gap-2">
                 <button
@@ -160,7 +158,7 @@ function RecipeList() {
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   !selectedTag
                       ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 text-black hover:bg-gray-200'
                   }`}
                 >
                   All Recipes ({recipes.length})
@@ -173,11 +171,11 @@ function RecipeList() {
 
                 const isLegacy = category === 'legacy'
                 const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
-                const colorClasses = isLegacy ? 'bg-gray-100 text-gray-800 border-gray-200' : getCategoryColorClasses(category)
+                const colorClasses = isLegacy ? 'bg-gray-100 text-black border-gray-200' : getCategoryColorClasses(category)
 
                 return (
                   <div key={category} className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-black flex items-center gap-2 font-tag">
                       <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
                       {displayName} ({tags.length})
                     </h4>
@@ -189,7 +187,7 @@ function RecipeList() {
                           className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                             selectedTag === tag
                               ? colorClasses
-                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                              : 'bg-gray-50 text-black border-gray-200 hover:bg-gray-100'
                           }`}
                         >
                           {tag}
@@ -204,7 +202,7 @@ function RecipeList() {
         </div>
 
         {searchTerm || selectedTag ? (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-black">
             Showing {filteredRecipes.length} of {recipes.length} recipes
             {searchTerm && ` matching "${searchTerm}"`}
             {selectedTag && ` tagged with "${selectedTag}"`}
@@ -216,9 +214,9 @@ function RecipeList() {
         {filteredRecipes.length === 0 ? (
           <div className="col-span-full text-center py-12">
             {recipes.length === 0 ? (
-              <p className="text-gray-500">No recipes yet. Add your first recipe to get started!</p>
+              <p className="text-black">No recipes yet. Add your first recipe to get started!</p>
             ) : (
-              <p className="text-gray-500">
+              <p className="text-black">
                 No recipes match your current filters. Try adjusting your search or tag selection.
               </p>
             )}
@@ -254,7 +252,7 @@ function RecipeList() {
       <AnimatePresence>
         {showImportSidebar && (
           <motion.div 
-            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50 overflow-y-auto border-l border-gray-200"
+            className="fixed inset-y-0 right-0 w-96 bg-brand-surface shadow-xl z-50 overflow-y-auto border-l border-gray-200"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -267,10 +265,10 @@ function RecipeList() {
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Import Recipes</h3>
+                <h3 className="text-lg font-semibold text-black">Import Recipes</h3>
                 <button
                   onClick={() => setShowImportSidebar(false)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                  className="text-black hover:text-black/80 text-2xl"
                 >
                   ×
                 </button>

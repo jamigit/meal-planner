@@ -19,7 +19,7 @@ function CategorizedTags({ recipe, className = '', showLegacy = false }) {
   }
 
   return (
-    <div className={`flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 ${className}`}>
+    <div className={`flex overflow-x-auto no-scrollbar ${className}`}>
       <div className="flex flex-nowrap gap-2 min-w-max">
         {/* Cuisine Tags */}
         {cuisine_tags.map(tag => (

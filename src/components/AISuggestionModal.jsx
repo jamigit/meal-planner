@@ -121,7 +121,7 @@ function AISuggestionModal({
             // Loading State
             <div className="text-center py-12">
               <motion.div 
-                className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-6"
+                className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-6"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               />
@@ -180,7 +180,7 @@ function AISuggestionModal({
                         key={index} 
                         className={`border-2 rounded-lg p-4 transition-colors cursor-pointer ${
                           isSelected 
-                            ? 'border-blue-500 bg-brand-surface' 
+                            ? 'border-green-600 bg-brand-surface' 
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         onClick={() => handleToggleMealSelection(index)}
@@ -191,7 +191,7 @@ function AISuggestionModal({
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleMealSelection(index)}
-                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="mt-1 h-4 w-4 text-green-700 focus:ring-green-600 border-gray-300 rounded"
                             />
                             <h4 className="font-semibold text-gray-900">{meal.recipe.name}</h4>
                           </div>
@@ -246,11 +246,11 @@ function AISuggestionModal({
                   {suggestions.map((suggestion, index) => (
                     <div
                       key={index}
-                      className="card hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-200"
+                      className="card hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-green-200"
                       onClick={() => handleSelectSet(suggestion)}
                     >
                       <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-xl font-semibold text-blue-600">
+                        <h3 className="text-xl font-semibold text-green-700">
                           Option {suggestion.set_number}
                         </h3>
                         <span className="text-sm text-gray-500">
@@ -336,7 +336,7 @@ function AISuggestionModal({
                   {availableRecipes.map((recipe) => (
                     <div
                       key={recipe.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors"
+                      className="border border-gray-200 rounded-lg p-4 hover:border-green-300 cursor-pointer transition-colors"
                       onClick={() => handleConfirmSwap(recipe)}
                     >
                       <h4 className="font-semibold text-gray-900 mb-2">{recipe.name}</h4>
@@ -346,7 +346,7 @@ function AISuggestionModal({
                           href={recipe.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 inline-block mt-2"
+                          className="text-sm text-green-700 hover:text-green-800 inline-block mt-2"
                         >
                           View Recipe →
                         </a>

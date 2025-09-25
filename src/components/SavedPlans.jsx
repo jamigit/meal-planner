@@ -96,14 +96,14 @@ function SavedPlans() {
 
   return (
     <div className="relative">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="font-heading text-display-2 uppercase text-gray-900">Saved Plans</h2>
-        <p className="text-gray-600">{savedPlans.length} saved plan{savedPlans.length !== 1 ? 's' : ''}</p>
+      <div className="mb-2">
+        <h2 className="font-heading text-display-2 uppercase text-black">Saved Plans</h2>
       </div>
+      <p className="text-black mb-4">{savedPlans.length} saved plan{savedPlans.length !== 1 ? 's' : ''}</p>
 
       {savedPlans.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">No saved plans yet.</p>
+          <p className="text-black mb-4">No saved plans yet.</p>
           <p className="text-sm text-gray-400">
             Create a weekly plan and save it to see it here.
           </p>
@@ -124,7 +124,7 @@ function SavedPlans() {
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-500 space-y-1">
+                  <div className="text-sm text-black space-y-1">
                     <p>
                       {plan.meals?.length || 0} meal{(plan.meals?.length || 0) !== 1 ? 's' : ''}
                     </p>
@@ -138,14 +138,14 @@ function SavedPlans() {
                   {!plan.is_current && (
                     <button
                       onClick={() => handleSetAsCurrent(plan.id)}
-                      className="btn-secondary text-sm"
+                      className="text-sm px-3 py-1 rounded border-2 border-black bg-white hover:bg-gray-50"
                     >
                       Set as Current
                     </button>
                   )}
                   <button
                     onClick={() => handleDeletePlan(plan.id)}
-                    className="text-red-600 hover:text-red-800 text-sm px-3 py-1 rounded border border-red-200 hover:border-red-300"
+                    className="text-red-700 text-sm px-3 py-1 rounded border-2 border-red-600 bg-white hover:bg-red-50"
                   >
                     Delete
                   </button>
@@ -154,11 +154,11 @@ function SavedPlans() {
 
               {/* Toggle Tabs */}
               <div className="mb-4">
-                <div className="relative inline-flex bg-sky-600 rounded-full p-1">
+                <div className="relative inline-flex bg-[#e7911f] rounded-full p-1">
                   <button
                     onClick={() => setActiveTab(plan.id, 'meals')}
                     className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                      getActiveTab(plan.id) === 'meals' ? 'bg-white text-sky-700 shadow' : 'text-white'
+                      getActiveTab(plan.id) === 'meals' ? 'bg-white text-black shadow' : 'text-black'
                     }`}
                   >
                     Meals ({plan.meals?.length || 0})
@@ -166,7 +166,7 @@ function SavedPlans() {
                   <button
                     onClick={() => setActiveTab(plan.id, 'shopping')}
                     className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                      getActiveTab(plan.id) === 'shopping' ? 'bg-white text-sky-700 shadow' : 'text-white'
+                      getActiveTab(plan.id) === 'shopping' ? 'bg-white text-black shadow' : 'text-black'
                     }`}
                   >
                     Shopping List
@@ -181,12 +181,13 @@ function SavedPlans() {
                     {plan.meals.map((meal, index) => (
                       <div key={meal.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-                          <span className="font-medium break-words whitespace-normal">{meal.name}</span>
+                          <span className="font-heading font-black break-words whitespace-normal">{meal.name}</span>
                           <button
                             onClick={() => setSidebarRecipe(meal)}
-                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap text-green-700 hover:text-green-800 text-sm px-2 py-1 bg-green-50 rounded hover:bg-green-100 transition-colors"
+                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap items-center gap-2 border-2 border-black text-black rounded-lg font-heading font-black uppercase text-[14px] px-3 py-1 hover:bg-gray-50 transition-colors"
                           >
                             View Recipe
+                            <span className="material-symbols-rounded text-base">arrow_forward</span>
                           </button>
                         </div>
 
@@ -199,7 +200,7 @@ function SavedPlans() {
                           ) : (
                             <button
                               onClick={() => handleMarkAsEaten(meal, plan.created_at)}
-                              className="text-sm px-3 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-full transition-colors"
+                              className="text-sm px-3 py-1 bg-[#a4e27c] text-black hover:brightness-95 rounded-full transition-colors"
                             >
                               Mark as Eaten
                             </button>
@@ -224,8 +225,8 @@ function SavedPlans() {
               {/* Notes */}
               {plan.notes && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Notes:</h4>
-                  <p className="text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  <h4 className="font-medium text-black mb-2">Notes:</h4>
+                  <p className="text-black bg-gray-50 p-3 rounded whitespace-pre-wrap">
                     {plan.notes}
                   </p>
                 </div>
@@ -254,7 +255,7 @@ function SavedPlans() {
       <AnimatePresence>
         {sidebarRecipe && (
           <motion.div 
-            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+            className="fixed inset-y-0 right-0 w-96 bg-brand-surface shadow-xl border-l border-gray-200 flex flex-col"
             style={{ zIndex: 1001 }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -267,12 +268,12 @@ function SavedPlans() {
             }}
           >
           {/* Fixed Header */}
-          <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
+          <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Recipe Details</h3>
+              <h3 className="text-[24px] font-semibold text-black">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <span className="text-lg">×</span>
                 <span className="text-sm font-medium">Close</span>

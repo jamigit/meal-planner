@@ -102,15 +102,23 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
         {/* Controls */}
         <div className="p-4 border-b bg-gray-50 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-4 items-center">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={groupByRecipe}
-                onChange={(e) => setGroupByRecipe(e.target.checked)}
-                className="mr-2"
-              />
-              <span className="text-sm font-medium">Group by recipe</span>
-            </label>
+            {/* View toggle */}
+            <div className="inline-flex items-center rounded-full border-2 border-black overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setGroupByRecipe(true)}
+                className={`px-3 py-1 text-xs font-medium ${groupByRecipe ? 'bg-black text-white' : 'bg-white text-black'}`}
+              >
+                By recipe
+              </button>
+              <button
+                type="button"
+                onClick={() => setGroupByRecipe(false)}
+                className={`px-3 py-1 text-xs font-medium border-l-2 border-black ${!groupByRecipe ? 'bg-black text-white' : 'bg-white text-black'}`}
+              >
+                By item
+              </button>
+            </div>
 
             <label className="flex items-center">
               <input
@@ -126,18 +134,20 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
           <button
             onClick={handleCopyToClipboard}
             disabled={loading || getTotalItems() === 0}
-            className={`inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 transition-colors ${
-              copySuccess
-                ? 'bg-green-600 text-white'
-                : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed'
+            className={`inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 transition-colors border-2 border-black bg-white text-black disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${
+              copySuccess ? 'opacity-80' : 'hover:bg-gray-50'
             }`}
           >
-            {copySuccess ? '✓ Copied!' : '📋 Copy All'}
+            {copySuccess ? (
+              '✓ Copied!'
+            ) : (
+              <span className="inline-flex items-center gap-1"><span className="material-symbols-rounded text-sm">content_copy</span>Copy All</span>
+            )}
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-brand-surface">
+        <div className="flex-1 overflow-y-auto p-6 bg-brand-surface rounded-lg">
           {loading ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

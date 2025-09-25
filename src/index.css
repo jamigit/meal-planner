@@ -52,10 +52,27 @@
   }
 }
 
+/* Nippo variable font for tags and filter interactions */
+@font-face {
+  font-family: 'Nippo';
+  src: url('/fonts/Nippo-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer utilities {
   .font-heading {
     font-family: 'Cabinet Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   }
+
+  .font-tag {
+    font-family: 'Nippo', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  }
+
+  /* Hide scrollbar while allowing scroll */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 @layer components {
@@ -64,36 +81,62 @@
     @apply rounded-lg shadow-sm p-6;
   }
 
+  /* Card variants */
+  .card-surface {
+    @apply rounded-lg shadow-sm p-6 bg-brand-surface;
+  }
+
+  .card-dark {
+    @apply rounded-lg p-6 bg-stone-900 text-white border-2 border-black;
+  }
+
   .btn-primary {
-    @apply bg-stone-800 text-white px-4 py-2 rounded-lg hover:bg-stone-900 transition-colors font-heading font-black uppercase text-[20px];
+    @apply text-white px-4 py-2 rounded-lg transition-colors font-heading font-black uppercase text-[20px];
+    background-color: #494443;
+    box-shadow: 0 6px 0 #000000;
   }
 
   .btn-secondary {
-    @apply bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors font-heading font-black uppercase text-[20px];
+    @apply bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-heading font-black uppercase text-[20px];
+    box-shadow: 0 6px 0 #000000;
   }
 
   .btn-tertiary {
     @apply bg-white text-black px-4 py-2 rounded-lg border border-black hover:bg-gray-50 transition-colors font-heading font-black uppercase text-[20px];
   }
 
+  /* Outline black buttons */
+  .btn-outline-black {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border-2 border-black text-black bg-transparent hover:bg-gray-50 transition-colors font-heading font-black uppercase text-[20px] px-4 py-2;
+  }
+
+  .btn-outline-black-sm {
+    @apply inline-flex items-center gap-2 rounded border-2 border-black text-black bg-transparent hover:bg-transparent text-sm px-3 py-1;
+  }
+
+  /* Danger outline */
+  .btn-danger-outline-sm {
+    @apply inline-flex items-center gap-2 rounded border-2 border-red-600 text-red-700 bg-white hover:bg-red-50 text-sm px-3 py-1;
+  }
+
   .tag {
-    @apply inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm mr-2 mb-2;
+    @apply inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm mr-2 mb-2 font-tag;
   }
 
   /* Categorized Tag Styles */
   .tag-cuisine {
-    @apply inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm border border-green-200;
+    @apply inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm border border-green-200 font-tag;
   }
 
   .tag-ingredients {
-    @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-200;
+    @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-200 font-tag;
   }
 
   .tag-convenience {
-    @apply inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-300;
+    @apply inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-300 font-tag;
   }
 
   .tag-legacy {
-    @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-200;
+    @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-200 font-tag;
   }
 }
