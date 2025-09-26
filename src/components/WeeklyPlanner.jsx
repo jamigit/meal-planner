@@ -550,7 +550,7 @@ function WeeklyPlanner() {
           {weeklyPlan.meals.length === 0 ? (
             <p className="text-black">No meals selected yet.</p>
           ) : (
-            <div className="space-y-6 max-h-96 overflow-y-auto">
+            <div className="space-y-6">
               <AnimatePresence>
                 {weeklyPlan.meals.map((meal, index) => (
                   <motion.div 

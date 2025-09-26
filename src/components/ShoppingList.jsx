@@ -79,7 +79,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-center">

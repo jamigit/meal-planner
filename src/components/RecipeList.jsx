@@ -288,7 +288,7 @@ function RecipeList() {
       <AnimatePresence>
         {showImportSidebar && (
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[55]"
             onClick={() => setShowImportSidebar(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

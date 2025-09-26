@@ -81,7 +81,7 @@ function AISuggestionModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -89,7 +89,7 @@ function AISuggestionModal({
           onClick={onClose}
         >
           <motion.div 
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col"
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col mx-2 sm:mx-4"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -103,24 +103,24 @@ function AISuggestionModal({
           >
 
         {/* Header */}
-        <div className="px-6 py-4 border-b">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b">
           {/* Title and Close button in line */}
           <div className="flex justify-between items-center">
-            <h2 className="!text-[28px] font-bold text-gray-900">
+            <h2 className="!text-[24px] sm:!text-[28px] font-bold text-gray-900 truncate pr-2">
               🤖 AI Meal Suggestions
             </h2>
             <button
               onClick={onClose}
-              className="btn-outline-black-sm flex items-center gap-2"
+              className="btn-outline-black-sm flex items-center gap-1 sm:gap-2 flex-shrink-0"
             >
               <span>×</span>
-              <span>Close</span>
+              <span className="hidden sm:inline">Close</span>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {isLoading ? (
             // Loading State
             <div className="text-center py-12">
@@ -159,13 +159,6 @@ function AISuggestionModal({
           ) : selectedSet ? (
             // Selected Set View
             <div>
-              <button
-                onClick={handleBackToOptions}
-                className="btn-outline-black mb-6"
-              >
-                ← Back to Options
-              </button>
-
               <div className="card">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -176,41 +169,41 @@ function AISuggestionModal({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
                   {selectedSet.meals.map((meal, index) => {
                     const isSelected = selectedMeals.includes(index)
                     return (
                       <div 
                         key={index} 
-                        className={`border-2 rounded-lg p-4 transition-colors cursor-pointer ${
+                        className={`border-2 rounded-lg p-3 sm:p-4 transition-colors cursor-pointer ${
                           isSelected 
                             ? 'border-green-600 bg-brand-surface' 
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         onClick={() => handleToggleMealSelection(index)}
                       >
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-start sm:space-y-0 sm:mb-3">
                           <div className="flex items-start space-x-3">
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleMealSelection(index)}
-                              className="mt-1 h-4 w-4 text-green-700 focus:ring-green-600 border-gray-300 rounded"
+                              className="mt-1 h-4 w-4 text-green-700 focus:ring-green-600 border-gray-300 rounded flex-shrink-0"
                             />
-                            <h4 className="font-semibold text-gray-900">{meal.recipe.name}</h4>
+                            <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{meal.recipe.name}</h4>
                           </div>
-                        <button
-                          onClick={(e) => {
-                              e.stopPropagation()
-                              handleSwapMeal(index)
-                            }}
-                          className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-3 py-1 bg-green-600 text-white hover:bg-green-700"
-                          >
+                          <button
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleSwapMeal(index)
+                              }}
+                            className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[18px] sm:text-[20px] px-3 py-1 bg-green-600 text-white hover:bg-green-700 self-start sm:self-auto flex-shrink-0"
+                            >
                             Swap
                           </button>
                         </div>
 
-                        <p className="text-sm text-gray-600 mb-3 ml-7">{meal.reason}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 ml-7">{meal.reason}</p>
 
                         {meal.recipe.url && (
                           <a
@@ -218,7 +211,7 @@ function AISuggestionModal({
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-sm text-green-700 hover:text-green-800 inline-block mb-2 ml-7"
+                            className="text-xs sm:text-sm text-green-700 hover:text-green-800 inline-block mb-2 ml-7"
                           >
                             View Recipe →
                           </a>
@@ -340,30 +333,28 @@ function AISuggestionModal({
 
         {/* Footer Actions (only show when set is selected) */}
         {selectedSet && !isLoading && !error && (
-          <div className="border-t p-6 bg-gray-50">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-600">
-                {selectedMeals.length} of {selectedSet.meals.length} meals selected
-              </div>
-              <div className="flex space-x-3">
-                <button onClick={handleBackToOptions} className="btn-outline-black">
-                  See Other Options
-                </button>
-                <button 
-                  onClick={handleConfirmSelection} 
-                  className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700"
-                  disabled={selectedMeals.length === 0}
-                >
-                  Use Selected Meals ({selectedMeals.length})
-                </button>
-              </div>
+          <div className="border-t p-4 sm:p-6 bg-gray-50">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-center">
+              <button 
+                onClick={handleBackToOptions}
+                className="btn-outline-black flex-1 sm:flex-initial order-2 sm:order-1"
+              >
+                Return to Meal Plans
+              </button>
+              <button 
+                onClick={handleConfirmSelection} 
+                className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-6 py-2 bg-green-600 text-white hover:bg-green-700 flex-1 sm:flex-initial order-1 sm:order-2"
+                disabled={selectedMeals.length === 0}
+              >
+                Use Selected Meals
+              </button>
             </div>
           </div>
         )}
 
         {/* Swap Modal */}
         {swapModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-60">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[70]">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
               <div className="flex justify-between items-center p-6 border-b">
                 <h3 className="text-xl font-semibold">Choose Replacement Recipe</h3>
@@ -375,22 +366,25 @@ function AISuggestionModal({
                 </button>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-2">
                   {availableRecipes.map((recipe) => (
                     <div
                       key={recipe.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:border-green-300 cursor-pointer transition-colors"
+                      className="border border-gray-200 rounded-lg p-3 hover:border-green-500 hover:bg-green-50 hover:shadow-md cursor-pointer transition-all duration-200"
                       onClick={() => handleConfirmSwap(recipe)}
                     >
-                      <h4 className="font-semibold text-gray-900 mb-2">{recipe.name}</h4>
-                      <CategorizedTags recipe={recipe} />
+                      <h4 className="font-medium text-gray-900 text-sm mb-1">{recipe.name}</h4>
+                      <div className="text-xs">
+                        <CategorizedTags recipe={recipe} />
+                      </div>
                       {recipe.url && (
                         <a
                           href={recipe.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-green-700 hover:text-green-800 inline-block mt-2"
+                          className="text-xs text-green-600 hover:text-green-800 inline-block mt-1"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           View Recipe →
                         </a>
