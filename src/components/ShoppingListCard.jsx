@@ -132,11 +132,11 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
         <label className="flex items-center">
           <input
             type="checkbox"
-            checked={excludePantry}
-            onChange={(e) => setExcludePantry(e.target.checked)}
-            className="mr-1 scale-75"
+            checked={!excludePantry}
+            onChange={(e) => setExcludePantry(!e.target.checked)}
+            className="mr-2 w-4 h-4 text-black bg-white border-2 border-black rounded focus:ring-black focus:ring-2 accent-black"
           />
-          <span>Hide pantry</span>
+          <span>Show pantry</span>
         </label>
 
         <button

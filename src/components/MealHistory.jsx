@@ -44,7 +44,7 @@ function MealHistory() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-display-2 uppercase text-black">Meal History</h1>
+      <h2 className="font-heading text-display-2 uppercase text-black">Meal History</h2>
 
       {mealStats ? (
         <div className="card">

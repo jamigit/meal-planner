@@ -79,8 +79,8 @@ function Navigation() {
       {/* Header removed per design */}
 
       {/* Sticky Bottom Navigation (mobile + desktop) */}
-      <div className="fixed bottom-0 left-0 right-0 md:bottom-4 z-50 flex justify-center pointer-events-none">
-        <div className="inline-flex bg-stone-900 border border-stone-800 rounded-t-2xl md:rounded-2xl shadow-lg px-3 md:px-3 py-3 md:py-3 pointer-events-auto font-heading uppercase">
+      <div className="fixed bottom-4 left-0 right-0 md:bottom-4 z-50 flex justify-center pointer-events-none">
+        <div className="inline-flex bg-stone-900 border border-stone-800 rounded-2xl shadow-lg px-3 md:px-3 py-3 md:py-3 pointer-events-auto font-heading uppercase">
         {/* More Menu Overlay */}
         {isMoreMenuOpen && (
           <div className="absolute bottom-full left-0 right-0 bg-stone-900 border-t border-stone-800 shadow-lg z-50">

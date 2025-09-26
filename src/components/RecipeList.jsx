@@ -129,24 +129,28 @@ function RecipeList() {
 
       {/* Search and Filter */}
       <div className="mb-6 space-y-4">
-        <input
-          type="text"
-          placeholder="Search recipes..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
+        {/* Search and Filter Controls - Side by Side */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 p-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-black"
+          />
 
-        {/* Filter Accordion */}
-        <div>
           {/* Filter Toggle Button */}
           <button
             onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-            className="w-full flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black mb-2 hover:bg-gray-50 transition-colors font-tag border-2 border-black"
+            className="flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black hover:bg-gray-50 transition-colors font-tag border-2 border-black sm:min-w-[200px]"
           >
             <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
             <span className="material-symbols-rounded text-[20px]">{isFilterExpanded ? 'expand_less' : 'expand_more'}</span>
           </button>
+        </div>
+
+        {/* Filter Accordion */}
+        <div>
 
           {/* Categorized Tag Filters - Collapsible */}
           {isFilterExpanded && (

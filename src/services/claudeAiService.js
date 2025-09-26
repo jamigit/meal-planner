@@ -129,9 +129,136 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
 
       // Try to extract JSON from response
       if (typeof response === 'string') {
-        const jsonMatch = response.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          jsonData = JSON.parse(jsonMatch[0])
+        console.log('🔍 Raw Claude response length:', response.length)
+        console.log('🔍 Raw Claude response (first 500 chars):', response.substring(0, 500))
+        console.log('🔍 Raw Claude response (last 200 chars):', response.substring(Math.max(0, response.length - 200)))
+        
+        // Find the complete JSON by matching braces properly
+        let jsonString = ''
+        let startIndex = response.indexOf('{')
+        
+        if (startIndex !== -1) {
+          let braceCount = 0
+          let inString = false
+          let escapeNext = false
+          
+          for (let i = startIndex; i < response.length; i++) {
+            const char = response[i]
+            jsonString += char
+            
+            if (escapeNext) {
+              escapeNext = false
+              continue
+            }
+            
+            if (char === '\\') {
+              escapeNext = true
+              continue
+            }
+            
+            if (char === '"') {
+              inString = !inString
+              continue
+            }
+            
+            if (!inString) {
+              if (char === '{') {
+                braceCount++
+              } else if (char === '}') {
+                braceCount--
+                if (braceCount === 0) {
+                  break // Found complete JSON
+                }
+              }
+            }
+          }
+          
+          console.log('🔍 Extracted complete JSON length:', jsonString.length)
+          console.log('🔍 Extracted JSON (first 500 chars):', jsonString.substring(0, 500))
+          console.log('🔍 Extracted JSON (last 200 chars):', jsonString.substring(Math.max(0, jsonString.length - 200)))
+          
+          try {
+            jsonData = JSON.parse(jsonString)
+            console.log('✅ Successfully parsed complete JSON')
+          } catch (parseError) {
+            console.error('❌ JSON Parse Error:', parseError)
+            
+            // Try to fix common JSON issues
+            let fixedJson = jsonString
+              .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
+              .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+              .replace(/\n/g, ' ')     // Remove newlines that might break JSON
+              .replace(/\r/g, '')      // Remove carriage returns
+            
+            try {
+              jsonData = JSON.parse(fixedJson)
+              console.log('✅ Fixed JSON successfully')
+            } catch (fixError) {
+              console.error('❌ Even fixed JSON failed:', fixError)
+              console.log('🔍 Final JSON attempt (last 500 chars):', fixedJson.substring(Math.max(0, fixedJson.length - 500)))
+              
+              // If we have an unterminated string, try to repair it
+              if (fixError.message.includes('Unterminated string')) {
+                console.log('🔧 Attempting to repair unterminated string...')
+                let repairedJson = fixedJson
+                
+                // More aggressive repair: find where the JSON structure breaks
+                const errorPos = parseInt(fixError.message.match(/position (\d+)/)?.[1] || '0')
+                console.log('🔍 Error position:', errorPos)
+                
+                // Truncate at the error position and try to close structures
+                if (errorPos > 0 && errorPos < repairedJson.length) {
+                  // Find the last complete key-value pair before the error
+                  let truncatePoint = errorPos
+                  
+                  // Look backwards for the last complete field
+                  for (let i = errorPos - 1; i >= 0; i--) {
+                    if (repairedJson[i] === ',' || repairedJson[i] === '{' || repairedJson[i] === '[') {
+                      truncatePoint = i
+                      if (repairedJson[i] === ',') {
+                        truncatePoint = i // Include the comma
+                      }
+                      break
+                    }
+                  }
+                  
+                  repairedJson = repairedJson.substring(0, truncatePoint)
+                  console.log('🔧 Truncated JSON at position:', truncatePoint)
+                  
+                  // Remove trailing comma if present
+                  repairedJson = repairedJson.replace(/,\s*$/, '')
+                  
+                  // Close any open objects/arrays
+                  let openBraces = (repairedJson.match(/\{/g) || []).length - (repairedJson.match(/\}/g) || []).length
+                  let openBrackets = (repairedJson.match(/\[/g) || []).length - (repairedJson.match(/\]/g) || []).length
+                  
+                  console.log('🔧 Need to close:', { openBrackets, openBraces })
+                  
+                  // Close any unclosed structures
+                  for (let i = 0; i < openBrackets; i++) {
+                    repairedJson += ']'
+                  }
+                  for (let i = 0; i < openBraces; i++) {
+                    repairedJson += '}'
+                  }
+                  
+                  console.log('🔧 Repaired JSON (last 200 chars):', repairedJson.substring(Math.max(0, repairedJson.length - 200)))
+                  
+                  try {
+                    jsonData = JSON.parse(repairedJson)
+                    console.log('✅ Successfully repaired truncated JSON!')
+                  } catch (repairError) {
+                    console.error('❌ Repair attempt failed:', repairError)
+                    throw new Error(`Failed to parse JSON even after repair attempts: ${fixError.message}`)
+                  }
+                } else {
+                  throw new Error(`Failed to parse JSON even after fixes: ${fixError.message}`)
+                }
+              } else {
+                throw new Error(`Failed to parse JSON even after fixes: ${fixError.message}`)
+              }
+            }
+          }
         } else {
           throw new Error('No JSON found in response')
         }
@@ -181,6 +308,7 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
 
   // Main function to generate meal suggestions using Claude API
   async generateMealSuggestions(userNotes = '', toggles = {}) {
+    console.log('🚀 Starting generateMealSuggestions with:', { userNotes, toggles })
     try {
       if (!this.isConfigured()) {
         console.error('❌ Claude API not configured:', {
@@ -225,7 +353,8 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
         },
         body: JSON.stringify({
           prompt: prompt,
-          userNotes: userNotes
+          userNotes: userNotes,
+          max_tokens: 2000 // Limit response size to prevent truncation
         })
       })
 
@@ -242,7 +371,91 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
       }
 
       // Parse the response and match with recipes
-      const suggestions = await this.parseMealSuggestions(content, validRecipes)
+      let suggestions
+      try {
+        suggestions = await this.parseMealSuggestions(content, validRecipes)
+      } catch (parseError) {
+        console.error('❌ Failed to parse Claude response, trying fallback...', parseError)
+        
+        // If JSON parsing fails with toggles, try without them
+        if (Object.keys(toggles).length > 0) {
+          console.log('🔄 Retrying without toggles due to parse error...')
+          return await this.generateMealSuggestions(userNotes, {})
+        }
+        
+        // If we're still failing, try a much simpler request
+        console.log('🔄 Trying simplified request due to persistent parse errors...')
+        try {
+          const simplePrompt = `Please suggest 3 different meal plan options from this recipe list. Each plan should have 3-4 meals. Respond with ONLY valid JSON in this exact format:
+{
+  "suggestions": [
+    {
+      "set_number": 1,
+      "explanation": "Balanced mix of proteins and vegetables",
+      "meals": [
+        {"recipe_name": "Recipe Name 1"},
+        {"recipe_name": "Recipe Name 2"},
+        {"recipe_name": "Recipe Name 3"}
+      ]
+    },
+    {
+      "set_number": 2,
+      "explanation": "Quick and easy meals",
+      "meals": [
+        {"recipe_name": "Recipe Name 4"},
+        {"recipe_name": "Recipe Name 5"},
+        {"recipe_name": "Recipe Name 6"}
+      ]
+    },
+    {
+      "set_number": 3,
+      "explanation": "International flavors",
+      "meals": [
+        {"recipe_name": "Recipe Name 7"},
+        {"recipe_name": "Recipe Name 8"},
+        {"recipe_name": "Recipe Name 9"}
+      ]
+    }
+  ]
+}
+
+Available recipes: ${validRecipes.slice(0, 50).map(r => r.name).join(', ')}`
+
+          const simpleResponse = await fetch(this.apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: simplePrompt,
+              userNotes: ''
+            })
+          })
+
+          const simpleData = await simpleResponse.json()
+          if (simpleData.error) {
+            throw new Error(simpleData.error)
+          }
+
+          const simpleContent = simpleData.content?.[0]?.text
+          if (!simpleContent) {
+            throw new Error('No content received from simplified Claude API request')
+          }
+
+          console.log('📋 Simplified response content (first 300 chars):', simpleContent.substring(0, 300))
+          const simpleSuggestions = await this.parseMealSuggestions(simpleContent, validRecipes)
+          console.log('✅ Simplified request succeeded, suggestions:', simpleSuggestions)
+          return {
+            success: true,
+            data: simpleSuggestions,
+            metadata: {
+              provider: 'Claude API (Simplified)',
+              totalRecipes: validRecipes.length
+            }
+          }
+        } catch (simpleError) {
+          console.error('❌ Even simplified request failed:', simpleError)
+          throw parseError
+        }
+      }
 
       if (suggestions.length === 0) {
         throw new Error('Claude did not generate any valid suggestions')
@@ -262,10 +475,14 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
 
     } catch (error) {
       console.error('Claude AI service error:', error)
+      console.log('🔄 Generating fallback suggestions...')
+      const fallbackSuggestions = await this.getFallbackSuggestions()
+      console.log('🎲 Fallback suggestions generated:', fallbackSuggestions.length, 'sets')
+      
       return {
         success: false,
         error: error.message,
-        fallback: await this.getFallbackSuggestions()
+        fallback: fallbackSuggestions
       }
     }
   }
@@ -273,18 +490,24 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
   // Fallback suggestions when Claude API fails
   async getFallbackSuggestions() {
     try {
+      console.log('🎲 Generating fallback suggestions...')
       const allRecipes = await recipeService.getAll()
+      console.log(`📋 Found ${allRecipes.length} total recipes`)
+      
       const validRecipes = this.filterByDietaryRestrictions(allRecipes)
+      console.log(`✅ Found ${validRecipes.length} valid recipes after dietary filtering`)
 
       if (validRecipes.length === 0) {
+        console.log('❌ No valid recipes available for fallback')
         return []
       }
 
       // Simple fallback: pick 4 random valid recipes
       const shuffled = validRecipes.sort(() => 0.5 - Math.random())
       const selected = shuffled.slice(0, Math.min(4, shuffled.length))
+      console.log(`🎯 Selected ${selected.length} recipes for fallback:`, selected.map(r => r.name))
 
-      return [{
+      const fallbackSuggestions = [{
         set_number: 1,
         meals: selected.map(recipe => ({
           recipe,
@@ -292,8 +515,11 @@ Generate diverse, personalized meal suggestions that balance the user's favorite
         })),
         explanation: "Simple selection of recipes that fit your dietary preferences. (Generated as fallback when AI is unavailable)"
       }]
+      
+      console.log('✅ Fallback suggestions created successfully:', fallbackSuggestions)
+      return fallbackSuggestions
     } catch (error) {
-      console.error('Fallback suggestions failed:', error)
+      console.error('❌ Fallback suggestions failed:', error)
       return []
     }
   }

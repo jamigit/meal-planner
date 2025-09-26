@@ -312,16 +312,16 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
             {/* Fixed Header */}
             <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="!text-[32px] font-semibold text-gray-900">
                   {recipe ? 'Edit Recipe' : 'Add New Recipe'}
                 </h2>
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="btn-outline-black-sm flex items-center gap-2"
                 >
-                  <span className="text-lg">×</span>
-                  <span className="text-sm font-medium">Close</span>
+                  <span>×</span>
+                  <span>Close</span>
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { serviceSelector } from '../services/serviceSelector.js'
 import { claudeAiService } from '../services/claudeAiService.js'
+import { emailService } from '../services/emailService.js'
 import RecipeSelector from './RecipeSelector'
 import AISuggestionModal from './AISuggestionModal'
 import ShoppingList from './ShoppingList'
@@ -190,6 +191,92 @@ function WeeklyPlanner() {
     }
   }
 
+  const handleSavePlanWithEmail = async () => {
+    console.log('🔄 Starting save process with email...')
+    
+    const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
+    
+    // Clear any existing current plans first
+    await weeklyPlanService.clearCurrentPlans()
+    
+    // Save the plan and set it as current
+    const savedPlan = await weeklyPlanService.save(weeklyPlan, true)
+    console.log('💾 Saved plan result:', savedPlan)
+    
+    if (savedPlan) {
+      // Send email
+      try {
+        console.log('📧 Sending meal plan email...')
+        const emailResults = await emailService.sendMealPlan(savedPlan)
+        
+        const successCount = emailResults.filter(r => r.success).length
+        const failCount = emailResults.filter(r => !r.success).length
+        
+        let emailMessage = ''
+        if (successCount > 0) {
+          emailMessage += `📧 Meal plan emailed to ${successCount} recipient${successCount !== 1 ? 's' : ''}!`
+        }
+        if (failCount > 0) {
+          emailMessage += failCount > 0 && successCount > 0 ? '\n' : ''
+          emailMessage += `⚠️ Failed to send to ${failCount} recipient${failCount !== 1 ? 's' : ''}.`
+        }
+        
+        console.log('✅ Plan saved successfully, resetting state...')
+        
+        // Reset all weekly planner state
+        setWeeklyPlan({
+          meals: [],
+          notes: '',
+          name: ''
+        })
+        setWeekPreferences('')
+        setMealEatenCounts({})
+        setSidebarRecipe(null)
+        setCurrentPlanId(null)
+        
+        // Close any open modals
+        setIsRecipeSelectorOpen(false)
+        setShowAIModal(false)
+        setShowShoppingList(false)
+        
+        // Clear AI suggestion state
+        setAISuggestions([])
+        setAIError(null)
+        setIsLoadingAI(false)
+        
+        alert(`Weekly plan saved successfully! ${emailMessage}\n\nThe planner has been reset.`)
+        
+        setTimeout(() => {
+          navigate('/saved-plans')
+        }, 1000)
+        
+      } catch (error) {
+        console.error('Failed to send email:', error)
+        // Still show success for saving, but mention email failure
+        alert('Weekly plan saved successfully!\n\n⚠️ Failed to send email. You can resend it from the Saved Plans page.')
+        
+        // Still reset and navigate
+        setWeeklyPlan({ meals: [], notes: '', name: '' })
+        setWeekPreferences('')
+        setMealEatenCounts({})
+        setSidebarRecipe(null)
+        setCurrentPlanId(null)
+        setIsRecipeSelectorOpen(false)
+        setShowAIModal(false)
+        setShowShoppingList(false)
+        setAISuggestions([])
+        setAIError(null)
+        setIsLoadingAI(false)
+        
+        setTimeout(() => {
+          navigate('/saved-plans')
+        }, 1000)
+      }
+    } else {
+      console.log('❌ Failed to save plan')
+    }
+  }
+
   const handleShowShoppingList = () => {
     if (weeklyPlan.meals.length === 0) {
       alert('Please add some meals to your weekly plan first.')
@@ -216,21 +303,42 @@ function WeeklyPlanner() {
     try {
       console.log('🤖 Requesting AI suggestions with preferences:', weekPreferences, 'toggles:', aiToggles)
       const result = await claudeAiService.generateMealSuggestions(weekPreferences, aiToggles)
+      console.log('📋 AI service result:', result)
 
       if (result.success) {
         setAISuggestions(result.data)
         console.log('✅ AI suggestions generated:', result.data)
       } else {
+        console.log('❌ AI service failed, checking fallback...', result)
         setAIError(result.error)
         // Try to use fallback suggestions if available
         if (result.fallback && result.fallback.length > 0) {
+          console.log('🎲 Using fallback suggestions:', result.fallback)
           setAISuggestions(result.fallback)
           setAIError(`${result.error} (showing fallback suggestions)`)
+        } else {
+          console.log('❌ No fallback suggestions available')
         }
       }
     } catch (error) {
-      console.error('Failed to get AI suggestions:', error)
-      setAIError('Unable to generate suggestions. Please try again later.')
+      console.error('❌ Exception thrown in AI suggestions:', error)
+      console.log('🔄 Trying to generate fallback manually...')
+      
+      // If an exception was thrown, try to get fallback suggestions manually
+      try {
+        const fallbackSuggestions = await claudeAiService.getFallbackSuggestions()
+        if (fallbackSuggestions && fallbackSuggestions.length > 0) {
+          console.log('✅ Manual fallback succeeded:', fallbackSuggestions)
+          setAISuggestions(fallbackSuggestions)
+          setAIError('AI service unavailable (showing backup suggestions)')
+        } else {
+          console.log('❌ Manual fallback also failed')
+          setAIError('Unable to generate suggestions. Please try again later.')
+        }
+      } catch (fallbackError) {
+        console.error('❌ Manual fallback failed:', fallbackError)
+        setAIError('Unable to generate suggestions. Please try again later.')
+      }
     } finally {
       setIsLoadingAI(false)
     }
@@ -442,7 +550,7 @@ function WeeklyPlanner() {
           {weeklyPlan.meals.length === 0 ? (
             <p className="text-black">No meals selected yet.</p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-6 max-h-96 overflow-y-auto">
               <AnimatePresence>
                 {weeklyPlan.meals.map((meal, index) => (
                   <motion.div 
@@ -510,7 +618,7 @@ function WeeklyPlanner() {
                       >
                         Open Original
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
                     )}
@@ -580,10 +688,13 @@ function WeeklyPlanner() {
         error={aiError}
       />
 
-      {/* Save Plan Button at Bottom */}
-      <div className="mt-8 text-center">
-        <button onClick={handleSavePlan} className="btn-primary">
-          Save Plan
+      {/* Save Plan Buttons at Bottom */}
+      <div className="mt-8 text-center space-x-4">
+        <button onClick={handleSavePlan} className="btn-tertiary">
+          Save Plan Only
+        </button>
+        <button onClick={handleSavePlanWithEmail} className="btn-primary">
+          Save & Email Plan
         </button>
       </div>
 
@@ -621,13 +732,13 @@ function WeeklyPlanner() {
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="text-[24px] font-semibold text-black">Recipe Details</h3>
+              <h3 className="!text-[32px] font-semibold text-black">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
-                className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 rounded-lg transition-colors"
+                className="btn-outline-black-sm flex items-center gap-2"
               >
-                <span className="text-lg">×</span>
-                <span className="text-sm font-medium">Close</span>
+                <span>×</span>
+                <span>Close</span>
               </button>
             </div>
           </div>

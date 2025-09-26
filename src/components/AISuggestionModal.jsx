@@ -103,16 +103,20 @@ function AISuggestionModal({
           >
 
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">
-            🤖 AI Meal Suggestions
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none"
-          >
-            ×
-          </button>
+        <div className="px-6 py-4 border-b">
+          {/* Title and Close button in line */}
+          <div className="flex justify-between items-center">
+            <h2 className="!text-[28px] font-bold text-gray-900">
+              🤖 AI Meal Suggestions
+            </h2>
+            <button
+              onClick={onClose}
+              className="btn-outline-black-sm flex items-center gap-2"
+            >
+              <span>×</span>
+              <span>Close</span>
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -157,7 +161,7 @@ function AISuggestionModal({
             <div>
               <button
                 onClick={handleBackToOptions}
-                className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700 mb-6"
+                className="btn-outline-black mb-6"
               >
                 ← Back to Options
               </button>
@@ -260,14 +264,54 @@ function AISuggestionModal({
 
                       <p className="text-gray-700 mb-4">{suggestion.explanation}</p>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                      {/* Mobile: Vertical List */}
+                      <div className="space-y-2 mb-4 md:hidden">
                         {suggestion.meals.map((meal, mealIndex) => (
-                          <div key={mealIndex} className="text-sm">
-                            <div className="font-medium text-gray-900 mb-1">
-                              {meal.recipe.name}
+                          <div key={mealIndex} className="bg-gray-50 rounded-lg p-2 border border-gray-200">
+                            <div className="flex items-start space-x-2">
+                              {/* Recipe Image */}
+                              {meal.recipe.image && (
+                                <img 
+                                  src={meal.recipe.image} 
+                                  alt={meal.recipe.name}
+                                  className="w-8 h-8 rounded object-cover flex-shrink-0"
+                                />
+                              )}
+                              
+                              <div className="flex-1 min-w-0">
+                                {/* Recipe Name */}
+                                <h4 className="font-medium text-gray-900 mb-1 truncate text-sm">
+                                  {meal.recipe.name}
+                                </h4>
+                                
+                                {/* AI Reason */}
+                                <p className="text-xs text-gray-600">
+                                  {meal.reason}
+                                </p>
+                              </div>
                             </div>
-                            <div className="text-gray-500 text-xs">
-                              {meal.reason}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop: Horizontal Rectangles */}
+                      <div className="hidden md:grid md:grid-cols-4 gap-3 mb-4">
+                        {suggestion.meals.map((meal, mealIndex) => (
+                          <div key={mealIndex} className="bg-gray-50 rounded-lg p-2 border border-gray-200 h-24 flex flex-col">
+                            {/* Recipe Image */}
+                            {meal.recipe.image && (
+                              <img 
+                                src={meal.recipe.image} 
+                                alt={meal.recipe.name}
+                                className="w-full h-12 rounded object-cover mb-1 flex-shrink-0"
+                              />
+                            )}
+                            
+                            <div className="flex-1 flex flex-col justify-center">
+                              {/* Recipe Name */}
+                              <h4 className="font-medium text-gray-900 text-xs line-clamp-2 text-center">
+                                {meal.recipe.name}
+                              </h4>
                             </div>
                           </div>
                         ))}
@@ -302,7 +346,7 @@ function AISuggestionModal({
                 {selectedMeals.length} of {selectedSet.meals.length} meals selected
               </div>
               <div className="flex space-x-3">
-                <button onClick={handleBackToOptions} className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700">
+                <button onClick={handleBackToOptions} className="btn-outline-black">
                   See Other Options
                 </button>
                 <button 

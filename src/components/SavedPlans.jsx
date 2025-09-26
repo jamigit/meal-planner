@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { serviceSelector } from '../services/serviceSelector.js'
+import { emailService } from '../services/emailService.js'
 import ShoppingListCard from './ShoppingListCard'
 import RecipeCard from './RecipeCard'
 
@@ -9,6 +10,7 @@ function SavedPlans() {
   const [eatenMeals, setEatenMeals] = useState(new Set()) // Track which meals are marked as eaten
   const [activeTabs, setActiveTabs] = useState({}) // Track active tab for each plan (meals/list)
   const [sidebarRecipe, setSidebarRecipe] = useState(null) // Recipe to show in sidebar
+  const [openDropdowns, setOpenDropdowns] = useState(new Set()) // Track which dropdowns are open
 
   // Lock/unlock body scroll when sidebar opens/closes
   useEffect(() => {
@@ -82,6 +84,25 @@ function SavedPlans() {
     }
   }
 
+  const handleResendEmail = async (plan) => {
+    try {
+      console.log('📧 Resending meal plan email...')
+      const emailResults = await emailService.sendMealPlan(plan)
+      
+      const successCount = emailResults.filter(r => r.success).length
+      const failCount = emailResults.filter(r => !r.success).length
+      
+      if (successCount > 0) {
+        alert(`📧 Meal plan emailed to ${successCount} recipient${successCount !== 1 ? 's' : ''}!`)
+      } else {
+        alert('⚠️ Failed to send emails. Please check your email configuration.')
+      }
+    } catch (error) {
+      console.error('Failed to resend email:', error)
+      alert('⚠️ Failed to send email. Please try again later.')
+    }
+  }
+
   const isMealEaten = (recipeId, planCreatedAt) => {
     return eatenMeals.has(`${recipeId}-${planCreatedAt}`)
   }
@@ -92,6 +113,31 @@ function SavedPlans() {
 
   const setActiveTab = (planId, tab) => {
     setActiveTabs(prev => ({ ...prev, [planId]: tab }))
+  }
+
+  const toggleDropdown = (planId) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(planId)) {
+        newSet.delete(planId)
+      } else {
+        newSet.clear() // Close other dropdowns
+        newSet.add(planId)
+      }
+      return newSet
+    })
+  }
+
+  const closeDropdown = (planId) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(planId)
+      return newSet
+    })
+  }
+
+  const isDropdownOpen = (planId) => {
+    return openDropdowns.has(planId)
   }
 
   return (
@@ -111,7 +157,7 @@ function SavedPlans() {
       ) : (
         <div className="space-y-6">
           {savedPlans.map((plan) => (
-            <div key={plan.id} className="card">
+            <div key={plan.id} className={`card ${plan.is_current ? 'bg-green-600 text-white' : ''}`}>
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -119,12 +165,12 @@ function SavedPlans() {
                       {plan.name?.toString().trim() || `Plan from ${formatDate(plan.created_at)}`}
                     </h3>
                     {plan.is_current && (
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                      <span className="bg-white text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                         Current
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-black space-y-1">
+                  <div className={`text-sm space-y-1 ${plan.is_current ? 'text-white' : 'text-black'}`}>
                     <p>
                       {plan.meals?.length || 0} meal{(plan.meals?.length || 0) !== 1 ? 's' : ''}
                     </p>
@@ -134,21 +180,62 @@ function SavedPlans() {
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
-                  {!plan.is_current && (
-                    <button
-                      onClick={() => handleSetAsCurrent(plan.id)}
-                      className="text-sm px-3 py-1 rounded border-2 border-black bg-white hover:bg-gray-50"
-                    >
-                      Set as Current
-                    </button>
-                  )}
+                <div className="relative">
                   <button
-                    onClick={() => handleDeletePlan(plan.id)}
-                    className="text-red-700 text-sm px-3 py-1 rounded border-2 border-red-600 bg-white hover:bg-red-50"
+                    onClick={() => toggleDropdown(plan.id)}
+                    className="w-8 h-8 border-2 border-black rounded bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                    title="More actions"
                   >
-                    Delete
+                    <span className="text-black text-lg leading-none">⋮</span>
                   </button>
+                  
+                  {isDropdownOpen(plan.id) && (
+                    <>
+                      {/* Backdrop to close dropdown */}
+                      <div 
+                        className="fixed inset-0 z-10" 
+                        onClick={() => closeDropdown(plan.id)}
+                      />
+                      
+                      {/* Dropdown menu */}
+                      <div className="absolute right-0 top-10 z-20 bg-white border-2 border-black rounded-lg shadow-lg py-1 min-w-[160px]">
+                        <button
+                          onClick={() => {
+                            handleResendEmail(plan)
+                            closeDropdown(plan.id)
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                        >
+                          <span>📧</span>
+                          <span>Email Plan</span>
+                        </button>
+                        
+                        {!plan.is_current && (
+                          <button
+                            onClick={() => {
+                              handleSetAsCurrent(plan.id)
+                              closeDropdown(plan.id)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                          >
+                            <span>⭐</span>
+                            <span>Set as Current</span>
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => {
+                            handleDeletePlan(plan.id)
+                            closeDropdown(plan.id)
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-700 transition-colors flex items-center gap-2"
+                        >
+                          <span>🗑️</span>
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -179,19 +266,12 @@ function SavedPlans() {
                 <div className="mb-4">
                   <div className="grid grid-cols-1 gap-3">
                     {plan.meals.map((meal, index) => (
-                      <div key={meal.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
-                          <span className="font-heading font-black break-words whitespace-normal">{meal.name}</span>
-                          <button
-                            onClick={() => setSidebarRecipe(meal)}
-                            className="mt-1 sm:mt-0 inline-flex w-auto self-start whitespace-nowrap items-center gap-2 border-2 border-black text-black rounded-lg font-heading font-black uppercase text-[14px] px-3 py-1 hover:bg-gray-50 transition-colors"
-                          >
-                            View Recipe
-                            <span className="material-symbols-rounded text-base">arrow_forward</span>
-                          </button>
+                      <div key={meal.id || index} className={`flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg ${plan.is_current ? 'bg-white' : 'bg-gray-50'}`}>
+                        <div className="mb-3 md:mb-0 md:flex-1">
+                          <span className="font-heading font-black break-words whitespace-normal text-black">{meal.name}</span>
                         </div>
 
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center justify-end md:justify-start space-x-2 md:ml-4">
                           {isMealEaten(meal.id, plan.created_at) ? (
                             <span className="text-green-600 text-sm font-medium flex items-center">
                               <span className="text-green-600 mr-1">✓</span>
@@ -205,6 +285,14 @@ function SavedPlans() {
                               Mark as Eaten
                             </button>
                           )}
+                          
+                          <button
+                            onClick={() => setSidebarRecipe(meal)}
+                            className="inline-flex items-center gap-2 border-2 border-black text-black rounded-lg font-heading font-black uppercase text-[14px] px-3 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                          >
+                            View Recipe
+                            <span className="material-symbols-rounded text-base">arrow_forward</span>
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -270,13 +358,13 @@ function SavedPlans() {
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="text-[24px] font-semibold text-black">Recipe Details</h3>
+              <h3 className="!text-[32px] font-semibold text-black">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
-                className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 rounded-lg transition-colors"
+                className="btn-outline-black-sm flex items-center gap-2"
               >
-                <span className="text-lg">×</span>
-                <span className="text-sm font-medium">Close</span>
+                <span>×</span>
+                <span>Close</span>
               </button>
             </div>
           </div>
