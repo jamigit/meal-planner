@@ -8,7 +8,7 @@ import WeeklyPlanner from './components/WeeklyPlanner'
 import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
-import RecipeSeeder from './components/RecipeSeeder'
+import DatabaseSeeder from './components/DatabaseSeeder'
 import Styleguide from './components/Styleguide'
 
 function AppContent() {
@@ -95,6 +95,17 @@ function AppContent() {
                 <MealHistory />
               </motion.div>
             } />
+            <Route path="/database-seeder" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <DatabaseSeeder />
+              </motion.div>
+            } />
             <Route path="/styleguide" element={
               <motion.div
                 initial="initial"
@@ -110,13 +121,12 @@ function AppContent() {
         </AnimatePresence>
       </main>
 
-      {/* Developer Utils - only in development */}
-          <RecipeSeeder />
-        </div>
-      )
-    }
+      <Navigation />
+    </div>
+  )
+}
 
-    function App() {
+function App() {
       return (
         <AuthProvider>
           <Router>

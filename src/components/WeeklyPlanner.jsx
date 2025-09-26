@@ -385,7 +385,7 @@ function WeeklyPlanner() {
   }
 
   return (
-    <div className="mt-16 md:mt-24 relative">
+    <div className="mt-16 md:mt-24 relative pb-[200px]">
       <img
         src="/images/kiwi-hero.png"
         alt="Kiwi hero"
