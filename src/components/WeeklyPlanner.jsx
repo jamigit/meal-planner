@@ -10,6 +10,7 @@ import ShoppingList from './ShoppingList'
 import ShoppingListCard from './ShoppingListCard'
 import CategorizedTags from './CategorizedTags'
 import RecipeCard from './RecipeCard'
+import SavePlanTransition from './SavePlanTransition'
 
 function WeeklyPlanner() {
   const navigate = useNavigate()
@@ -19,6 +20,10 @@ function WeeklyPlanner() {
     name: ''
   })
   const [isRecipeSelectorOpen, setIsRecipeSelectorOpen] = useState(false)
+
+  // Save transition state
+  const [showSaveTransition, setShowSaveTransition] = useState(false)
+  const [transitionMessage, setTransitionMessage] = useState('Well done!')
 
   // AI Suggestion state
   const [showAIModal, setShowAIModal] = useState(false)
@@ -57,6 +62,12 @@ function WeeklyPlanner() {
       document.body.style.overflow = 'unset'
     }
   }, [sidebarRecipe])
+
+  // Handle transition completion
+  const handleTransitionComplete = () => {
+    setShowSaveTransition(false)
+    navigate('/saved-plans')
+  }
 
   useEffect(() => {
     const loadCurrentPlan = async () => {
@@ -179,13 +190,9 @@ function WeeklyPlanner() {
         currentPlanId: null
       })
       
-      // Don't navigate immediately - let user see the reset
-      alert('Weekly plan saved successfully! The planner has been reset.')
-      
-      // Optional: Navigate after a short delay
-      setTimeout(() => {
-        navigate('/saved-plans')
-      }, 1000)
+      // Show transition screen
+      setTransitionMessage('Well done!')
+      setShowSaveTransition(true)
     } else {
       console.log('❌ Failed to save plan')
     }
@@ -244,18 +251,18 @@ function WeeklyPlanner() {
         setAIError(null)
         setIsLoadingAI(false)
         
-        alert(`Weekly plan saved successfully! ${emailMessage}\n\nThe planner has been reset.`)
-        
-        setTimeout(() => {
-          navigate('/saved-plans')
-        }, 1000)
+        // Show transition screen with email status
+        const successMessage = successCount > 0 ? 'Plan Saved & Emailed!' : 'Well done!'
+        setTransitionMessage(successMessage)
+        setShowSaveTransition(true)
         
       } catch (error) {
         console.error('Failed to send email:', error)
         // Still show success for saving, but mention email failure
-        alert('Weekly plan saved successfully!\n\n⚠️ Failed to send email. You can resend it from the Saved Plans page.')
+        setTransitionMessage('Plan Saved!')
+        setShowSaveTransition(true)
         
-        // Still reset and navigate
+        // Still reset state
         setWeeklyPlan({ meals: [], notes: '', name: '' })
         setWeekPreferences('')
         setMealEatenCounts({})
@@ -753,6 +760,13 @@ function WeeklyPlanner() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Save Plan Transition Screen */}
+      <SavePlanTransition
+        isVisible={showSaveTransition}
+        onComplete={handleTransitionComplete}
+        message={transitionMessage}
+      />
 
     </div>
   )
