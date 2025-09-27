@@ -3,52 +3,47 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+  
   body {
     font-family: 'Nunito', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
     background-color: #fef9c2;
     @apply text-stone-800;
   }
 
+  /* Unified heading styles using design tokens */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cabinet Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    font-weight: 700;
+    @apply font-heading text-text-primary;
   }
 
   h1 {
-    font-weight: 900;
-    font-size: 48px;
-    line-height: 1.2;
-    text-transform: uppercase;
+    @apply text-h1 uppercase;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
   }
 
   h2 {
-    @apply font-heading !font-black !text-[56px] !leading-[1.25] uppercase;
+    @apply text-h2 uppercase;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
   }
 
   h3 {
-    @apply font-heading !font-black !text-[24px] !leading-[1.35];
+    @apply text-h3;
   }
 
   h4 {
-    font-weight: 900;
-    font-size: 26px;
-    line-height: 1.35;
+    @apply text-h4;
   }
 
   h5 {
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 1.4;
+    @apply text-h5;
   }
 
   h6 {
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 1.45;
+    @apply text-h6;
   }
 }
 

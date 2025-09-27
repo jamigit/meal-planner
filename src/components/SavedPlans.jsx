@@ -143,7 +143,7 @@ function SavedPlans() {
   return (
     <div className="relative">
       <div className="mb-2">
-        <h2 className="font-heading text-display-2 uppercase text-black">Saved Plans</h2>
+        <h2 className="font-heading text-display-2 uppercase text-text-primary">Saved Plans</h2>
       </div>
       <p className="text-black mb-4">{savedPlans.length} saved plan{savedPlans.length !== 1 ? 's' : ''}</p>
 
@@ -161,7 +161,7 @@ function SavedPlans() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-semibold break-words whitespace-normal">
+                    <h3 className={`text-h5 font-heading font-black break-words whitespace-normal ${plan.is_current ? 'text-white' : 'text-text-primary'}`}>
                       {plan.name?.toString().trim() || `Plan from ${formatDate(plan.created_at)}`}
                     </h3>
                     {plan.is_current && (
@@ -313,7 +313,7 @@ function SavedPlans() {
               {/* Notes */}
               {plan.notes && (
                 <div>
-                  <h4 className="font-medium text-black mb-2">Notes:</h4>
+                  <h4 className="text-h6 font-heading font-black text-text-primary mb-2">Notes:</h4>
                   <p className="text-black bg-gray-50 p-3 rounded whitespace-pre-wrap">
                     {plan.notes}
                   </p>
@@ -358,7 +358,7 @@ function SavedPlans() {
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="!text-[32px] font-semibold text-black">Recipe Details</h3>
+              <h3 className="text-h3 font-heading font-black text-text-primary">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
                 className="btn-outline-black-sm flex items-center gap-2"

@@ -91,7 +91,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
       <div className={`card ${className}`}>
         {showTitle && (
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-black">Shopping List</h3>
+            <h3 className="text-h5 font-heading font-black text-text-primary">Shopping List</h3>
           </div>
         )}
         <div className="text-center py-8 text-black">
@@ -105,7 +105,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
     <div className={`card ${className}`}>
       {showTitle && (
         <div className="mb-2">
-          <h3 className="text-lg font-semibold text-black">Shopping List</h3>
+          <h3 className="text-h5 font-heading font-black text-text-primary">Shopping List</h3>
         </div>
       )}
 

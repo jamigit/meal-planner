@@ -43,7 +43,7 @@ function TagMigrationModal({ isOpen, onClose, onMigrationComplete }) {
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-h2 font-heading font-black text-text-primary">
               Migrate to Categorized Tags
             </h2>
             <button

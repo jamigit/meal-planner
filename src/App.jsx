@@ -10,6 +10,7 @@ import MealHistory from './components/MealHistory'
 import Login from './components/Login'
 import DatabaseSeeder from './components/DatabaseSeeder'
 import Styleguide from './components/Styleguide'
+import DesignSystemTest from './components/DesignSystemTest'
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
@@ -115,6 +116,17 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <Styleguide />
+              </motion.div>
+            } />
+            <Route path="/design-system-test" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <DesignSystemTest />
               </motion.div>
             } />
           </Routes>

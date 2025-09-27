@@ -9,7 +9,8 @@ function AISuggestionModal({
   suggestions,
   onSelectMeals,
   isLoading,
-  error
+  error,
+  setSidebarRecipe
 }) {
   const [selectedSet, setSelectedSet] = useState(null)
   const [swapModalOpen, setSwapModalOpen] = useState(false)
@@ -106,7 +107,7 @@ function AISuggestionModal({
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b">
           {/* Title and Close button in line */}
           <div className="flex justify-between items-center">
-            <h2 className="!text-[24px] sm:!text-[28px] font-bold text-gray-900 truncate pr-2">
+            <h2 className="text-h3 font-heading font-black text-text-primary truncate pr-2">
               🤖 AI Meal Suggestions
             </h2>
             <button
@@ -159,14 +160,12 @@ function AISuggestionModal({
           ) : selectedSet ? (
             // Selected Set View
             <div>
-              <div className="card">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">
-                      Selected Meal Plan - Option {selectedSet.set_number}
-                    </h3>
-                    <p className="text-gray-600">{selectedSet.explanation}</p>
-                  </div>
+              <div className="mb-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-semibold mb-1">
+                    Selected Meal Plan - Option {selectedSet.set_number}
+                  </h3>
+                  <p className="text-gray-600">{selectedSet.explanation}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
@@ -175,47 +174,47 @@ function AISuggestionModal({
                     return (
                       <div 
                         key={index} 
-                        className={`border-2 rounded-lg p-3 sm:p-4 transition-colors cursor-pointer ${
+                        className={`border-2 rounded-lg p-3 sm:p-4 transition-colors cursor-pointer relative ${
                           isSelected 
-                            ? 'border-green-600 bg-brand-surface' 
+                            ? 'border-green-600 bg-green-100' 
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         onClick={() => handleToggleMealSelection(index)}
                       >
-                        <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-start sm:space-y-0 sm:mb-3">
-                          <div className="flex items-start space-x-3">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleMealSelection(index)}
-                              className="mt-1 h-4 w-4 text-green-700 focus:ring-green-600 border-gray-300 rounded flex-shrink-0"
-                            />
-                            <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{meal.recipe.name}</h4>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                handleSwapMeal(index)
-                              }}
-                            className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[18px] sm:text-[20px] px-3 py-1 bg-green-600 text-white hover:bg-green-700 self-start sm:self-auto flex-shrink-0"
-                            >
-                            Swap
-                          </button>
+                        <button
+                          onClick={(e) => {
+                              e.stopPropagation()
+                              handleSwapMeal(index)
+                            }}
+                          className="absolute top-2 right-2 inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-xs px-2 py-1 bg-green-600 text-white hover:bg-green-700 z-10"
+                          >
+                          Swap
+                        </button>
+                        
+                        <div className="flex items-start space-x-3 mb-3 pr-16">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleMealSelection(index)}
+                            className="mt-1 h-4 w-4 text-green-700 focus:ring-green-600 border-gray-300 rounded flex-shrink-0"
+                          />
+                          <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{meal.recipe.name}</h4>
                         </div>
 
                         <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 ml-7">{meal.reason}</p>
 
-                        {meal.recipe.url && (
-                          <a
-                            href={meal.recipe.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-xs sm:text-sm text-green-700 hover:text-green-800 inline-block mb-2 ml-7"
-                          >
-                            View Recipe →
-                          </a>
-                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (setSidebarRecipe) {
+                              setSidebarRecipe(meal.recipe)
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 text-xs sm:text-sm border-2 border-black text-black rounded px-2 py-1 mb-2 ml-7 hover:bg-gray-50 transition-colors"
+                        >
+                          View Recipe
+                          <span className="material-symbols-rounded text-sm">arrow_forward</span>
+                        </button>
 
                         <div className="ml-7">
                           <CategorizedTags recipe={meal.recipe} />
@@ -243,11 +242,11 @@ function AISuggestionModal({
                   {suggestions.map((suggestion, index) => (
                     <div
                       key={index}
-                      className="card hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-green-200"
+                      className="card hover:shadow-lg transition-shadow cursor-pointer"
                       onClick={() => handleSelectSet(suggestion)}
                     >
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-xl font-semibold text-green-700">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-xl font-heading font-black text-black">
                           Option {suggestion.set_number}
                         </h3>
                         <span className="text-sm text-gray-500">
@@ -310,7 +309,10 @@ function AISuggestionModal({
                         ))}
                       </div>
 
-                      <button className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700 w-full">
+                      <button 
+                        onClick={() => handleSelectSet(suggestion)}
+                        className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-4 py-2 bg-green-600 text-white hover:bg-green-700 w-full shadow-[0_4px_0_0_#15803d] hover:shadow-[0_2px_0_0_#15803d] hover:translate-y-[2px] transition-all"
+                      >
                         Select This Plan →
                       </button>
                     </div>
@@ -334,19 +336,19 @@ function AISuggestionModal({
         {/* Footer Actions (only show when set is selected) */}
         {selectedSet && !isLoading && !error && (
           <div className="border-t p-4 sm:p-6 bg-gray-50">
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-center">
+            <div className="flex flex-row gap-3 justify-center">
               <button 
                 onClick={handleBackToOptions}
-                className="btn-outline-black flex-1 sm:flex-initial order-2 sm:order-1"
+                className="btn-outline-black flex-1 text-sm"
               >
-                Return to Meal Plans
+                Back
               </button>
               <button 
                 onClick={handleConfirmSelection} 
-                className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-[20px] px-6 py-2 bg-green-600 text-white hover:bg-green-700 flex-1 sm:flex-initial order-1 sm:order-2"
+                className="inline-flex items-center justify-center rounded-lg font-heading font-black uppercase text-sm px-4 py-2 bg-green-600 text-white hover:bg-green-700 flex-1 shadow-[0_4px_0_0_#000000] hover:shadow-[0_2px_0_0_#000000] hover:translate-y-[2px] transition-all"
                 disabled={selectedMeals.length === 0}
               >
-                Use Selected Meals
+                Use Selected
               </button>
             </div>
           </div>
@@ -357,7 +359,14 @@ function AISuggestionModal({
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[70]">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col">
               <div className="flex justify-between items-center p-6 border-b">
-                <h3 className="text-xl font-semibold">Choose Replacement Recipe</h3>
+                <div>
+                  <h3 className="text-h3 font-heading font-black text-text-primary">Choose Replacement Recipe</h3>
+                  {selectedSet && swapIndex !== null && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Replacing: {selectedSet.meals[swapIndex]?.recipe?.name}
+                    </p>
+                  )}
+                </div>
                 <button
                   onClick={() => setSwapModalOpen(false)}
                   className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none"
@@ -378,17 +387,18 @@ function AISuggestionModal({
                       <div className="text-xs">
                         <CategorizedTags recipe={recipe} />
                       </div>
-                      {recipe.url && (
-                        <a
-                          href={recipe.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-green-600 hover:text-green-800 inline-block mt-1"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          View Recipe →
-                        </a>
-                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (setSidebarRecipe) {
+                            setSidebarRecipe(recipe)
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-xs border-2 border-black text-black rounded px-2 py-1 mt-1 hover:bg-gray-50 transition-colors"
+                      >
+                        View Recipe
+                        <span className="material-symbols-rounded text-sm">arrow_forward</span>
+                      </button>
                     </div>
                   ))}
                 </div>

@@ -4,7 +4,7 @@ import { recipeService } from '../database/recipeService.js'
 class ClaudeAiService {
   constructor() {
     this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:3002'
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:3001'
     this.apiUrl = `${apiBase}/api/claude`
     this.model = 'claude-3-5-sonnet-20241022'
     this.maxTokens = 1024
@@ -627,8 +627,8 @@ Available recipes: ${validRecipes.slice(0, 50).map(r => r.name).join(', ')}`
       const allRecipes = await recipeService.getAll()
       console.log(`📋 Found ${allRecipes.length} total recipes`)
       
-      const validRecipes = this.filterByDietaryRestrictions(allRecipes)
-      console.log(`✅ Found ${validRecipes.length} valid recipes after dietary filtering`)
+      const validRecipes = allRecipes // Use all recipes (no dietary restrictions)
+      console.log(`✅ Found ${validRecipes.length} valid recipes`)
 
       if (validRecipes.length === 0) {
         console.log('❌ No valid recipes available for fallback')

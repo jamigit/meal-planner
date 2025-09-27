@@ -165,7 +165,7 @@ function SavePlanTransition({ isVisible, onComplete, message = "Well done!" }) {
 
             {/* Main message - appears after wipe */}
             <motion.h1
-              className="text-6xl font-bold text-white mb-4 font-heading drop-shadow-lg"
+              className="text-6xl font-black text-white mb-4 font-heading drop-shadow-lg"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.5, duration: 0.8 }}

@@ -1,21 +1,32 @@
 import React from 'react'
+import { joinClasses, typography } from '../../utils/designSystem'
 
-const sizes = {
-  'display-1': 'text-display-1',
-  'display-2': 'text-display-2',
-  'display-3': 'text-display-3',
-  'h1': 'text-4xl md:text-5xl',
-  'h2': 'text-3xl md:text-4xl',
-  'h3': 'text-2xl md:text-3xl',
-  'h4': 'text-xl md:text-2xl'
+const headingSizes = {
+  'display-1': typography.display[1],
+  'display-2': typography.display[2],
+  'display-3': typography.display[3],
+  'heading-xl': typography.heading.xl,
+  'heading-lg': typography.heading.lg,
+  'heading-md': typography.heading.md,
+  'heading-sm': typography.heading.sm,
+  // Backward compatibility
+  'h1': typography.display[1],
+  'h2': typography.display[2],
+  'h3': typography.heading.xl,
+  'h4': typography.heading.lg
 }
 
 export default function Heading({ as = 'h2', size = 'display-2', uppercase = true, className, children }) {
   const Component = as
-  const base = 'font-heading font-black tracking-tight'
+  const base = 'tracking-tight'
+  const sizeClass = headingSizes[size] || typography.heading.lg
   const transform = uppercase ? 'uppercase' : ''
-  const cls = [base, sizes[size] || '', transform, className].filter(Boolean).join(' ')
-  return <Component className={cls}>{children}</Component>
+  
+  return (
+    <Component className={joinClasses(base, sizeClass, transform, className)}>
+      {children}
+    </Component>
+  )
 }
 
 

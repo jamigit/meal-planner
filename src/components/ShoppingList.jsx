@@ -84,7 +84,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-center">
           <div>
-            <h2 className="font-heading text-display-2 uppercase text-gray-900">Shopping List</h2>
+            <h2 className="font-heading text-display-2 uppercase text-text-primary">Shopping List</h2>
             {!loading && (
               <p className="text-gray-600 mt-1">
                 {getTotalItems()} items from {recipes?.length || 0} recipes
@@ -163,7 +163,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
                 // Recipe-based view
                 Object.entries(getRecipeBasedView()).map(([recipe, items]) => (
                   <div key={recipe} className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900 mb-3">{recipe}</h3>
+                    <h3 className="text-h5 font-heading font-black text-text-primary mb-3">{recipe}</h3>
                     <div className="space-y-1">
                       {items.map((item, index) => (
                         <div key={index} className="text-sm text-gray-700 flex">
@@ -181,7 +181,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
 
                   return (
                     <div key={category} className="bg-gray-50 rounded-lg p-4">
-                      <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <h3 className="text-h5 font-heading font-black text-text-primary mb-3 flex items-center">
                         <span className="mr-2">{getCategoryIcon(category)}</span>
                         {category}
                         <span className="ml-2 text-sm font-normal text-gray-500">

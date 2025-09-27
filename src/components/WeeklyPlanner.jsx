@@ -73,21 +73,43 @@ function WeeklyPlanner() {
     const loadCurrentPlan = async () => {
       console.log('🔄 Loading current plan...')
       const weeklyPlanService = await serviceSelector.getWeeklyPlanService()
+      const recipeService = await serviceSelector.getRecipeService()
       const currentPlan = await weeklyPlanService.getCurrentWithRecipes()
       console.log('📋 Current plan found:', currentPlan)
       
       if (currentPlan) {
+        // Get all available recipes to validate meal IDs
+        const allRecipes = await recipeService.getAll()
+        const validRecipeIds = allRecipes.map(r => r.id)
+        
+        // Filter out any meals that no longer exist in the database
+        const validMeals = (currentPlan.meals || []).filter(meal => {
+          const isValid = validRecipeIds.includes(meal.id)
+          if (!isValid) {
+            console.warn('⚠️ Removing orphaned meal from plan:', { id: meal.id, name: meal.name })
+          }
+          return isValid
+        })
+        
         // Ensure each meal has a scaling factor
-        const mealsWithScaling = (currentPlan.meals || []).map(meal => ({
+        const mealsWithScaling = validMeals.map(meal => ({
           ...meal,
           scaling: meal.scaling || 1
         }))
+        
         console.log('🍽️ Setting meals:', mealsWithScaling)
         setWeeklyPlan({
           meals: mealsWithScaling,
-          notes: currentPlan.notes || ''
+          notes: currentPlan.notes || '',
+          name: currentPlan.name || ''
         })
         setCurrentPlanId(currentPlan.id)
+        
+        // If we removed orphaned meals, save the cleaned plan
+        if (validMeals.length < (currentPlan.meals || []).length) {
+          console.log('🧹 Cleaning up orphaned meals and saving plan...')
+          // Note: We'll let the user save manually to avoid auto-saves
+        }
       } else {
         console.log('❌ No current plan found')
       }
@@ -396,7 +418,7 @@ function WeeklyPlanner() {
       <img
         src="/images/kiwi-hero.png"
         alt="Kiwi hero"
-        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-0 max-[500px]:-right-20 md:-right-20 w-72 h-72 md:w-96 md:h-96 object-contain transform -scale-x-100 z-[-1]"
+        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-4 max-[500px]:right-2 md:-right-10 w-60 max-[500px]:w-48 h-60 max-[500px]:h-48 md:w-80 md:h-80 object-contain transform -scale-x-100 z-[-1]"
       />
       <div className="mt-16 mb-10 relative z-10">
         <h2 className="font-heading text-display-2 uppercase text-black">
@@ -406,7 +428,7 @@ function WeeklyPlanner() {
 
       {/* AI Suggestion Section */}
       <div className="card mb-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><span className="material-symbols-rounded text-[28px]">robot_2</span> AI-Powered Meal Suggestions</h3>
+        <h3 className="text-h3 font-heading font-black mb-4 flex items-center gap-2"><span className="material-symbols-rounded text-[28px]">robot_2</span> AI-Powered Meal Suggestions</h3>
         <p className="text-black mb-4">
           Get personalized meal recommendations based on your history and preferences
         </p>
@@ -551,7 +573,7 @@ function WeeklyPlanner() {
       {/* Selected Meals and Shopping List Section - Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="card">
-          <h3 className="text-lg font-semibold mb-4">
+          <h3 className="text-h5 font-heading font-black mb-4">
             {weeklyPlan.name ? `${weeklyPlan.name} - Selected Meals` : 'Selected Meals'}
           </h3>
           {weeklyPlan.meals.length === 0 ? (
@@ -573,7 +595,7 @@ function WeeklyPlanner() {
                   >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h4 className="font-black text-[20px]">{meal.name}</h4>
+                      <h4 className="text-h5 md:text-h4 font-heading font-black">{meal.name}</h4>
                       {mealEatenCounts[meal.id] !== undefined && (
                         <div className="text-sm text-black mt-1">
                           Eaten {mealEatenCounts[meal.id]} times in last 8 weeks
@@ -655,7 +677,7 @@ function WeeklyPlanner() {
 
       {/* Notes Section - Full Width */}
       <div className="card mb-6">
-        <h3 className="text-lg font-semibold mb-4">Notes</h3>
+        <h3 className="text-h5 font-heading font-black mb-4">Notes</h3>
         <textarea
           value={weeklyPlan.notes}
           onChange={(e) => setWeeklyPlan(prev => ({ ...prev, notes: e.target.value }))}
@@ -666,7 +688,7 @@ function WeeklyPlanner() {
 
       {/* Meal Plan Name Section - Full Width */}
       <div className="card">
-        <h3 className="text-lg font-semibold mb-4">Meal Plan Name (Optional)</h3>
+        <h3 className="text-h5 font-heading font-black mb-4">Meal Plan Name (Optional)</h3>
         <p className="text-black mb-4">
           Give your meal plan a custom name. If left blank, it will use a default name with the creation date.
         </p>
@@ -683,7 +705,12 @@ function WeeklyPlanner() {
         isOpen={isRecipeSelectorOpen}
         onClose={() => setIsRecipeSelectorOpen(false)}
         onSelectRecipes={handleSelectRecipes}
-        selectedMealIds={weeklyPlan.meals.map(meal => meal.id).filter(Boolean)}
+        selectedMealIds={(() => {
+          const mealIds = weeklyPlan.meals.map(meal => meal.id).filter(Boolean)
+          console.log('🔍 WeeklyPlanner: passing selectedMealIds:', mealIds)
+          console.log('🔍 WeeklyPlanner: current weeklyPlan.meals:', weeklyPlan.meals.map(m => ({ id: m.id, name: m.name })))
+          return mealIds
+        })()}
       />
 
       <AISuggestionModal
@@ -693,15 +720,16 @@ function WeeklyPlanner() {
         onSelectMeals={handleSelectAIMeals}
         isLoading={isLoadingAI}
         error={aiError}
+        setSidebarRecipe={setSidebarRecipe}
       />
 
       {/* Save Plan Buttons at Bottom */}
-      <div className="mt-8 text-center space-x-4">
+      <div className="mt-8 flex justify-center space-x-4">
         <button onClick={handleSavePlan} className="btn-tertiary">
-          Save Plan Only
+          Save
         </button>
         <button onClick={handleSavePlanWithEmail} className="btn-primary">
-          Save & Email Plan
+          Save and Email
         </button>
       </div>
 
@@ -739,7 +767,7 @@ function WeeklyPlanner() {
           {/* Fixed Header */}
           <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
             <div className="flex justify-between items-center">
-              <h3 className="!text-[32px] font-semibold text-black">Recipe Details</h3>
+              <h3 className="text-h3 font-heading font-black text-text-primary">Recipe Details</h3>
               <button
                 onClick={() => setSidebarRecipe(null)}
                 className="btn-outline-black-sm flex items-center gap-2"

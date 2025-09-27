@@ -312,7 +312,7 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
             {/* Fixed Header */}
             <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
               <div className="flex justify-between items-center">
-                <h2 className="!text-[32px] font-semibold text-gray-900">
+                <h2 className="text-h3 font-heading font-black text-text-primary">
                   {recipe ? 'Edit Recipe' : 'Add New Recipe'}
                 </h2>
                 <button

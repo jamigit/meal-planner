@@ -245,7 +245,7 @@ function BulkRecipeScraper({ isOpen, onClose }) {
         {/* Header */}
         <div className="px-6 py-4 border-b">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-h2 font-heading font-black text-text-primary">
               🤖 Bulk Recipe Processor
             </h2>
             <button

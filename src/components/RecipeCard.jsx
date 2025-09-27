@@ -22,7 +22,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold flex-1">{recipe.name}</h3>
+        <h3 className="text-h5 font-heading font-black text-text-primary flex-1">{recipe.name}</h3>
         <div className="flex space-x-2 ml-4">
           {onEdit && (
             <button
@@ -98,7 +98,7 @@ function RecipeCard({ recipe, onEdit, onDelete, showDetails = false }) {
               {/* Ingredients */}
               {recipe.ingredients?.length > 0 && (
                 <div>
-                  <h4 className="font-semibold text-black mb-2">Ingredients</h4>
+                  <h4 className="text-h6 font-heading font-black text-text-primary mb-2">Ingredients</h4>
                   <ul className="space-y-1">
                     {recipe.ingredients.map((ingredient, index) => (
                       <li key={index} className="text-sm text-black flex">

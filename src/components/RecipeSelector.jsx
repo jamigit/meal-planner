@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { serviceSelector } from '../services/serviceSelector.js'
 import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
 import CategorizedTags from './CategorizedTags'
+import { getRecipeSelectionClasses, getTagFilterClasses, getModalClasses } from '../utils/colorMigration'
+import { joinClasses, colors, typography } from '../utils/designSystem'
 
 function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
@@ -10,6 +12,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   const [selectedTag, setSelectedTag] = useState('')
   const [eatenCounts, setEatenCounts] = useState({})
   const [isTagFilterExpanded, setIsTagFilterExpanded] = useState(false)
+  const [showOnlySelected, setShowOnlySelected] = useState(false)
   // Removed expandedRecipeTags state as we're using CategorizedTags component now
 
   useEffect(() => {
@@ -27,12 +30,26 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
         setEatenCounts(counts)
 
         // Clear selection first, then pre-select if needed
+        console.log('🔍 RecipeSelector: selectedMealIds prop:', selectedMealIds)
+        console.log('🔍 RecipeSelector: allRecipes count:', allRecipes.length)
+        console.log('🔍 RecipeSelector: all recipe IDs in database:', allRecipes.map(r => r.id))
+        
         if (selectedMealIds && selectedMealIds.length > 0) {
           const alreadySelected = allRecipes.filter(recipe =>
             selectedMealIds.includes(recipe.id)
           )
+          console.log('🔍 RecipeSelector: found alreadySelected:', alreadySelected.map(r => ({ id: r.id, name: r.name })))
+          
+          // Check for missing recipes
+          const foundIds = alreadySelected.map(r => r.id)
+          const missingIds = selectedMealIds.filter(id => !foundIds.includes(id))
+          if (missingIds.length > 0) {
+            console.warn('⚠️ RecipeSelector: Missing recipes with IDs:', missingIds)
+          }
+          
           setSelectedRecipes(alreadySelected)
         } else {
+          console.log('🔍 RecipeSelector: no selectedMealIds, clearing selection')
           setSelectedRecipes([])
         }
       }
@@ -70,6 +87,11 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
   }
 
   const filteredRecipes = recipes.filter(recipe => {
+    // First check if we should only show selected recipes
+    if (showOnlySelected) {
+      return selectedRecipes.some(r => r.id === recipe.id)
+    }
+
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
 
     if (!selectedTag) return matchesSearch
@@ -111,29 +133,58 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
   if (!isOpen) return null
 
+  const modalClasses = getModalClasses()
+  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-      <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="font-heading text-[32px] uppercase">Select Meals ({selectedRecipes.length}/4)</h2>
+    <div className={joinClasses('fixed inset-0 flex items-center justify-center z-[60] p-4', modalClasses.overlay)}>
+      <div className="bg-white rounded-lg shadow-modal p-4 max-w-4xl w-full h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-h3 font-heading font-black text-text-primary uppercase">
+            Select Meals ({selectedRecipes.length}/4)
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="inline-flex items-center gap-2 rounded border-2 border-border-primary text-text-primary bg-white hover:bg-state-hover text-sm px-3 py-1"
           >
-            ×
+            Close
           </button>
+        </div>
+
+        {/* View Toggle */}
+        <div className="mb-4">
+          <div className="inline-flex items-center rounded-full border-2 border-border-primary overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowOnlySelected(false)}
+              className={`px-4 py-2 text-sm font-medium w-32 ${
+                !showOnlySelected ? 'bg-text-primary text-text-inverse' : 'bg-white text-text-primary'
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowOnlySelected(true)}
+              className={`px-4 py-2 text-sm font-medium border-l-2 border-border-primary w-32 ${
+                showOnlySelected ? 'bg-text-primary text-text-inverse' : 'bg-white text-text-primary'
+              }`}
+            >
+              Selected ({selectedRecipes.length})
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
         <div className="overflow-y-auto flex-1 mb-6">
-          {/* Search and Filter */}
-          <div className="mb-6 space-y-4">
+          {/* Search and Filter - only show when not filtering by selected */}
+          {!showOnlySelected && (
+            <div className="mb-6 space-y-4">
             <input
               type="text"
               placeholder="Search recipes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border-2 border-border-secondary rounded-lg focus:ring-2 focus:ring-state-focus focus:border-transparent text-text-primary placeholder:text-text-tertiary"
             />
 
             {/* Filter Accordion */}
@@ -141,7 +192,7 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
               {/* Filter Toggle Button */}
               <button
                 onClick={() => setIsTagFilterExpanded(!isTagFilterExpanded)}
-                className="w-full flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black mb-2 hover:bg-gray-50 transition-colors font-tag border-2 border-black"
+                className="w-full flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-text-primary mb-2 hover:bg-state-hover transition-colors font-tag border-2 border-border-primary"
               >
                 <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
                 <span className="material-symbols-rounded text-[20px]">{isTagFilterExpanded ? 'expand_less' : 'expand_more'}</span>
@@ -149,16 +200,17 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
               {/* Categorized Tag Filters - Collapsible */}
               {isTagFilterExpanded && (
-                <div className="space-y-3 p-4 border-2 border-black rounded-lg bg-white">
+                <div className="space-y-3 p-4 border-2 border-border-primary rounded-lg bg-white">
                   {/* All Tags Button */}
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedTag('')}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                      className={joinClasses(
+                        'px-4 py-2 rounded-lg text-sm font-medium',
                         !selectedTag
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                          ? 'bg-semantic-success text-text-inverse'
+                          : 'bg-state-disabled text-text-primary hover:bg-state-hover'
+                      )}
                     >
                       All Recipes ({recipes.length})
                     </button>
@@ -199,7 +251,8 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                 </div>
               )}
             </div>
-          </div>
+            </div>
+          )}
 
           {/* Recipe Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,19 +262,10 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
 
 
-              // More explicit class building
-              const baseClasses = 'border rounded-lg p-4 cursor-pointer transition-colors'
-              let specificClasses = ''
-
-              if (isSelected) {
-                specificClasses = 'bg-[rgb(22,163,74)] text-white'
-              } else if (canSelect) {
-                specificClasses = 'border-gray-200 hover:border-gray-300 bg-white'
-              } else {
-                specificClasses = 'border-gray-100 bg-gray-50 cursor-not-allowed'
-              }
-
-              const cardClasses = `${baseClasses} ${specificClasses}`
+              // Use design system classes for recipe selection - reduced padding for mobile
+              const baseClasses = 'border rounded-lg p-3 md:p-4 cursor-pointer transition-colors'
+              const specificClasses = getRecipeSelectionClasses(isSelected, canSelect)
+              const cardClasses = joinClasses(baseClasses, specificClasses)
 
               return (
                 <div
@@ -231,17 +275,23 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h3 className={`font-semibold ${!canSelect ? 'text-gray-400' : ''}`}>
+                      <h3 className={joinClasses(
+                        'text-sm md:text-base font-medium',
+                        !canSelect ? colors.text.tertiary : isSelected ? colors.text.inverse : colors.text.primary
+                      )}>
                         {recipe.name}
                       </h3>
                       {eatenCounts[recipe.id] !== undefined && (
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className={joinClasses(
+                          'text-xs md:text-sm mt-1',
+                          isSelected ? colors.text.inverse : colors.text.secondary
+                        )}>
                           Eaten {eatenCounts[recipe.id]} times in last 8 weeks
                         </div>
                       )}
                     </div>
                     {isSelected && (
-                      <span className="text-white text-xl">✓</span>
+                      <span className={joinClasses(colors.text.inverse, 'text-xl')}>✓</span>
                     )}
                   </div>
 
@@ -250,15 +300,17 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
                       href={recipe.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-green-700 hover:text-green-800 text-sm inline-block mb-2"
+                      className={joinClasses(
+                        'text-xs md:text-sm inline-block mb-2',
+                        isSelected ? colors.text.inverse : 'text-semantic-success hover:text-semantic-success-light'
+                      )}
                       onClick={(e) => e.stopPropagation()}
                     >
                       View Recipe →
                     </a>
                   )}
 
-                  {/* Categorized Tags */}
-                  <CategorizedTags recipe={recipe} />
+                  {/* Tags hidden for cleaner mobile view */}
                 </div>
               )
             })}
@@ -266,11 +318,11 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4 flex-shrink-0 pt-4 border-t border-gray-200">
-          <button onClick={onClose} className="btn-secondary">
+        <div className={joinClasses('flex justify-end space-x-4 flex-shrink-0 pt-4', modalClasses.footer)}>
+          <button onClick={onClose} className="btn-primary">
             Cancel
           </button>
-          <button onClick={handleSave} className="btn-primary">
+          <button onClick={handleSave} className="btn-secondary">
             Save Selection ({selectedRecipes.length} meals)
           </button>
         </div>
