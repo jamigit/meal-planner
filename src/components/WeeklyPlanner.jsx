@@ -38,7 +38,7 @@ function WeeklyPlanner() {
     spiceItUp: false,
     more: false
   })
-  const [weekPreferences, setWeekPreferences] = useState('')
+  const [aiNotes, setAiNotes] = useState('')
 
 
   // Shopping list state
@@ -330,8 +330,8 @@ function WeeklyPlanner() {
     setAISuggestions([])
 
     try {
-      console.log('🤖 Requesting AI suggestions with preferences:', weekPreferences, 'toggles:', aiToggles)
-      const result = await claudeAiService.generateMealSuggestions(weekPreferences, aiToggles)
+      console.log('🤖 Requesting AI suggestions with notes:', aiNotes, 'toggles:', aiToggles)
+      const result = await claudeAiService.generateMealSuggestions(aiNotes, aiToggles)
       console.log('📋 AI service result:', result)
 
       if (result.success) {
@@ -435,14 +435,17 @@ function WeeklyPlanner() {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-black mb-2">
-            Weekly Preferences (optional)
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-rounded text-[18px]">kitchen</span>
+              Ingredients & Preferences
+            </span>
           </label>
           <textarea
-            value={weekPreferences}
-            onChange={(e) => setWeekPreferences(e.target.value)}
+            value={aiNotes}
+            onChange={(e) => setAiNotes(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            rows="3"
-            placeholder="Any preferences for this week? (e.g., 'feeling like healthy meals', 'have chicken in fridge', 'want something quick')"
+            rows="4"
+            placeholder="Tell the AI about ingredients you have and any preferences. Examples:&#10;• 'I have chicken breast, bell peppers, rice, and onions'&#10;• 'Want something quick and healthy'&#10;• 'Have leftover pasta, feeling like Italian food'"
           />
         </div>
 

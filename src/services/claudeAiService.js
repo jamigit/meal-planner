@@ -129,11 +129,13 @@ class ClaudeAiService {
     if (toggles.spiceItUp) prefs.push('bold')
     
     const prefText = prefs.length ? ` Prefer: ${prefs.join(', ')}.` : ''
-    const notesText = userNotes ? ` ${userNotes.slice(0, 50)}` : '' // Limit user notes
+    const notesText = userNotes ? ` User notes: ${userNotes.slice(0, 150)}.` : '' // Increased limit for combined notes
+    const randomSeed = Math.floor(Math.random() * 1000) // Add randomness for fresh suggestions
 
-    // Optimized prompt with clear meal count requirements
-    return `Create 3 meal plans from: ${recipeNames.join(', ')}.
+    // Optimized prompt with clear meal count requirements and randomness
+    return `Create 3 diverse meal plans from: ${recipeNames.join(', ')}.
 Avoid: ${recentNames.join(', ') || 'none'}.${prefText}${notesText}
+Random seed: ${randomSeed}. Generate creative, varied combinations each time.
 
 IMPORTANT: Each meal plan must have exactly 4 meals.
 
@@ -423,6 +425,9 @@ Return 3 plans with 4 meals each.`
         }
       }
 
+      // Clear cache for fresh suggestions each time
+      this.cache.clear()
+      
       // Create prompt for Claude
       const promptStartTime = performance.now()
       const prompt = this.createMealSuggestionPrompt(
