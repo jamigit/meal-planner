@@ -12,6 +12,7 @@ import { AccessibilityProvider } from './components/AccessibilityComponents.jsx'
 import Navigation from './components/Navigation'
 import RecipeList from './components/RecipeList'
 import WeeklyPlanner from './components/WeeklyPlanner'
+import MealPlannerV2 from './components/MealPlannerV2'
 import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
@@ -100,6 +101,17 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <MealHistory />
+              </motion.div>
+            } />
+            <Route path="/meal-planner-v2" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <MealPlannerV2 />
               </motion.div>
             } />
             <Route path="/styleguide" element={

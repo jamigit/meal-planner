@@ -1,0 +1,248 @@
+import React, { useState, useEffect, useCallback } from 'react'
+import { recipeService } from '../database/recipeService.js'
+import { debounce } from '../utils/performance.js'
+
+export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMealIds = [] }) {
+  const [recipes, setRecipes] = useState([])
+  const [filteredRecipes, setFilteredRecipes] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCuisine, setSelectedCuisine] = useState('')
+  const [selectedTag, setSelectedTag] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Load recipes when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadRecipes()
+    }
+  }, [isOpen])
+
+  // Filter recipes when search term or filters change
+  useEffect(() => {
+    filterRecipes()
+  }, [recipes, searchTerm, selectedCuisine, selectedTag])
+
+  const loadRecipes = async () => {
+    setIsLoading(true)
+    try {
+      const allRecipes = await recipeService.getAll()
+      setRecipes(allRecipes)
+    } catch (error) {
+      console.error('Failed to load recipes:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filterRecipes = useCallback(() => {
+    let filtered = recipes
+
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      filtered = filtered.filter(recipe =>
+        recipe.name.toLowerCase().includes(term) ||
+        recipe.ingredients?.some(ing => ing.toLowerCase().includes(term)) ||
+        recipe.tags?.some(tag => tag.toLowerCase().includes(term))
+      )
+    }
+
+    // Filter by cuisine
+    if (selectedCuisine) {
+      filtered = filtered.filter(recipe =>
+        recipe.cuisine_tags?.includes(selectedCuisine)
+      )
+    }
+
+    // Filter by tag
+    if (selectedTag) {
+      filtered = filtered.filter(recipe =>
+        recipe.ingredient_tags?.includes(selectedTag) ||
+        recipe.convenience_tags?.includes(selectedTag) ||
+        recipe.tags?.includes(selectedTag)
+      )
+    }
+
+    setFilteredRecipes(filtered)
+  }, [recipes, searchTerm, selectedCuisine, selectedTag])
+
+  // Debounced search
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      setSearchTerm(term)
+    }, 300),
+    []
+  )
+
+  const handleSearchChange = (e) => {
+    debouncedSearch(e.target.value)
+  }
+
+  const handleAddMeal = (recipe) => {
+    onAddMeal(recipe)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose()
+    }
+  }
+
+  // Get unique cuisines and tags for filter dropdowns
+  const cuisines = [...new Set(recipes.flatMap(r => r.cuisine_tags || []))].sort()
+  const tags = [...new Set([
+    ...recipes.flatMap(r => r.ingredient_tags || []),
+    ...recipes.flatMap(r => r.convenience_tags || []),
+    ...recipes.flatMap(r => r.tags || [])
+  ])].sort()
+
+  if (!isOpen) return null
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
+    >
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900">Browse All Recipes</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
+            aria-label="Close modal"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="p-6 border-b border-gray-200 bg-gray-50">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+                Search Recipes
+              </label>
+              <input
+                id="search"
+                type="text"
+                placeholder="Search by name, ingredients, or tags..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={handleSearchChange}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Cuisine
+              </label>
+              <select
+                id="cuisine"
+                value={selectedCuisine}
+                onChange={(e) => setSelectedCuisine(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Cuisines</option>
+                {cuisines.map(cuisine => (
+                  <option key={cuisine} value={cuisine}>{cuisine}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="tag" className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Tag
+              </label>
+              <select
+                id="tag"
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Tags</option>
+                {tags.map(tag => (
+                  <option key={tag} value={tag}>{tag}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading recipes...</p>
+            </div>
+          ) : filteredRecipes.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="text-4xl mb-4">🔍</div>
+              <h3 className="text-lg font-medium mb-2">No recipes found</h3>
+              <p>Try adjusting your search terms or filters</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRecipes.map((recipe) => {
+                const isSelected = selectedMealIds.includes(recipe.id)
+                return (
+                  <div key={recipe.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 className="font-semibold text-gray-900 mb-2">{recipe.name}</h3>
+                    
+                    <div className="text-sm text-gray-600 mb-3">
+                      {recipe.cuisine_tags?.length > 0 && (
+                        <div className="mb-1">
+                          <span className="font-medium">Cuisine:</span> {recipe.cuisine_tags.join(', ')}
+                        </div>
+                      )}
+                      {recipe.ingredient_tags?.length > 0 && (
+                        <div className="mb-1">
+                          <span className="font-medium">Tags:</span> {recipe.ingredient_tags.slice(0, 3).join(', ')}
+                        </div>
+                      )}
+                      {recipe.prep_time && (
+                        <div className="mb-1">
+                          <span className="font-medium">Prep:</span> {recipe.prep_time} min
+                        </div>
+                      )}
+                      {recipe.cook_time && (
+                        <div className="mb-1">
+                          <span className="font-medium">Cook:</span> {recipe.cook_time} min
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button
+                      onClick={() => handleAddMeal(recipe)}
+                      disabled={isSelected}
+                      className={`w-full px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                      }`}
+                    >
+                      {isSelected ? 'Already Added' : 'Add to Plan'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

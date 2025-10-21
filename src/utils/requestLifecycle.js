@@ -5,6 +5,8 @@
  * and memory leak prevention for async operations.
  */
 
+import React from 'react'
+
 /**
  * Request manager for handling request lifecycle
  */

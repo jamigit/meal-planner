@@ -5,6 +5,8 @@
  * including different types of loading states and state management.
  */
 
+import React from 'react'
+
 /**
  * Loading state types
  */

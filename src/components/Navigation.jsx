@@ -13,7 +13,7 @@ function Navigation() {
     await signOut()
   }
 
-  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history'
+  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/meal-planner-v2'
 
   // Close more menu when screen size changes
   useEffect(() => {
@@ -129,6 +129,22 @@ function Navigation() {
                 </span>
                 <span>History</span>
               </Link>
+              <Link
+                to="/meal-planner-v2"
+                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
+                  location.pathname === '/meal-planner-v2'
+                    ? 'bg-white/10 text-white'
+                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
+                }`}
+                onClick={() => setIsMoreMenuOpen(false)}
+              >
+                <span className="mr-2" aria-hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                </span>
+                <span>AI Planner</span>
+              </Link>
             </div>
           </div>
         )}
@@ -182,6 +198,21 @@ function Navigation() {
               </svg>
             </span>
             <span>Recipes</span>
+          </Link>
+
+          {/* AI Planner (show until viewport < 400px) */}
+          <Link
+            to="/meal-planner-v2"
+            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
+              location.pathname === '/meal-planner-v2' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="mb-1" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </span>
+            <span>AI Planner</span>
           </Link>
 
           {/* History (show until viewport < 400px) */}

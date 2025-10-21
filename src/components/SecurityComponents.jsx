@@ -434,15 +434,13 @@ export function LoginAttemptTracker({
  * @returns {JSX.Element}
  */
 export function SecurityHeaders({ 
-  contentSecurityPolicy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
-  xFrameOptions = 'DENY',
+  contentSecurityPolicy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://*.netlify.app https://*.netlify.com http://localhost:* ws://localhost:*; img-src 'self' data: https:; font-src 'self' data:;",
   xContentTypeOptions = 'nosniff',
   referrerPolicy = 'strict-origin-when-cross-origin'
 }) {
   return (
     <>
       <meta httpEquiv="Content-Security-Policy" content={contentSecurityPolicy} />
-      <meta httpEquiv="X-Frame-Options" content={xFrameOptions} />
       <meta httpEquiv="X-Content-Type-Options" content={xContentTypeOptions} />
       <meta name="referrer-policy" content={referrerPolicy} />
     </>
