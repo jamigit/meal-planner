@@ -2,7 +2,7 @@ export async function scrapeRecipeFromUrl(url, signal) {
   if (!url || typeof url !== 'string') {
     throw new Error('URL required')
   }
-  const apiBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:3002'
+  const apiBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:3001'
   const res = await fetch(`${apiBase}/api/scrape-recipe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
