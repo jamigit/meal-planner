@@ -6,8 +6,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useLoadingState } from './loadingStates.js'
-import { normalizeError, logError } from './errorHandling.js'
+import { useLoadingState } from '../utils/loadingStates.js'
+import { normalizeError, logError } from '../utils/errorHandling.js'
+import { useRequestLifecycle, useMemoryLeakPrevention } from '../utils/requestLifecycle.js'
 
 /**
  * Hook for async service operations with automatic error handling and loading states

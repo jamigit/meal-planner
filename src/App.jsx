@@ -5,6 +5,10 @@ import { isSupabaseConfigured } from './lib/supabase.js'
 import { ErrorBoundary, withErrorBoundary } from './components/ErrorBoundary.jsx'
 import { LoadingProvider } from './components/LoadingComponents.jsx'
 import { GlobalLoadingIndicator } from './components/LoadingIndicators.jsx'
+import { SecurityHeaders } from './components/SecurityComponents.jsx'
+import { OptimisticUpdateProvider } from './components/OptimisticComponents.jsx'
+import { NetworkResilienceProvider } from './components/NetworkComponents.jsx'
+import { AccessibilityProvider } from './components/AccessibilityComponents.jsx'
 import Navigation from './components/Navigation'
 import RecipeList from './components/RecipeList'
 import WeeklyPlanner from './components/WeeklyPlanner'
@@ -149,12 +153,19 @@ function App() {
       fallbackMessage="Something went wrong with the meal planner. Please try refreshing the page."
       showDetails={process.env.NODE_ENV === 'development'}
     >
+      <SecurityHeaders />
       <LoadingProvider>
-        <AuthProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </AuthProvider>
+        <AccessibilityProvider enableSkipLinks={true} enableLiveRegions={true}>
+          <NetworkResilienceProvider showStatusIndicator={true} showOfflineBanner={true}>
+            <OptimisticUpdateProvider enableToasts={true} enableHistory={false}>
+              <AuthProvider>
+                <Router>
+                  <AppContent />
+                </Router>
+              </AuthProvider>
+            </OptimisticUpdateProvider>
+          </NetworkResilienceProvider>
+        </AccessibilityProvider>
       </LoadingProvider>
     </ErrorBoundary>
   )

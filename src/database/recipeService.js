@@ -1,6 +1,7 @@
 import { getDatabase } from './db.js'
 import { validateNumericField, validateArrayField, validateStringField } from '../utils/schemaValidation.js'
 import { withErrorHandling, createSuccessResponse, ERROR_CODES, ERROR_TYPES } from '../utils/errorHandling.js'
+import { validateRecipe } from '../utils/dataValidation.js'
 
 class RecipeService {
   constructor() {
@@ -51,29 +52,27 @@ class RecipeService {
   // Add new recipe
   async add(recipe) {
     try {
-      // Validate required fields
-      if (!recipe || typeof recipe !== 'object') {
-        throw new Error('Recipe data is required')
-      }
-      
-      const name = validateStringField(recipe.name, 'name', true)
-      if (!name) {
-        throw new Error('Recipe name is required')
+      // Validate recipe data using comprehensive validation
+      const validationResult = validateRecipe(recipe)
+      if (!validationResult.isValid) {
+        throw new Error(`Validation failed: ${validationResult.errors.join(', ')}`)
       }
 
+      const validatedRecipe = validationResult.data
       const now = new Date().toISOString()
+      
       const normalizedRecipe = {
-        name: name,
-        url: validateStringField(recipe.url, 'url', false),
-        tags: validateArrayField(recipe.tags, 'tags'),
-        cuisine_tags: validateArrayField(recipe.cuisine_tags, 'cuisine_tags'),
-        ingredient_tags: validateArrayField(recipe.ingredient_tags, 'ingredient_tags'),
-        convenience_tags: validateArrayField(recipe.convenience_tags, 'convenience_tags'),
-        ingredients: validateArrayField(recipe.ingredients, 'ingredients'),
-        instructions: validateArrayField(recipe.instructions, 'instructions'),
-        prep_time: validateNumericField(recipe.prep_time, 'prep_time'),
-        cook_time: validateNumericField(recipe.cook_time, 'cook_time'),
-        servings: validateNumericField(recipe.servings, 'servings'),
+        name: validatedRecipe.name,
+        url: validatedRecipe.url || null,
+        tags: validatedRecipe.tags || [],
+        cuisine_tags: validatedRecipe.cuisine_tags || [],
+        ingredient_tags: validatedRecipe.ingredient_tags || [],
+        convenience_tags: validatedRecipe.convenience_tags || [],
+        ingredients: validatedRecipe.ingredients || [],
+        instructions: validatedRecipe.instructions || [],
+        prep_time: validatedRecipe.prep_time || null,
+        cook_time: validatedRecipe.cook_time || null,
+        servings: validatedRecipe.servings || null,
         created_at: now,
         updated_at: now
       }

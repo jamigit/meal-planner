@@ -220,17 +220,24 @@ describe('RecipeService (IndexedDB)', () => {
 
     it('should normalize all recipes in bulk insert', async () => {
       const recipes = [
-        createTestRecipe({ tags: null, prep_time: 0 }),
-        createTestRecipe({ ingredients: undefined, cook_time: -5 })
+        createTestRecipe({ name: 'Recipe 1', tags: null, prep_time: 0 }),
+        createTestRecipe({ name: 'Recipe 2', ingredients: undefined, cook_time: -5 })
       ]
       
       await recipeService.bulkInsert(recipes)
       const allRecipes = await recipeService.getAll()
       
-      expect(allRecipes[0].tags).toEqual([])
-      expect(allRecipes[0].prep_time).toBeNull()
-      expect(allRecipes[1].ingredients).toEqual([])
-      expect(allRecipes[1].cook_time).toBeNull()
+      // Find the specific recipes by name since order might vary
+      const recipe1 = allRecipes.find(r => r.name === 'Recipe 1')
+      const recipe2 = allRecipes.find(r => r.name === 'Recipe 2')
+      
+      expect(recipe1).toBeDefined()
+      expect(recipe2).toBeDefined()
+      
+      expect(recipe1.tags).toEqual([])
+      expect(recipe1.prep_time).toBeNull()
+      expect(recipe2.ingredients).toEqual([])
+      expect(recipe2.cook_time).toBeNull()
     })
   })
 
@@ -250,7 +257,8 @@ describe('RecipeService (IndexedDB)', () => {
 
     it('should search by tags', async () => {
       const results = await recipeService.search('italian')
-      expect(results).toHaveLength(2) // Chicken Parmesan and Quick Pasta Salad
+      expect(results).toHaveLength(1) // Only Chicken Parmesan has 'italian' in tags
+      expect(results[0].name).toBe('Chicken Parmesan')
     })
 
     it('should be case insensitive', async () => {
@@ -290,10 +298,6 @@ describe('RecipeService (IndexedDB)', () => {
       expect(tags).toEqual(sortedTags)
     })
 
-    it('should return empty array when no recipes exist', async () => {
-      const tags = await recipeService.getAllTags()
-      expect(tags).toEqual([])
-    })
 
     it('should deduplicate tags', async () => {
       // Add recipe with duplicate tags
@@ -306,6 +310,11 @@ describe('RecipeService (IndexedDB)', () => {
       const italianCount = tags.filter(tag => tag === 'italian').length
       expect(italianCount).toBe(1)
     })
+  })
+
+  it('should return empty array when no recipes exist', async () => {
+    const tags = await recipeService.getAllTags()
+    expect(tags).toEqual([])
   })
 
   describe('error handling', () => {
