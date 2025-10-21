@@ -31,7 +31,13 @@ CLAUDE_API_KEY=your_claude_api_key
 
 ## 4. Create Database Tables
 
-Run this SQL in your Supabase SQL Editor:
+**⚠️ Important**: If you already have an existing Supabase database, run the migration script first:
+```sql
+-- Run this migration if you have existing data
+-- See: supabase-migration-add-name.sql
+```
+
+Then run this SQL in your Supabase SQL Editor:
 
 ```sql
 -- Enable Row Level Security
@@ -64,6 +70,7 @@ CREATE TABLE weekly_plans (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   meals JSONB NOT NULL,
   notes TEXT,
+  name TEXT,
   is_current BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

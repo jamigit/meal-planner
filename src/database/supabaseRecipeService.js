@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase.js'
 import { authService } from '../services/authService.js'
+import { validateNumericField, validateArrayField, validateStringField } from '../utils/schemaValidation.js'
 
 class SupabaseRecipeService {
   constructor() {
@@ -7,9 +8,13 @@ class SupabaseRecipeService {
   }
 
   async getUserId() {
-    const user = await authService.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-    return user.id
+    try {
+      const user = await authService.getCurrentUser()
+      if (!user) throw new Error('User not authenticated')
+      return user.id
+    } catch (error) {
+      throw new Error('User not authenticated')
+    }
   }
 
   // Get all recipes for current user
@@ -44,6 +49,10 @@ class SupabaseRecipeService {
       if (error) throw error
       return data
     } catch (error) {
+      // Re-throw authentication errors
+      if (error.message === 'User not authenticated') {
+        throw error
+      }
       console.error('Failed to get recipe by ID:', error)
       return null
     }
@@ -53,22 +62,31 @@ class SupabaseRecipeService {
   async add(recipe) {
     try {
       const userId = await this.getUserId()
+      
+      // Validate and normalize recipe data
+      const name = validateStringField(recipe.name, 'name', true)
+      if (!name) {
+        throw new Error('Recipe name is required')
+      }
+      
+      const normalizedRecipe = {
+        user_id: userId,
+        name: name,
+        url: validateStringField(recipe.url, 'url', false),
+        ingredients: validateArrayField(recipe.ingredients, 'ingredients'),
+        instructions: validateArrayField(recipe.instructions, 'instructions'),
+        prep_time: validateNumericField(recipe.prep_time, 'prep_time'),
+        cook_time: validateNumericField(recipe.cook_time, 'cook_time'),
+        servings: validateNumericField(recipe.servings, 'servings'),
+        cuisine_tags: validateArrayField(recipe.cuisine_tags, 'cuisine_tags'),
+        ingredient_tags: validateArrayField(recipe.ingredient_tags, 'ingredient_tags'),
+        convenience_tags: validateArrayField(recipe.convenience_tags, 'convenience_tags'),
+        tags: validateArrayField(recipe.tags, 'tags')
+      }
+      
       const { data, error } = await supabase
         .from(this.tableName)
-        .insert({
-          user_id: userId,
-          name: recipe.name,
-          url: recipe.url || null,
-          ingredients: recipe.ingredients || [],
-          instructions: recipe.instructions || [],
-          prep_time: recipe.prep_time || null,
-          cook_time: recipe.cook_time || null,
-          servings: recipe.servings || null,
-          cuisine_tags: recipe.cuisine_tags || [],
-          ingredient_tags: recipe.ingredient_tags || [],
-          convenience_tags: recipe.convenience_tags || [],
-          tags: recipe.tags || []
-        })
+        .insert(normalizedRecipe)
         .select()
         .single()
 
@@ -173,20 +191,29 @@ class SupabaseRecipeService {
   async bulkInsert(recipes) {
     try {
       const userId = await this.getUserId()
-      const recipesToInsert = recipes.map(recipe => ({
-        user_id: userId,
-        name: recipe.name,
-        url: recipe.url || null,
-        ingredients: recipe.ingredients || [],
-        instructions: recipe.instructions || [],
-        prep_time: recipe.prep_time || null,
-        cook_time: recipe.cook_time || null,
-        servings: recipe.servings || null,
-        cuisine_tags: recipe.cuisine_tags || [],
-        ingredient_tags: recipe.ingredient_tags || [],
-        convenience_tags: recipe.convenience_tags || [],
-        tags: recipe.tags || []
-      }))
+      
+      // Normalize all recipes before inserting
+      const recipesToInsert = recipes.map(recipe => {
+        const name = validateStringField(recipe.name, 'name', true)
+        if (!name) {
+          throw new Error(`Recipe name is required for recipe: ${JSON.stringify(recipe)}`)
+        }
+        
+        return {
+          user_id: userId,
+          name: name,
+          url: validateStringField(recipe.url, 'url', false),
+          ingredients: validateArrayField(recipe.ingredients, 'ingredients'),
+          instructions: validateArrayField(recipe.instructions, 'instructions'),
+          prep_time: validateNumericField(recipe.prep_time, 'prep_time'),
+          cook_time: validateNumericField(recipe.cook_time, 'cook_time'),
+          servings: validateNumericField(recipe.servings, 'servings'),
+          cuisine_tags: validateArrayField(recipe.cuisine_tags, 'cuisine_tags'),
+          ingredient_tags: validateArrayField(recipe.ingredient_tags, 'ingredient_tags'),
+          convenience_tags: validateArrayField(recipe.convenience_tags, 'convenience_tags'),
+          tags: validateArrayField(recipe.tags, 'tags')
+        }
+      })
 
       const { data, error } = await supabase
         .from(this.tableName)

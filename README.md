@@ -51,8 +51,8 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
   name: string,         // Recipe name
   url: string,          // Optional recipe URL
   tags: string[],       // Array of tags for filtering
-  createdAt: string,    // ISO timestamp
-  updatedAt: string     // ISO timestamp
+  created_at: string,   // ISO timestamp
+  updated_at: string    // ISO timestamp
 }
 ```
 
@@ -62,8 +62,9 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
   id: string,           // Unique identifier
   meals: Recipe[],      // Array of selected recipes (max 4)
   notes: string,        // Optional notes about preferences
-  isCurrent: boolean,   // Whether this is the active plan
-  createdAt: string     // ISO timestamp
+  name: string,         // Optional custom name for the plan
+  is_current: boolean,  // Whether this is the active plan
+  created_at: string    // ISO timestamp
 }
 ```
 
@@ -74,7 +75,7 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
   recipe_id: string,    // Reference to recipe
   week_date: string,    // YYYY-MM-DD (Monday of week)
   eaten_date: string,   // YYYY-MM-DD (actual consumption)
-  createdAt: string     // ISO timestamp
+  created_at: string    // ISO timestamp
 }
 ```
 
@@ -575,6 +576,396 @@ This is a personal project, but suggestions and improvements are welcome:
 - **Reliable**: Built on PostgreSQL with automatic backups
 - **Fast**: Real-time updates with minimal latency
 - **Maintainable**: No server management required
+
+## 🚨 Data Structure & Testing Status
+
+### Critical Issues Identified
+
+**Schema Inconsistencies Found:**
+- **Missing Field**: `name` column missing from Supabase `weekly_plans` table (data loss)
+- **Type Mismatch**: `is_current` uses integers (0/1) in IndexedDB vs booleans in Supabase
+- **Naming Convention**: Documentation shows `camelCase` but code uses `snake_case`
+- **Array Handling**: Different normalization between storage backends
+
+**Architecture Decision:**
+- **Dual Storage**: Keep both IndexedDB (dev/demo) + Supabase (production)
+- **Clear Separation**: IndexedDB = offline development, Supabase = authenticated production
+- **One-way Migration**: IndexedDB → Supabase only (no going back)
+
+### Testing Implementation Plan
+
+**Phase 1: Critical Bug Fixes (Highest Impact)**
+1. ✅ **Fix missing `name` field in Supabase weekly_plans table** - Migration script created
+2. ✅ **Fix `is_current` boolean type inconsistency** - IndexedDB now uses proper booleans
+3. ✅ **Fix documentation naming convention** - README examples updated to snake_case
+
+**Phase 2: Schema Validation (High Impact)**
+4. ✅ **Create shared schema definitions (JSDoc types)** - Canonical types defined
+5. ✅ **Add runtime schema validation** - Validation utilities implemented
+
+**Phase 3: Testing Infrastructure (Medium Impact)**
+6. ✅ **Setup Vitest testing framework** - Complete test environment configured
+7. ✅ **Create test fixtures and mock data** - Comprehensive test data created
+
+**Phase 4: Core Service Tests (Medium Impact)**
+8. ✅ **Unit tests for Recipe services (both IndexedDB + Supabase)** - Tests written, bugs discovered
+9. 🔄 **Unit tests for Weekly Plan services** - Next priority
+10. 🔄 **Unit tests for Meal History services** - Pending
+
+**Phase 5: Integration & Consistency (Lower Impact)**
+11. 🔵 **Integration tests for data flow**
+12. 🔵 **Service selector tests**
+13. 🔵 **Consistency validation between backends**
+
+**Phase 6: Edge Cases & Robustness (Lower Impact)**
+14. 🔵 **Data integrity tests**
+15. 🔵 **Error handling tests**
+16. 🔵 **Boundary condition tests**
+17. 🔵 **Performance benchmarks**
+
+**Phase 7: CI/CD Integration (Lowest Impact)**
+18. 🔵 **CI/CD pipeline integration**
+
+## 🎯 CRUD App Quality Checklist & Implementation Plan
+
+This section outlines a comprehensive checklist for building production-ready CRUD applications, prioritized by impact and implementation order.
+
+### Priority 1: Critical (App-Breaking if Missing)
+
+#### Error Handling
+- [ ] All API calls wrapped in try-catch blocks
+- [ ] Consistent error object structure across app: `{ success: boolean, data?: T, error?: Error }`
+- [ ] Handle different error types: network, 404, 500, auth, validation
+- [ ] Error boundaries for component-level React failures
+- [ ] User-friendly error messages (not raw error objects/stack traces)
+- [ ] Errors logged, never silently swallowed
+- [ ] Error tracking service integrated (Sentry, Rollbar, etc.)
+
+#### Loading States
+- [ ] Loading indicator for every async operation
+- [ ] Distinguish initial load vs. refresh/update states
+- [ ] Skeleton screens for content areas (not just spinners)
+- [ ] No blocking UI during background operations
+- [ ] Loading states don't prevent reading existing data
+
+#### Data Validation
+- [ ] Client-side validation before submission
+- [ ] Server-side validation (never trust client)
+- [ ] Type safety: TypeScript or PropTypes for all data shapes
+- [ ] Schema validation for API responses (Zod, Yup, io-ts)
+- [ ] Inline validation errors, not just on submit
+- [ ] Prevent invalid form submission (disable button)
+
+#### Request Lifecycle
+- [ ] Cancel pending requests on component unmount
+- [ ] Abort controllers for fetch/axios cancellation
+- [ ] No memory leaks from unresolved promises
+- [ ] Request deduplication (don't send identical concurrent requests)
+- [ ] Timeout for long-running requests (30s+)
+
+#### Security Basics
+- [ ] Input sanitization to prevent XSS
+- [ ] CSRF protection for all mutations
+- [ ] Auth tokens in httpOnly cookies (not localStorage)
+- [ ] Sanitize user-generated content before rendering
+- [ ] HTTPS for all API calls
+- [ ] Input length limits to prevent DOS
+- [ ] File upload validation (type, size) if applicable
+
+### Priority 2: Production-Ready
+
+#### State Management
+- [ ] Server state separated from UI state (React Query/SWR/TanStack)
+- [ ] Single source of truth for each piece of data
+- [ ] No data duplication across state locations
+- [ ] State lifted only as high as needed
+- [ ] Unidirectional data flow (props down, events up)
+
+#### Data Normalization
+- [ ] Nested data normalized to prevent duplication
+- [ ] Related entities stored by ID reference
+- [ ] Updates propagate correctly to all references
+
+```javascript
+// Good structure
+{
+  posts: { 1: { id: 1, authorId: 5 }, 2: { id: 2, authorId: 5 } },
+  users: { 5: { id: 5, name: "Jane" } }
+}
+```
+
+#### Empty States
+- [ ] Explicit empty state UI (not blank screens)
+- [ ] Empty states have helpful messaging/actions
+- [ ] Distinguish "loading" from "no data" from "error"
+- [ ] First-time user empty states guide next steps
+
+#### Optimistic Updates
+- [ ] UI updates immediately on user action
+- [ ] Rollback on server failure with error notification
+- [ ] Subtle sync indicator during server request
+- [ ] Handle race conditions with request IDs/timestamps
+
+```javascript
+async function deleteItem(id) {
+  const original = [...items];
+  setItems(items.filter(item => item.id !== id));
+  
+  try {
+    await api.delete(`/items/${id}`);
+  } catch (error) {
+    setItems(original); // Rollback
+    showError('Failed to delete');
+  }
+}
+```
+
+#### Network Resilience
+- [ ] Detect offline state and disable actions
+- [ ] Clear "offline" indicator shown to user
+- [ ] Auto-retry failed requests with exponential backoff
+- [ ] Show cached/stale data when offline (with indicator)
+- [ ] Handle 429 (rate limit) responses gracefully
+
+#### Concurrency Handling
+- [ ] Edit conflicts detected (two users editing same data)
+- [ ] ETags or version numbers for optimistic locking
+- [ ] Conflict resolution UI shown when detected
+- [ ] Clear strategy: last-write-wins vs. merge vs. user choice
+
+```javascript
+// Example with ETag
+async function updateItem(id, data, etag) {
+  const response = await api.put(`/items/${id}`, data, {
+    headers: { 'If-Match': etag }
+  });
+  
+  if (response.status === 412) {
+    // Conflict detected
+    showConflictResolutionUI();
+  }
+}
+```
+
+#### Idempotency
+- [ ] Operations safe to retry without duplicate effects
+- [ ] POST create checks for duplicates (unique constraint)
+- [ ] DELETE returns success even if already deleted
+- [ ] PUT/PATCH updates are replayable
+- [ ] Unique request IDs for deduplication if needed
+
+#### Testing
+- [ ] Unit tests for data transformation logic
+- [ ] Integration tests for API calls with mocked responses
+- [ ] Error scenarios explicitly tested
+- [ ] Race conditions and cleanup tested
+- [ ] Test coverage >70% for critical paths
+
+#### Logging & Monitoring
+- [ ] Different log levels: debug, info, warn, error
+- [ ] User actions logged for debugging
+- [ ] API performance tracked
+- [ ] Never log sensitive data (passwords, tokens, PII)
+- [ ] Structured logging (JSON format)
+
+### Priority 3: Quality User Experience
+
+#### Form Handling
+- [ ] Track dirty/pristine state
+- [ ] Warn before leaving with unsaved changes
+- [ ] Disable submit button during submission
+- [ ] Prevent double submission (debounce)
+- [ ] Field-level validation (not just form-level)
+- [ ] Async validation where needed (username availability)
+- [ ] Auto-save drafts (localStorage or server)
+- [ ] Clear form after successful submit (or redirect)
+
+#### CRUD Operation Patterns
+- [ ] Proper HTTP methods: GET, POST, PUT/PATCH, DELETE
+- [ ] RESTful or consistent endpoint naming
+- [ ] Standard response formats across endpoints
+- [ ] Proper status codes (200, 201, 204, 400, 404, 500)
+- [ ] Cache invalidation after mutations
+- [ ] List refreshed after creating new item
+- [ ] Detail views updated after edits
+
+#### Batch Operations
+- [ ] Select all/deselect all functionality
+- [ ] Progress indicators (3 of 10 completed)
+- [ ] Handle partial failures (show which items failed)
+- [ ] Allow canceling in-progress operations
+- [ ] Optimize with single API call when possible
+
+#### URL/Route State
+- [ ] Filters and search persisted in URL params
+- [ ] Shareable links with current view state
+- [ ] Back button restores previous state correctly
+- [ ] Deep linking to specific items/views works
+- [ ] URL synced with application state
+
+#### Soft Deletes & Undo
+- [ ] Important data uses soft delete (deletedAt timestamp)
+- [ ] Undo functionality for destructive actions
+- [ ] Time-limited undo window (30-60 seconds)
+- [ ] Undo notification shown after deletion
+- [ ] Permanent delete available for admins
+
+#### Audit Trail
+- [ ] Track who created/modified records
+- [ ] Timestamp all changes (createdAt, updatedAt)
+- [ ] Change log for important data
+- [ ] Creator/modifier fields (createdBy, updatedBy)
+
+#### Accessibility
+- [ ] All form inputs have associated labels
+- [ ] Error messages announced to screen readers (aria-live)
+- [ ] Loading states use aria-live regions
+- [ ] Full keyboard navigation
+- [ ] Focus management (after delete, modal close)
+- [ ] Semantic HTML (buttons, forms, headings)
+- [ ] Color contrast meets WCAG AA standards
+
+#### Performance Optimization
+- [ ] Virtualize long lists (>100 items) with react-window
+- [ ] Memoize expensive computations (useMemo, useCallback)
+- [ ] Debounce search/filter inputs (300-500ms)
+- [ ] Lazy load components and routes
+- [ ] Pagination or infinite scroll for large datasets
+- [ ] Prefetch on hover for predictive loading
+- [ ] Request cancellation for stale searches
+
+#### Data Fetching Patterns
+- [ ] Fetch data at component level where needed
+- [ ] Response caching to avoid redundant requests
+- [ ] Pagination implemented (don't load all data)
+- [ ] Stale-while-revalidate pattern for better UX
+- [ ] Background refresh for frequently accessed data
+
+### Priority 4: Code Quality & Architecture
+
+#### Code Organization
+- [ ] API calls separated from components (/api, /services)
+- [ ] Colocate related files (component, styles, tests)
+- [ ] Shared utilities in /utils or /lib
+- [ ] Types/interfaces in dedicated files
+- [ ] Custom hooks extracted for reusable logic
+
+#### Component Patterns
+- [ ] Separate presentational from container components
+- [ ] Components focused on single responsibility
+- [ ] No prop drilling (use composition or Context)
+- [ ] Context used sparingly (truly global state only)
+- [ ] No inline object/array creation in renders
+
+#### API Client Setup
+- [ ] Centralized API client configuration
+- [ ] Request/response interceptors for common logic
+- [ ] Automatic auth token refresh
+- [ ] API versioning strategy
+- [ ] Consistent base URL and headers
+
+### Quick Automated Validation
+
+For agentic tool to check:
+
+#### Critical Checks
+```javascript
+// Pattern matching for common issues
+- [ ] console.log/console.error in production code
+- [ ] fetch/axios without .catch() or try-catch
+- [ ] useEffect with async without cleanup
+- [ ] localStorage used for auth tokens
+- [ ] Inline styles creating new objects each render
+- [ ] Missing loading states on async operations
+- [ ] Raw error objects shown to users
+- [ ] No key prop in list items
+- [ ] Mutations without cache invalidation
+```
+
+#### Data Flow Checks
+```javascript
+- [ ] Server data duplicated in multiple state variables
+- [ ] No single source of truth violations
+- [ ] Props drilling more than 2 levels deep
+- [ ] Context updates causing unnecessary re-renders
+```
+
+#### Security Checks
+```javascript
+- [ ] User input rendered with dangerouslySetInnerHTML
+- [ ] API calls over http:// instead of https://
+- [ ] Sensitive data in console.log statements
+- [ ] Missing input sanitization before display
+```
+
+### Implementation Order for New Apps
+
+- **Week 1**: Error handling + Loading states + Basic validation
+- **Week 2**: State management + Data fetching + Request cancellation
+- **Week 3**: Optimistic updates + Network resilience + Testing
+- **Week 4**: Forms + Batch operations + Accessibility
+- **Week 5**: Performance + Logging + Polish
+
+### Critical Anti-Patterns to Flag
+
+```javascript
+❌ BAD: No error handling
+const data = await fetch('/api/items').then(r => r.json());
+
+✅ GOOD: Proper error handling
+const result = await fetchItems();
+if (!result.success) {
+  showError(result.error.message);
+  return;
+}
+
+❌ BAD: No cleanup
+useEffect(() => {
+  fetchData();
+}, []);
+
+✅ GOOD: Cleanup on unmount
+useEffect(() => {
+  const controller = new AbortController();
+  fetchData(controller.signal);
+  return () => controller.abort();
+}, []);
+
+❌ BAD: Blocking UI
+setLoading(true);
+await saveData();
+setLoading(false);
+// Can't interact with anything
+
+✅ GOOD: Non-blocking
+setSaving(true);
+await saveData();
+setSaving(false);
+// Rest of UI still usable
+
+❌ BAD: Nested duplicated data
+{ posts: [{ author: {id: 1, name: "Jane"} }] }
+
+✅ GOOD: Normalized
+{ posts: {1: {authorId: 1}}, users: {1: {name: "Jane"}} }
+```
+
+This checklist is comprehensive but prioritized - start with Priority 1, then work through the rest based on your app's maturity and needs.
+
+### Current Data Architecture
+
+**Storage Backends:**
+- **IndexedDB**: Local storage via Dexie (offline-first, no auth)
+- **Supabase**: PostgreSQL cloud storage (authenticated, multi-user)
+
+**Service Layer:**
+- **Service Selector**: Auto-switches based on auth state
+- **Dual Implementations**: Each service has IndexedDB + Supabase versions
+- **Data Migration**: Built-in migration from local to cloud
+
+**Schema Evolution:**
+- **Version 1-5**: IndexedDB migrations handled via Dexie
+- **Current**: Both backends support categorized tags, meal scaling, full recipe data
 
 ## License
 

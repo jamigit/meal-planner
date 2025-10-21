@@ -25,14 +25,27 @@ class WeeklyPlanService {
   // Get current weekly plan
   async getCurrent() {
     try {
-      const plan = await this.db.weeklyPlans.where('is_current').equals(1).first()
-      if (!plan) return null
+      console.log('Getting current plan...')
+      
+      // Use a safer approach - get all plans and filter
+      const allPlans = await this.db.weeklyPlans.toArray()
+      console.log('All plans for getCurrent:', allPlans.map(p => ({ id: p.id, is_current: p.is_current, type: typeof p.is_current })))
+      
+      const currentPlan = allPlans.find(plan => 
+        plan.is_current === true || plan.is_current === 1
+      )
+      
+      if (!currentPlan) {
+        console.log('No current plan found')
+        return null
+      }
 
+      console.log('Found current plan:', currentPlan.id)
       return {
-        ...plan,
-        meal_ids: plan.meal_ids || [], // Keep for backwards compatibility
-        meals: plan.meals || [], // New format
-        is_current: Boolean(plan.is_current)
+        ...currentPlan,
+        meal_ids: currentPlan.meal_ids || [], // Keep for backwards compatibility
+        meals: currentPlan.meals || [], // New format
+        is_current: Boolean(currentPlan.is_current)
       }
     } catch (error) {
       console.error('Failed to get current weekly plan:', error)
@@ -43,9 +56,26 @@ class WeeklyPlanService {
   // Clear all current plans (set all to not current)
   async clearCurrentPlans() {
     try {
-      const result = await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
-      console.log(`Cleared ${result} current plans`)
-      return result
+      console.log('Clearing current plans...')
+      
+      // Use a safer approach - get all plans and filter, then update
+      const allPlans = await this.db.weeklyPlans.toArray()
+      console.log('All plans:', allPlans.map(p => ({ id: p.id, is_current: p.is_current, type: typeof p.is_current })))
+      
+      const currentPlans = allPlans.filter(plan => 
+        plan.is_current === true || plan.is_current === 1
+      )
+      
+      console.log('Found current plans:', currentPlans.length)
+      
+      let totalCleared = 0
+      for (const plan of currentPlans) {
+        const result = await this.db.weeklyPlans.update(plan.id, { is_current: false })
+        totalCleared += result
+      }
+      
+      console.log(`Total cleared ${totalCleared} current plans`)
+      return totalCleared
     } catch (error) {
       console.error('Failed to clear current plans:', error)
       return 0
@@ -106,7 +136,18 @@ class WeeklyPlanService {
     try {
       // First, set all existing plans to not current (only if setting as current)
       if (setAsCurrent) {
-        await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
+        console.log('Clearing current plans before saving...')
+        // Use safer approach to clear current plans
+        const allPlans = await this.db.weeklyPlans.toArray()
+        const currentPlans = allPlans.filter(plan => 
+          plan.is_current === true || plan.is_current === 1
+        )
+        
+        console.log('Found current plans to clear:', currentPlans.length)
+        
+        for (const plan of currentPlans) {
+          await this.db.weeklyPlans.update(plan.id, { is_current: false })
+        }
       }
 
       // Store meal objects with scaling information
@@ -128,7 +169,7 @@ class WeeklyPlanService {
         meals: meals,
         notes: weeklyPlan.notes || null,
         name: weeklyPlan.name || null,
-        is_current: setAsCurrent ? 1 : 0,
+        is_current: setAsCurrent,
         created_at: new Date().toISOString()
       })
 
@@ -198,11 +239,20 @@ class WeeklyPlanService {
   // Set a plan as current
   async setAsCurrent(id) {
     try {
-      // Set all plans to not current
-      await this.db.weeklyPlans.where('is_current').equals(1).modify({ is_current: 0 })
+      // Use safer approach to clear current plans
+      const allPlans = await this.db.weeklyPlans.toArray()
+      const currentPlans = allPlans.filter(plan => 
+        plan.is_current === true || plan.is_current === 1
+      )
+      
+      console.log('Found current plans to clear:', currentPlans.length)
+      
+      for (const plan of currentPlans) {
+        await this.db.weeklyPlans.update(plan.id, { is_current: false })
+      }
 
       // Set specified plan as current
-      const result = await this.db.weeklyPlans.update(id, { is_current: 1 })
+      const result = await this.db.weeklyPlans.update(id, { is_current: true })
 
       if (result === 0) {
         throw new Error('Weekly plan not found')

@@ -34,12 +34,53 @@ class MealPlannerDB extends Dexie {
       shoppingLists: '++id, weekly_plan_id, items, created_at'
     })
 
-    // Version 5: Add categorized tags (cuisine_tags, ingredient_tags, convenience_tags)
-    this.version(5).stores({
+    // Version 6: Fix is_current to use boolean instead of integer and add name
+    this.version(6).stores({
       recipes: '++id, name, url, tags, cuisine_tags, ingredient_tags, convenience_tags, ingredients, instructions, prep_time, cook_time, servings, created_at, updated_at',
-      weeklyPlans: '++id, meals, notes, is_current, created_at',
+      weeklyPlans: '++id, meals, notes, name, is_current, created_at',
       mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
       shoppingLists: '++id, weekly_plan_id, items, created_at'
+    }).upgrade(tx => {
+      // Migrate is_current from integer (0/1) to boolean (true/false)
+      return tx.weeklyPlans.toCollection().modify(plan => {
+        if (typeof plan.is_current === 'number') {
+          plan.is_current = plan.is_current === 1
+        }
+        // Add name field if it doesn't exist
+        if (plan.name === undefined) {
+          plan.name = null
+        }
+      })
+    })
+
+    // Version 7: Ensure all data is properly migrated
+    this.version(7).stores({
+      recipes: '++id, name, url, tags, cuisine_tags, ingredient_tags, convenience_tags, ingredients, instructions, prep_time, cook_time, servings, created_at, updated_at',
+      weeklyPlans: '++id, meals, notes, name, is_current, created_at',
+      mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
+      shoppingLists: '++id, weekly_plan_id, items, created_at'
+    })
+
+    // Version 8: Force migration with explicit data conversion
+    this.version(8).stores({
+      recipes: '++id, name, url, tags, cuisine_tags, ingredient_tags, convenience_tags, ingredients, instructions, prep_time, cook_time, servings, created_at, updated_at',
+      weeklyPlans: '++id, meals, notes, name, is_current, created_at',
+      mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
+      shoppingLists: '++id, weekly_plan_id, items, created_at'
+    }).upgrade(tx => {
+      console.log('Running Version 8 migration...')
+      // Explicitly convert all is_current values to boolean
+      return tx.weeklyPlans.toCollection().modify(plan => {
+        console.log('Migrating plan:', plan.id, 'is_current:', plan.is_current, 'type:', typeof plan.is_current)
+        if (typeof plan.is_current === 'number') {
+          plan.is_current = plan.is_current === 1
+          console.log('Converted to boolean:', plan.is_current)
+        }
+        // Ensure name field exists
+        if (plan.name === undefined) {
+          plan.name = null
+        }
+      })
     })
   }
 }
@@ -52,6 +93,7 @@ export async function initDatabase() {
   try {
     await db.open()
     console.log('Connected to IndexedDB database')
+    console.log('Database version:', db.verno)
     return db
   } catch (error) {
     console.error('Failed to initialize database:', error)

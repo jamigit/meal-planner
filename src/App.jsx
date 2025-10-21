@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { motion, AnimatePresence } from 'framer-motion'
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
 import { isSupabaseConfigured } from './lib/supabase.js'
+import { ErrorBoundary, withErrorBoundary } from './components/ErrorBoundary.jsx'
+import { LoadingProvider } from './components/LoadingComponents.jsx'
+import { GlobalLoadingIndicator } from './components/LoadingIndicators.jsx'
 import Navigation from './components/Navigation'
 import RecipeList from './components/RecipeList'
 import WeeklyPlanner from './components/WeeklyPlanner'
@@ -134,18 +137,27 @@ function AppContent() {
       </main>
 
       <Navigation />
+      <GlobalLoadingIndicator />
     </div>
   )
 }
 
 function App() {
-      return (
+  return (
+    <ErrorBoundary 
+      title="Application Error"
+      fallbackMessage="Something went wrong with the meal planner. Please try refreshing the page."
+      showDetails={process.env.NODE_ENV === 'development'}
+    >
+      <LoadingProvider>
         <AuthProvider>
           <Router>
             <AppContent />
           </Router>
         </AuthProvider>
-      )
-    }
+      </LoadingProvider>
+    </ErrorBoundary>
+  )
+}
 
 export default App

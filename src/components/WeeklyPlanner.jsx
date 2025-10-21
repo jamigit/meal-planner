@@ -191,7 +191,6 @@ function WeeklyPlanner() {
         notes: '',
         name: ''
       })
-      setWeekPreferences('')
       setMealEatenCounts({})
       setSidebarRecipe(null)
       setCurrentPlanId(null) // Clear current plan ID
@@ -258,7 +257,6 @@ function WeeklyPlanner() {
           notes: '',
           name: ''
         })
-        setWeekPreferences('')
         setMealEatenCounts({})
         setSidebarRecipe(null)
         setCurrentPlanId(null)
@@ -286,7 +284,6 @@ function WeeklyPlanner() {
         
         // Still reset state
         setWeeklyPlan({ meals: [], notes: '', name: '' })
-        setWeekPreferences('')
         setMealEatenCounts({})
         setSidebarRecipe(null)
         setCurrentPlanId(null)
