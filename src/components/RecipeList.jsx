@@ -123,7 +123,6 @@ function RecipeList() {
         <div className="flex flex-wrap gap-3 mt-3">
           <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
           <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
-          <a href="/database-seeder" className="btn-outline-black">🌱 Database Seeder</a>
         </div>
       </div>
 

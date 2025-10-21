@@ -4,8 +4,22 @@ import { recipeService } from '../database/recipeService.js'
 class ClaudeAiService {
   constructor() {
     this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:3001'
-    this.apiUrl = `${apiBase}/api/claude`
+    
+    // Auto-detect production environment and set appropriate API URL
+    const isProduction = import.meta.env.PROD
+    const customApiBase = import.meta.env.VITE_API_BASE
+    
+    if (customApiBase) {
+      this.apiUrl = `${customApiBase}/api/claude`
+    } else if (isProduction) {
+      // Default to Netlify Functions in production
+      const netlifyUrl = window.location.origin + '/.netlify/functions/claude'
+      this.apiUrl = netlifyUrl
+    } else {
+      // Development fallback
+      this.apiUrl = 'http://localhost:3001/api/claude'
+    }
+    
     this.model = 'claude-3-5-sonnet-20241022'
     this.maxTokens = 1024
     this.cache = new Map() // Simple in-memory cache
@@ -18,6 +32,8 @@ class ClaudeAiService {
       hasApiKey: !!this.apiKey,
       apiUrl: this.apiUrl,
       isDev: import.meta.env.DEV,
+      isProd: import.meta.env.PROD,
+      customApiBase,
       cacheTimeout: this.cacheTimeout,
       requestTimeout: this.requestTimeout,
       concurrentRequestLimit: this.concurrentRequestLimit
@@ -443,6 +459,14 @@ Return 3 plans with 4 meals each.`
 
       // Call Claude API with timeout
       const apiStartTime = performance.now()
+      
+      console.log('🌐 Making API request to:', this.apiUrl)
+      console.log('📤 Request payload:', {
+        prompt: prompt.substring(0, 100) + '...',
+        userNotes,
+        max_tokens: 1200
+      })
+      
       const fetchPromise = fetch(this.apiUrl, {
         method: 'POST',
         headers: {
@@ -461,8 +485,12 @@ Return 3 plans with 4 meals each.`
         this.createTimeoutPromise(this.requestTimeout)
       ])
 
+      console.log('📥 API Response status:', response.status, response.statusText)
+      console.log('📥 API Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (!response.ok) {
         const errorData = await response.text()
+        console.error('❌ API Error Response:', errorData)
         throw new Error(`Claude API error: ${response.status} - ${errorData}`)
       }
 
@@ -612,7 +640,24 @@ Available recipes: ${validRecipes.slice(0, 50).map(r => r.name).join(', ')}`
       }
 
     } catch (error) {
-      console.error('Claude AI service error:', error)
+      console.error('❌ Claude AI service error:', error)
+      console.error('❌ Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        apiUrl: this.apiUrl,
+        hasApiKey: !!this.apiKey
+      })
+      
+      // Check if it's a network error
+      if (error.message === 'Failed to fetch') {
+        console.error('🌐 Network error detected - possible causes:')
+        console.error('  1. Wrong API URL:', this.apiUrl)
+        console.error('  2. CORS issues')
+        console.error('  3. Server not running')
+        console.error('  4. Network connectivity issues')
+      }
+      
       console.log('🔄 Generating fallback suggestions...')
       const fallbackSuggestions = await this.getFallbackSuggestions()
       console.log('🎲 Fallback suggestions generated:', fallbackSuggestions.length, 'sets')

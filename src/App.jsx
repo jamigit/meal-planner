@@ -15,7 +15,6 @@ import WeeklyPlanner from './components/WeeklyPlanner'
 import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
 import Login from './components/Login'
-import DatabaseSeeder from './components/DatabaseSeeder'
 import Styleguide from './components/Styleguide'
 import DesignSystemTest from './components/DesignSystemTest'
 
@@ -56,7 +55,7 @@ function AppContent() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <main className="container mx-auto max-w-[1000px] px-4 py-8 pb-20 md:pb-8">
+      <main id="main-content" className="container mx-auto max-w-[1000px] px-4 py-8 pb-20 md:pb-8">
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={
@@ -103,17 +102,6 @@ function AppContent() {
                 <MealHistory />
               </motion.div>
             } />
-            <Route path="/database-seeder" element={
-              <motion.div
-                initial="initial"
-                animate="in"
-                exit="out"
-                variants={pageVariants}
-                transition={pageTransition}
-              >
-                <DatabaseSeeder />
-              </motion.div>
-            } />
             <Route path="/styleguide" element={
               <motion.div
                 initial="initial"
@@ -156,7 +144,7 @@ function App() {
       <SecurityHeaders />
       <LoadingProvider>
         <AccessibilityProvider enableSkipLinks={true} enableLiveRegions={true}>
-          <NetworkResilienceProvider showStatusIndicator={true} showOfflineBanner={true}>
+          <NetworkResilienceProvider showStatusIndicator={false} showOfflineBanner={true}>
             <OptimisticUpdateProvider enableToasts={true} enableHistory={false}>
               <AuthProvider>
                 <Router>
