@@ -34,7 +34,7 @@ function AppContent() {
   const pageTransition = {
     type: "tween",
     ease: "easeInOut",
-    duration: 0.3
+    duration: 0.15
   }
 
   if (loading) {
@@ -67,7 +67,7 @@ function AppContent() {
                 variants={pageVariants}
                 transition={pageTransition}
               >
-                <WeeklyPlanner />
+                <MealPlannerV2 />
               </motion.div>
             } />
             <Route path="/recipes" element={
@@ -101,17 +101,6 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <MealHistory />
-              </motion.div>
-            } />
-            <Route path="/meal-planner-v2" element={
-              <motion.div
-                initial="initial"
-                animate="in"
-                exit="out"
-                variants={pageVariants}
-                transition={pageTransition}
-              >
-                <MealPlannerV2 />
               </motion.div>
             } />
             <Route path="/styleguide" element={

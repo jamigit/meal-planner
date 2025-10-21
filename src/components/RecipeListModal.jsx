@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { recipeService } from '../database/recipeService.js'
 import { debounce } from '../utils/performance.js'
+import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 
 export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
   const [filteredRecipes, setFilteredRecipes] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCuisine, setSelectedCuisine] = useState('')
-  const [selectedTag, setSelectedTag] = useState('')
+  const [selectedCuisines, setSelectedCuisines] = useState([])
+  const [selectedTags, setSelectedTags] = useState([])
+  const [selectedDietary, setSelectedDietary] = useState([])
   const [isLoading, setIsLoading] = useState(false)
 
   // Load recipes when modal opens
@@ -20,7 +22,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
   // Filter recipes when search term or filters change
   useEffect(() => {
     filterRecipes()
-  }, [recipes, searchTerm, selectedCuisine, selectedTag])
+  }, [recipes, searchTerm, selectedCuisines, selectedTags, selectedDietary])
 
   const loadRecipes = async () => {
     setIsLoading(true)
@@ -47,24 +49,33 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
       )
     }
 
-    // Filter by cuisine
-    if (selectedCuisine) {
+    // Filter by cuisines (OR logic - recipe matches if it has ANY of the selected cuisines)
+    if (selectedCuisines.length > 0) {
       filtered = filtered.filter(recipe =>
-        recipe.cuisine_tags?.includes(selectedCuisine)
+        recipe.cuisine_tags?.some(cuisine => selectedCuisines.includes(cuisine))
       )
     }
 
-    // Filter by tag
-    if (selectedTag) {
+    // Filter by tags (OR logic - recipe matches if it has ANY of the selected tags)
+    if (selectedTags.length > 0) {
       filtered = filtered.filter(recipe =>
-        recipe.ingredient_tags?.includes(selectedTag) ||
-        recipe.convenience_tags?.includes(selectedTag) ||
-        recipe.tags?.includes(selectedTag)
+        recipe.ingredient_tags?.some(tag => selectedTags.includes(tag)) ||
+        recipe.convenience_tags?.some(tag => selectedTags.includes(tag)) ||
+        recipe.tags?.some(tag => selectedTags.includes(tag))
+      )
+    }
+
+    // Filter by dietary (OR logic - recipe matches if it has ANY of the selected dietary options)
+    if (selectedDietary.length > 0) {
+      filtered = filtered.filter(recipe =>
+        recipe.ingredient_tags?.some(tag => selectedDietary.includes(tag)) ||
+        recipe.convenience_tags?.some(tag => selectedDietary.includes(tag)) ||
+        recipe.tags?.some(tag => selectedDietary.includes(tag))
       )
     }
 
     setFilteredRecipes(filtered)
-  }, [recipes, searchTerm, selectedCuisine, selectedTag])
+  }, [recipes, searchTerm, selectedCuisines, selectedTags, selectedDietary])
 
   // Debounced search
   const debouncedSearch = useCallback(
@@ -88,13 +99,17 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
     }
   }
 
-  // Get unique cuisines and tags for filter dropdowns
+  // Get unique cuisines, tags, and dietary options for filter dropdowns
   const cuisines = [...new Set(recipes.flatMap(r => r.cuisine_tags || []))].sort()
   const tags = [...new Set([
     ...recipes.flatMap(r => r.ingredient_tags || []),
     ...recipes.flatMap(r => r.convenience_tags || []),
     ...recipes.flatMap(r => r.tags || [])
   ])].sort()
+  
+  // Common dietary options that might appear in tags
+  const dietaryOptions = ['Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Keto', 'Paleo', 'Vegan', 'Low-Sodium', 'Sugar-Free', 'Vegetarian', 'Low-Carb', 'High-Protein']
+    .filter(option => tags.includes(option)) // Only show dietary options that actually exist in the recipes
 
   if (!isOpen) return null
 
@@ -107,7 +122,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Browse All Recipes</h2>
+          <h2 className="text-h3 font-heading font-black">Browse All Recipes</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
@@ -121,53 +136,43 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
 
         {/* Filters */}
         <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="search" className="block text-sm font-medium text-black mb-2">
                 Search Recipes
               </label>
               <input
                 id="search"
                 type="text"
                 placeholder="Search by name, ingredients, or tags..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 onChange={handleSearchChange}
               />
             </div>
             
-            <div>
-              <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Cuisine
-              </label>
-              <select
-                id="cuisine"
-                value={selectedCuisine}
-                onChange={(e) => setSelectedCuisine(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Cuisines</option>
-                {cuisines.map(cuisine => (
-                  <option key={cuisine} value={cuisine}>{cuisine}</option>
-                ))}
-              </select>
-            </div>
+            <MultiSelectDropdown
+              label="Filter by Cuisine"
+              placeholder="All cuisines"
+              options={cuisines}
+              selectedValues={selectedCuisines}
+              onChange={setSelectedCuisines}
+            />
             
-            <div>
-              <label htmlFor="tag" className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Tag
-              </label>
-              <select
-                id="tag"
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Tags</option>
-                {tags.map(tag => (
-                  <option key={tag} value={tag}>{tag}</option>
-                ))}
-              </select>
-            </div>
+            <MultiSelectDropdown
+              label="Filter by Tag"
+              placeholder="All tags"
+              options={tags}
+              selectedValues={selectedTags}
+              onChange={setSelectedTags}
+            />
+            
+            <MultiSelectDropdown
+              label="Filter by Dietary"
+              placeholder="All dietary"
+              options={dietaryOptions}
+              selectedValues={selectedDietary}
+              onChange={setSelectedDietary}
+            />
           </div>
         </div>
 
@@ -221,7 +226,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
                       className={`w-full px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         isSelected
                           ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                          : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                          : 'btn-secondary'
                       }`}
                     >
                       {isSelected ? 'Already Added' : 'Add to Plan'}
@@ -237,7 +242,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
         <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className="btn-tertiary"
           >
             Close
           </button>

@@ -1,4 +1,5 @@
 import React, { useReducer, useEffect, useRef, useCallback, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useLoadingState } from '../utils/loadingStates.js'
 import { useRequestLifecycle } from '../utils/requestLifecycle.js'
 import { aiMealPlannerService } from '../services/aiMealPlannerService.js'
@@ -9,6 +10,7 @@ import { SkeletonLoader } from '../components/LoadingComponents.jsx'
 import RecipeListModal from './RecipeListModal.jsx'
 import ShoppingListCard from './ShoppingListCard.jsx'
 import SavePlanTransition from './SavePlanTransition.jsx'
+import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 import { useNavigate } from 'react-router-dom'
 
 // State management with reducer
@@ -302,112 +304,72 @@ export default function MealPlannerV2() {
   )
 
   return (
-    <div className="meal-planner-v2 max-w-4xl mx-auto p-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Meal Planner V2</h1>
-        <p className="text-gray-600">Get personalized meal suggestions based on your preferences and eating history.</p>
+    <div className="mt-16 md:mt-24 relative pb-[200px]">
+      <img
+        src="/images/kiwi-hero.png"
+        alt="Kiwi hero"
+        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-4 max-[500px]:right-2 md:-right-10 w-60 max-[500px]:w-48 h-60 max-[500px]:h-48 md:w-80 md:h-80 object-contain transform -scale-x-100 z-[-1]"
+      />
+      <div className="mt-16 mb-10 relative z-10">
+        <h1 className="font-heading text-display-2 uppercase text-black">
+          AI Meal Planner
+        </h1>
       </div>
 
       {/* User Preferences Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Your Preferences</h2>
+      <div className="card mb-6">
+        <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
+          <span className="material-symbols-rounded text-[28px]">tune</span>
+          Your Preferences
+        </h2>
         
         <div className="space-y-4">
           <div>
-            <label htmlFor="userPrompt" className="block text-sm font-medium text-gray-700 mb-2">
-              Tell us what you're looking for (optional)
+            <label htmlFor="userPrompt" className="block text-sm font-medium text-black mb-2">
+              <span className="flex items-center gap-2">
+                <span className="material-symbols-rounded text-[18px]">edit_note</span>
+                Tell us what you're looking for (optional)
+              </span>
             </label>
             <textarea
               id="userPrompt"
               placeholder="e.g., 'I want quick meals with chicken and vegetables', 'Looking for Italian cuisine', 'Need gluten-free options'"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               onChange={handlePromptChange}
               defaultValue={state.preferences.userPrompt}
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Cuisines</label>
-                <button
-                  onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines: [] } })}
-                  className="text-xs text-gray-500 hover:text-gray-700 underline"
-                >
-                  Clear
-                </button>
-              </div>
-              <select 
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => {
-                  const selected = Array.from(e.target.selectedOptions, option => option.value)
-                  dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines: selected } })
-                }}
-              >
-                <option value="Italian">Italian</option>
-                <option value="Asian">Asian</option>
-                <option value="Mexican">Mexican</option>
-                <option value="Mediterranean">Mediterranean</option>
-                <option value="American">American</option>
-                <option value="Indian">Indian</option>
-              </select>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Tags</label>
-                <button
-                  onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { tags: [] } })}
-                  className="text-xs text-gray-500 hover:text-gray-700 underline"
-                >
-                  Clear
-                </button>
-              </div>
-              <select 
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => {
-                  const selected = Array.from(e.target.selectedOptions, option => option.value)
-                  dispatch({ type: 'UPDATE_PREFERENCES', preferences: { tags: selected } })
-                }}
-              >
-                <option value="Quick">Quick</option>
-                <option value="Healthy">Healthy</option>
-                <option value="One-Pot">One-Pot</option>
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Chicken">Chicken</option>
-                <option value="Beef">Beef</option>
-                <option value="Seafood">Seafood</option>
-              </select>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">Dietary</label>
-                <button
-                  onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { dietary: [] } })}
-                  className="text-xs text-gray-500 hover:text-gray-700 underline"
-                >
-                  Clear
-                </button>
-              </div>
-              <select 
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => {
-                  const selected = Array.from(e.target.selectedOptions, option => option.value)
-                  dispatch({ type: 'UPDATE_PREFERENCES', preferences: { dietary: selected } })
-                }}
-              >
-                <option value="Gluten-Free">Gluten-Free</option>
-                <option value="Dairy-Free">Dairy-Free</option>
-                <option value="Nut-Free">Nut-Free</option>
-                <option value="Low-Carb">Low-Carb</option>
-                <option value="Keto">Keto</option>
-                <option value="Paleo">Paleo</option>
-              </select>
+          {/* Quick Preference Dropdowns */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-black mb-3">
+              Quick Preferences (additive - select meals matching ANY of these)
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <MultiSelectDropdown
+                label="Cuisines"
+                placeholder="Select cuisines..."
+                options={['Italian', 'Asian', 'Mexican', 'Mediterranean', 'American', 'Indian', 'Thai', 'Chinese', 'Japanese', 'French']}
+                selectedValues={state.preferences.cuisines || []}
+                onChange={(cuisines) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines } })}
+              />
+              
+              <MultiSelectDropdown
+                label="Tags"
+                placeholder="Select tags..."
+                options={['Quick', 'Easy', 'Healthy', 'Comfort', 'Spicy', 'Vegetarian', 'One-Pot', 'Low-Carb', 'High-Protein', 'Budget-Friendly']}
+                selectedValues={state.preferences.tags || []}
+                onChange={(tags) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { tags } })}
+              />
+              
+              <MultiSelectDropdown
+                label="Dietary"
+                placeholder="Select dietary..."
+                options={['Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Keto', 'Paleo', 'Vegan', 'Low-Sodium', 'Sugar-Free']}
+                selectedValues={state.preferences.dietary || []}
+                onChange={(dietary) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { dietary } })}
+              />
             </div>
           </div>
           
@@ -415,25 +377,38 @@ export default function MealPlannerV2() {
           <div className="flex justify-center mt-4">
             <button
               onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines: [], tags: [], dietary: [] } })}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-sm"
+              className="btn-outline-black-sm"
             >
               Clear All Preferences
             </button>
           </div>
         </div>
 
-        <button
+        <motion.button
           onClick={handleGetSuggestions}
           disabled={isLoading}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          {isLoading ? 'Getting Suggestions...' : 'Suggest 8 Meals'}
-        </button>
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+              Generating Suggestions...
+            </>
+          ) : (
+            <>Suggest 8 Meals</>
+          )}
+        </motion.button>
       </div>
 
       {/* Suggestions Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">AI Suggestions</h2>
+      <div className="card mb-6">
+        <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
+          <span className="material-symbols-rounded text-[28px]">lightbulb</span>
+          AI Suggestions
+        </h2>
         
         {isLoading && (
           <div className="space-y-2">
@@ -532,7 +507,7 @@ export default function MealPlannerV2() {
       )}
 
       {/* Selected Meals and Recipe Browser - Tabbed Interface */}
-      <div className="bg-white rounded-lg shadow-md mb-6">
+      <div className="card mb-6">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-6 pt-6">
@@ -565,10 +540,10 @@ export default function MealPlannerV2() {
             <div>
               {/* Add Recipes Button */}
               <div className="mb-4 flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">Your Selected Meals</h3>
+                <h3 className="text-h5 font-heading font-black">Your Selected Meals</h3>
                 <button
                   onClick={() => dispatch({ type: 'SET_RECIPE_MODAL_OPEN', isOpen: true })}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
+                  className="btn-outline-black-sm"
                 >
                   Add Recipes
                 </button>
@@ -607,7 +582,7 @@ export default function MealPlannerV2() {
                         
                         <button
                           onClick={() => handleRemoveMeal(meal.id)}
-                          className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          className="btn-danger-outline-sm"
                         >
                           Remove
                         </button>
@@ -625,7 +600,7 @@ export default function MealPlannerV2() {
             </div>
           ) : (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Shopping List</h3>
+              <h3 className="text-h5 font-heading font-black mb-4">Shopping List</h3>
               <ShoppingListCard 
                 recipes={state.selectedMeals}
                 className="max-h-96 overflow-y-auto"
@@ -637,32 +612,35 @@ export default function MealPlannerV2() {
       </div>
 
       {/* Plan Details Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Plan Details</h2>
+      <div className="card mb-6">
+        <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
+          <span className="material-symbols-rounded text-[28px]">edit_note</span>
+          Plan Details
+        </h2>
         
         <div className="space-y-4">
           <div>
-            <label htmlFor="planName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="planName" className="block text-sm font-medium text-black mb-2">
               Plan Name (optional)
             </label>
             <input
               id="planName"
               type="text"
               placeholder="e.g., 'Week of Jan 15th', 'Healthy Week', 'Quick Meals'"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={state.plan.name}
               onChange={(e) => dispatch({ type: 'UPDATE_PLAN', plan: { name: e.target.value } })}
             />
           </div>
 
           <div>
-            <label htmlFor="planNotes" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="planNotes" className="block text-sm font-medium text-black mb-2">
               Notes (optional)
             </label>
             <textarea
               id="planNotes"
               placeholder="Add any notes about this meal plan..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               value={state.plan.notes}
               onChange={(e) => dispatch({ type: 'UPDATE_PLAN', plan: { notes: e.target.value } })}
@@ -676,7 +654,7 @@ export default function MealPlannerV2() {
         <button
           onClick={handleSavePlan}
           disabled={state.selectedMeals.length === 0 || isLoading}
-          className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium"
+          className="btn-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Saving...' : 'Save Plan'}
         </button>
@@ -684,7 +662,7 @@ export default function MealPlannerV2() {
         <button
           onClick={handleSaveAndEmailPlan}
           disabled={state.selectedMeals.length === 0 || isLoading}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium"
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Saving...' : 'Save & Email'}
         </button>

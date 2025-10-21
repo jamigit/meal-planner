@@ -13,7 +13,7 @@ function Navigation() {
     await signOut()
   }
 
-  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/meal-planner-v2'
+  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history'
 
   // Close more menu when screen size changes
   useEffect(() => {
@@ -43,7 +43,7 @@ function Navigation() {
                     : 'text-stone-300 hover:text-white'
                 }`}
               >
-                Weekly Planner
+                AI Planner
               </Link>
               <Link
                 to="/saved-plans"
@@ -129,29 +129,13 @@ function Navigation() {
                 </span>
                 <span>History</span>
               </Link>
-              <Link
-                to="/meal-planner-v2"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
-                  location.pathname === '/meal-planner-v2'
-                    ? 'bg-white/10 text-white'
-                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
-                }`}
-                onClick={() => setIsMoreMenuOpen(false)}
-              >
-                <span className="mr-2" aria-hidden>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                </span>
-                <span>AI Planner</span>
-              </Link>
             </div>
           </div>
         )}
 
         {/* Bottom Nav Tabs */}
         <div className="flex items-center justify-around flex-1">
-          {/* Weekly Planner */}
+          {/* AI Planner */}
           <Link
             to="/"
             className={`flex flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 rounded-l-2xl ${
@@ -162,7 +146,7 @@ function Navigation() {
           >
             <span className="mb-1" aria-hidden>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1Zm12 7H5v10h14V9Zm-2-3H7v1a1 1 0 1 1-2 0V6H5h14h0v1a1 1 0 1 1-2 0V6Z" />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </span>
             <span>Planner</span>
@@ -200,20 +184,6 @@ function Navigation() {
             <span>Recipes</span>
           </Link>
 
-          {/* AI Planner (show until viewport < 400px) */}
-          <Link
-            to="/meal-planner-v2"
-            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
-              location.pathname === '/meal-planner-v2' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <span className="mb-1" aria-hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-            </span>
-            <span>AI Planner</span>
-          </Link>
 
           {/* History (show until viewport < 400px) */}
           <Link
