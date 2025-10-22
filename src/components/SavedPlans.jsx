@@ -80,7 +80,19 @@ function SavedPlans() {
 
     } catch (error) {
       console.error('Failed to mark meal as eaten:', error)
-      alert('Failed to mark meal as eaten. Please try again.')
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to mark meal as eaten. Please try again.'
+      
+      if (error.message.includes('does not exist')) {
+        errorMessage = `Recipe "${recipe.name}" is not available in the current database. This might be a recipe from a different storage system.`
+      } else if (error.message.includes('foreign key constraint')) {
+        errorMessage = `Recipe "${recipe.name}" is not found in the recipes database. Please try refreshing the page.`
+      } else if (error.message.includes('Conflict')) {
+        errorMessage = `"${recipe.name}" has already been marked as eaten today.`
+      }
+      
+      alert(errorMessage)
     }
   }
 

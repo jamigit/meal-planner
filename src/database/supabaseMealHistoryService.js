@@ -21,12 +21,78 @@ class SupabaseMealHistoryService {
     return d.toISOString().split('T')[0] // Return YYYY-MM-DD format
   }
 
+  // Validate recipe exists in Supabase
+  async validateRecipeId(recipeId) {
+    try {
+      const userId = await this.getUserId()
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id')
+        .eq('id', recipeId)
+        .eq('user_id', userId)
+
+      if (error) {
+        console.warn(`Recipe with ID ${recipeId} not found in Supabase:`, error.message)
+        return false
+      }
+      
+      // Check if we got any results
+      return data && data.length > 0
+    } catch (error) {
+      console.warn(`Error validating recipe ID ${recipeId}:`, error.message)
+      return false
+    }
+  }
+
   // Add meal to history
   async addMealToHistory(recipeId, eatenDate = null) {
     try {
       const userId = await this.getUserId()
       const actualEatenDate = eatenDate || new Date().toISOString().split('T')[0]
       const weekDate = this.getWeekStartDate(new Date(actualEatenDate))
+
+      // Validate recipe exists
+      const recipeExists = await this.validateRecipeId(recipeId)
+      if (!recipeExists) {
+        console.warn(`Recipe with ID ${recipeId} not found in Supabase. Attempting to create a placeholder entry...`)
+        
+        // Try to create a placeholder recipe entry for this meal
+        try {
+          const { data: placeholderRecipe, error: recipeError } = await supabase
+            .from('recipes')
+            .insert({
+              user_id: userId,
+              name: `Unknown Recipe (ID: ${recipeId})`,
+              url: null,
+              ingredients: ['Recipe data not available'],
+              instructions: ['This recipe was marked as eaten but the original recipe data is not available in Supabase.'],
+              prep_time: null,
+              cook_time: null,
+              servings: null,
+              cuisine_tags: [],
+              ingredient_tags: [],
+              convenience_tags: [],
+              tags: ['placeholder']
+            })
+            .select()
+
+          if (recipeError) {
+            console.error('Failed to create placeholder recipe:', recipeError)
+            throw new Error(`Recipe with ID ${recipeId} does not exist in Supabase and could not create placeholder. This might be a recipe from IndexedDB that hasn't been synced yet.`)
+          }
+
+          if (!placeholderRecipe || placeholderRecipe.length === 0) {
+            throw new Error('Placeholder recipe creation returned no data')
+          }
+
+          console.log('Created placeholder recipe:', placeholderRecipe[0].id)
+          // Use the new placeholder recipe ID
+          recipeId = placeholderRecipe[0].id
+        } catch (placeholderError) {
+          console.error('Failed to create placeholder recipe:', placeholderError)
+          throw new Error(`Recipe with ID ${recipeId} does not exist in Supabase. This might be a recipe from IndexedDB that hasn't been synced yet.`)
+        }
+      }
 
       const { data, error } = await supabase
         .from(this.tableName)

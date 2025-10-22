@@ -11,8 +11,41 @@ import RecipeListModal from './RecipeListModal.jsx'
 import ShoppingListCard from './ShoppingListCard.jsx'
 import SavePlanTransition from './SavePlanTransition.jsx'
 import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
+import CategorizedTags from './CategorizedTags.jsx'
 import { useNavigate } from 'react-router-dom'
 import { TAG_TAXONOMY } from '../constants/recipeTags.js'
+
+// Local storage key for persisting planner state
+const PLANNER_STORAGE_KEY = 'meal-planner-v2-state'
+
+// State persistence functions
+const saveStateToStorage = (state) => {
+  try {
+    localStorage.setItem(PLANNER_STORAGE_KEY, JSON.stringify(state))
+  } catch (error) {
+    console.warn('Failed to save planner state to localStorage:', error)
+  }
+}
+
+const loadStateFromStorage = () => {
+  try {
+    const saved = localStorage.getItem(PLANNER_STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (error) {
+    console.warn('Failed to load planner state from localStorage:', error)
+  }
+  return null
+}
+
+const clearStateFromStorage = () => {
+  try {
+    localStorage.removeItem(PLANNER_STORAGE_KEY)
+  } catch (error) {
+    console.warn('Failed to clear planner state from localStorage:', error)
+  }
+}
 
 // State management with reducer
 const initialState = {
@@ -67,16 +100,24 @@ function mealPlanReducer(state, action) {
       return { ...state, isRecipeModalOpen: action.isOpen }
     case 'SET_SAVE_TRANSITION':
       return { ...state, showSaveTransition: action.show, transitionMessage: action.message || 'Well done!' }
+    case 'CLEAR_ALL':
+      return initialState
     default:
       return state
   }
 }
 
 export default function MealPlannerV2() {
-  const [state, dispatch] = useReducer(mealPlanReducer, initialState)
+  // Initialize with saved state or default state
+  const [state, dispatch] = useReducer(mealPlanReducer, loadStateFromStorage() || initialState)
   const navigate = useNavigate()
   const { signal, cancel } = useRequestLifecycle('meal-planner')
   const { isLoading, startLoading, stopLoading } = useLoadingState('AI Suggestions')
+  
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    saveStateToStorage(state)
+  }, [state])
   
   // Load all recipes for the recipe tab
   useEffect(() => {
@@ -199,14 +240,14 @@ export default function MealPlannerV2() {
       
       const savedPlan = await weeklyPlanService.save(plan, true)
       
-      if (savedPlan) {
-        // Show transition screen
-        dispatch({ type: 'SET_SAVE_TRANSITION', show: true, message: 'Well done!' })
-        
-        // Clear selected meals and reset form after save
-        dispatch({ type: 'CLEAR_SELECTED' })
-        dispatch({ type: 'UPDATE_PLAN', plan: { name: '', notes: '' } })
-      } else {
+          if (savedPlan) {
+            // Show transition screen
+            dispatch({ type: 'SET_SAVE_TRANSITION', show: true, message: 'Well done!' })
+            
+            // Clear all state after save
+            dispatch({ type: 'CLEAR_ALL' })
+            clearStateFromStorage()
+          } else {
         dispatch({ type: 'SET_ERROR_MESSAGE', message: 'Failed to save meal plan' })
       }
       
@@ -259,9 +300,9 @@ export default function MealPlannerV2() {
           dispatch({ type: 'SET_SAVE_TRANSITION', show: true, message: 'Plan Saved! (Email failed)' })
         }
         
-        // Clear selected meals and reset form after save
-        dispatch({ type: 'CLEAR_SELECTED' })
-        dispatch({ type: 'UPDATE_PLAN', plan: { name: '', notes: '' } })
+        // Clear all state after save
+        dispatch({ type: 'CLEAR_ALL' })
+        clearStateFromStorage()
         
       } else {
         dispatch({ type: 'SET_ERROR_MESSAGE', message: 'Failed to save meal plan' })
@@ -312,9 +353,20 @@ export default function MealPlannerV2() {
         className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-4 max-[500px]:right-2 md:-right-10 w-60 max-[500px]:w-48 h-60 max-[500px]:h-48 md:w-80 md:h-80 object-contain transform -scale-x-100 z-[-1]"
       />
       <div className="mt-16 mb-10 relative z-10">
-        <h1 className="font-heading text-display-2 uppercase text-black">
-          AI Meal Planner
-        </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="font-heading text-display-2 uppercase text-black">
+            AI Meal Planner
+          </h1>
+          <button
+            onClick={() => {
+              dispatch({ type: 'CLEAR_ALL' })
+              clearStateFromStorage()
+            }}
+            className="btn-outline-black-sm"
+          >
+            Start Again
+          </button>
+        </div>
       </div>
 
       {/* User Preferences Section */}
@@ -447,26 +499,17 @@ export default function MealPlannerV2() {
         )}
 
         {!isLoading && state.suggestions.meals.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {state.suggestions.meals.map((meal) => (
-              <div key={meal.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 mb-2">{meal.name}</h3>
-                <div className="text-sm text-gray-600 mb-3">
-                  {meal.cuisine_tags?.length > 0 && (
-                    <div className="mb-1">
-                      <span className="font-medium">Cuisine:</span> {meal.cuisine_tags.join(', ')}
-                    </div>
-                  )}
-                  {meal.ingredient_tags?.length > 0 && (
-                    <div className="mb-1">
-                      <span className="font-medium">Tags:</span> {meal.ingredient_tags.slice(0, 3).join(', ')}
-                    </div>
-                  )}
+              <div key={meal.id} className="!bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                <h3 className="font-medium text-black text-sm mb-2 line-clamp-2">{meal.name}</h3>
+                <div className="mb-3">
+                  <CategorizedTags recipe={meal} className="text-xs" />
                 </div>
                 <button
                   onClick={() => handleAddMeal(meal)}
                   disabled={state.selectedMeals.find(m => m.id === meal.id)}
-                  className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                  className="w-full px-3 py-1.5 border-2 border-black text-black bg-white rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed text-xs font-medium transition-colors"
                 >
                   {state.selectedMeals.find(m => m.id === meal.id) ? 'Added' : 'Add to Plan'}
                 </button>
@@ -559,42 +602,37 @@ export default function MealPlannerV2() {
               </div>
               
               {state.selectedMeals.length > 0 ? (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {state.selectedMeals.map((meal) => (
-                    <div key={meal.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{meal.name}</h3>
-                        <div className="text-sm text-gray-600">
-                          {meal.cuisine_tags?.length > 0 && (
-                            <span className="mr-3">Cuisine: {meal.cuisine_tags.join(', ')}</span>
-                          )}
-                          {meal.ingredient_tags?.length > 0 && (
-                            <span>Tags: {meal.ingredient_tags.slice(0, 3).join(', ')}</span>
-                          )}
-                        </div>
+                    <div key={meal.id} className="!bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-medium text-black text-sm line-clamp-2 flex-1 mr-2">{meal.name}</h3>
+                        <button
+                          onClick={() => handleRemoveMeal(meal.id)}
+                          className="text-red-500 hover:text-red-700 text-xs font-medium"
+                        >
+                          ✕
+                        </button>
                       </div>
                       
-                      <div className="flex items-center space-x-3">
+                      <div className="mb-3">
+                        <CategorizedTags recipe={meal} className="text-xs" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <label htmlFor={`scaling-${meal.id}`} className="text-sm font-medium">Servings:</label>
+                          <label htmlFor={`scaling-${meal.id}`} className="text-xs font-medium text-gray-600">Servings:</label>
                           <select
                             id={`scaling-${meal.id}`}
-                            value={meal.scaling}
+                            value={meal.scaling || 1}
                             onChange={(e) => handleUpdateScaling(meal.id, parseInt(e.target.value))}
-                            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                           >
                             {[1, 2, 3, 4, 5].map(num => (
                               <option key={num} value={num}>{num}</option>
                             ))}
                           </select>
                         </div>
-                        
-                        <button
-                          onClick={() => handleRemoveMeal(meal.id)}
-                          className="btn-danger-outline-sm"
-                        >
-                          Remove
-                        </button>
                       </div>
                     </div>
                   ))}

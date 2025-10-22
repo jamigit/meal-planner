@@ -39,7 +39,23 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
   }
 
   const filterRecipes = useCallback(() => {
-    let filtered = recipes
+    // First filter out unknown/placeholder recipes
+    let filtered = recipes.filter(recipe => {
+      const isUnknownRecipe = 
+        recipe.name?.includes('Unknown Recipe') ||
+        recipe.name?.includes('placeholder') ||
+        recipe.name?.toLowerCase().includes('unknown') ||
+        recipe.tags?.includes('placeholder') ||
+        recipe.ingredient_tags?.includes('placeholder') ||
+        recipe.convenience_tags?.includes('placeholder') ||
+        recipe.cuisine_tags?.includes('placeholder') ||
+        recipe.dietary_tags?.includes('placeholder') ||
+        // Check for recipes with placeholder ingredients/instructions
+        (recipe.ingredients?.length === 1 && recipe.ingredients[0] === 'Recipe data not available') ||
+        (recipe.instructions?.length === 1 && recipe.instructions[0]?.includes('original recipe data is not available'))
+      
+      return !isUnknownRecipe
+    })
 
     // Filter by search term
     if (searchTerm) {
