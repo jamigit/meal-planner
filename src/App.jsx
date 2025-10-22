@@ -15,6 +15,7 @@ import WeeklyPlanner from './components/WeeklyPlanner'
 import MealPlannerV2 from './components/MealPlannerV2'
 import SavedPlans from './components/SavedPlans'
 import MealHistory from './components/MealHistory'
+import ShoppingListPage from './components/ShoppingListPage'
 import Login from './components/Login'
 import Styleguide from './components/Styleguide'
 import DesignSystemTest from './components/DesignSystemTest'
@@ -102,6 +103,17 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <MealHistory />
+              </motion.div>
+            } />
+            <Route path="/shopping-list" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <ShoppingListPage />
               </motion.div>
             } />
             <Route path="/tag-management" element={

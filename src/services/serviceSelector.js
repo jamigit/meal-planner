@@ -4,9 +4,11 @@
 import { recipeService } from '../database/recipeService.js'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
 import { mealHistoryService } from '../database/mealHistoryService.js'
+import { shoppingListService } from '../database/shoppingListService.js'
 import { supabaseRecipeService } from '../database/supabaseRecipeService.js'
 import { supabaseWeeklyPlanService } from '../database/supabaseWeeklyPlanService.js'
 import { supabaseMealHistoryService } from '../database/supabaseMealHistoryService.js'
+import { supabaseShoppingListService } from '../database/supabaseShoppingListService.js'
 import { authService } from './authService.js'
 import { isSupabaseConfigured } from '../lib/supabase.js'
 
@@ -61,12 +63,24 @@ class ServiceSelector {
     return mealHistoryService
   }
 
+  async getShoppingListService() {
+    // Always check current auth status
+    const shouldUseSupabase = isSupabaseConfigured() && authService.isAuthenticated()
+    console.log('🔧 Shopping list service:', shouldUseSupabase ? 'Using Supabase' : 'Using IndexedDB')
+    
+    if (shouldUseSupabase) {
+      return supabaseShoppingListService
+    }
+    return shoppingListService
+  }
+
   // Helper method to get all services at once
   async getAllServices() {
     return {
       recipeService: await this.getRecipeService(),
       weeklyPlanService: await this.getWeeklyPlanService(),
-      mealHistoryService: await this.getMealHistoryService()
+      mealHistoryService: await this.getMealHistoryService(),
+      shoppingListService: await this.getShoppingListService()
     }
   }
 }

@@ -73,6 +73,7 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 - **Recipe Management**: Store recipes with name, URL, and intelligent AI-generated tags
 - **Weekly Meal Selection**: Choose 4 recipes for the week with notes
 - **AI Meal Planner V2**: Intelligent 8-meal suggestions based on preferences and meal history
+- **Shopping List**: Persistent shopping list with real-time sync, category grouping, and meal plan import
 - **Auto-Tagging System**: Claude AI-powered recipe analysis with smart fallback suggestions
 - **Tag Management**: Comprehensive tag taxonomy with analytics and management tools
 - **Saved Plans**: View and manage all previous weekly plans
@@ -591,6 +592,96 @@ The goal is to get a working meal planner quickly, then enhance it iteratively b
 - **App-like Experience**: Standalone mode with custom splash screens
 - **Performance**: Sub-second load times with intelligent caching
 - **Update Management**: Seamless app updates with user notifications
+
+### Phase 6: Shopping List - Future Enhancements 🛒 Planned
+
+#### **Core Implementation Completed** ✅
+- **Database Schema**: Supabase and IndexedDB tables for persistent shopping lists
+- **Service Layer**: Dual-storage pattern following existing codebase architecture
+- **Real-time Sync**: Supabase subscriptions for live collaboration
+- **Main UI**: Complete shopping list page with CRUD operations
+- **Import Integration**: Modal for importing from meal plan shopping lists
+- **Navigation**: Dedicated shopping list route and navigation item
+
+#### **Future Phases** (Saved for Implementation)
+
+**Phase 4: Drag-and-Drop Reordering** 🔄
+- **dnd-kit Integration**: Smooth drag-and-drop for item reordering
+- **Fractional Indexing**: Maintain order without gaps using fractional positions
+- **Visual Feedback**: Drag previews and drop zones
+- **Touch Support**: Mobile-friendly drag gestures
+
+**Phase 5: Inline Item Editing Components** ✏️
+- **Inline Editing**: Click-to-edit for item names, quantities, and units
+- **Auto-save**: Save changes on blur/Enter with visual feedback
+- **Validation**: Real-time validation with error states
+- **Keyboard Navigation**: Full keyboard support for accessibility
+
+**Phase 7: Smart Duplicate Detection & Merging** 🧠
+- **Fuzzy Matching**: Detect similar items using string similarity algorithms
+- **Quantity Merging**: Combine quantities (2 cups + 1 cup = 3 cups)
+- **Unit Conversion**: Convert between compatible units (cups ↔ tablespoons)
+- **User Confirmation**: Show merge suggestions with user approval
+
+**Phase 8: Enhanced Recipe Integration** 🔗
+- **Recipe Linking**: Link shopping list items back to source recipes
+- **Scaling Integration**: Auto-update quantities when recipe servings change
+- **Meal Plan Sync**: Real-time sync between meal plans and shopping lists
+- **Recipe Suggestions**: Suggest recipes based on shopping list items
+
+**Phase 9: AI-Powered Categorization** 🤖
+- **Smart Categorization**: AI suggests categories for manually added items
+- **Learning System**: Improve categorization based on user corrections
+- **Bulk Categorization**: Categorize multiple items at once
+- **Custom Categories**: User-defined categories with AI suggestions
+
+**Phase 10: Mobile Optimizations** 📱
+- **Swipe Gestures**: Swipe to check/uncheck items
+- **Pull-to-Refresh**: Refresh shopping list with pull gesture
+- **Haptic Feedback**: Tactile feedback for mobile interactions
+- **Voice Input**: Add items using voice recognition
+
+**Phase 11: Comprehensive Testing** 🧪
+- **Unit Tests**: Service layer and utility function testing
+- **Integration Tests**: End-to-end shopping list workflows
+- **Real-time Tests**: Multi-client synchronization testing
+- **Performance Tests**: Large list handling and optimization
+
+**Phase 12: Performance Optimization** ⚡
+- **Virtual Scrolling**: Handle thousands of items efficiently
+- **Lazy Loading**: Load categories on demand
+- **Caching Strategy**: Intelligent caching for offline performance
+- **Bundle Optimization**: Code splitting for shopping list features
+
+**Phase 13: Accessibility & Polish** ♿
+- **Screen Reader Support**: Full ARIA labels and descriptions
+- **Keyboard Navigation**: Complete keyboard-only operation
+- **High Contrast Mode**: Support for accessibility preferences
+- **Focus Management**: Proper focus handling in modals and forms
+
+#### **Technical Implementation Notes**
+
+**Data Sync Strategy (Supabase + IndexedDB)**
+- **Primary Key Handling**: Supabase uses SERIAL (auto-increment), IndexedDB uses auto-increment
+- **Write Flow**: User action → Write to active service → Real-time sync (if Supabase)
+- **Migration**: IndexedDB → Supabase sync when user authenticates
+- **Read Flow**: Always read from active service via serviceSelector
+
+**Category System**
+- **Reused Categories**: Leverages existing shoppingListService.categories
+- **Extensible Design**: Easy to add new categories or modify existing ones
+- **Consistent Grouping**: Same categories used across meal plans and shopping lists
+
+**Real-time Considerations**
+- **Authentication Required**: Real-time only for authenticated Supabase users
+- **Graceful Degradation**: IndexedDB users get local-only experience
+- **Connection Handling**: Automatic reconnection and error recovery
+
+**Code Architecture**
+- **Service Pattern**: Follows existing recipeService/supabaseRecipeService pattern
+- **Hook Pattern**: useShoppingListRealtime follows existing hook conventions
+- **Component Pattern**: Uses existing layout components (PageContainer, PageHeader, PageSection)
+- **Error Handling**: Consistent error handling and user feedback
 
 ### UI/UX Improvements
 - Drag-and-drop meal planning interface
@@ -1398,6 +1489,34 @@ The application now includes all critical production-ready features:
 - **Bundle analysis** and performance monitoring
 
 ### 🚀 Recent Updates & Improvements
+
+#### **Shopping List Feature** (Latest)
+- **Persistent Shopping Lists**: Dual-storage system (Supabase + IndexedDB) with real-time sync
+- **Category Grouping**: Items organized by Produce, Meat & Seafood, Dairy & Eggs, etc.
+- **Meal Plan Import**: One-click import from generated meal plan shopping lists
+- **Real-time Collaboration**: Live updates across devices for authenticated users
+- **CRUD Operations**: Add, edit, delete, and check/uncheck items with smooth animations
+- **Completed Items**: Collapsible section for checked items with count badges
+- **Navigation Integration**: Dedicated shopping list page with mobile-responsive navigation
+
+#### Shopping List – Decisions & Plan
+- **1.B Flow (chosen)**: Users manually add the generated meal plan ingredient list to the new persistent Shopping List via an Import button (no automatic overwrite). This keeps control in the user’s hands and avoids accidental list churn.
+- **2.B Storage (chosen)**: Keep both Supabase and IndexedDB. Complexity is managed by:
+  - Service selector parity with recipes/plans
+  - Auth-gated real-time (Supabase only), local-only for guests
+  - Consistent schemas and normalization
+  - Future: explicit sync jobs on login if we later support offline list edits pre-auth
+- **3. Navigation**: Standalone page at `/shopping-list`, linked in the bottom nav as “Shopping”.
+- **4.b Documentation**: This plan and checklist are captured here; future phases are tracked below under “Phase 6: Shopping List – Future Enhancements”.
+
+Checklist (current status):
+- [x] Schema (Supabase + IndexedDB)
+- [x] Dual services + selector
+- [x] Real-time hook (Supabase)
+- [x] Shopping List page UI (CRUD, grouping, completed bucket)
+- [x] Import from generated meal plan list
+- [x] Navigation & route
+- [ ] Advanced features (drag-and-drop, merging, units, AI categorization) → see Future Enhancements
 
 #### **AI-Powered Auto-Tagging System** (Latest)
 - **Claude API Integration**: Intelligent recipe analysis using Claude 3.5 Sonnet

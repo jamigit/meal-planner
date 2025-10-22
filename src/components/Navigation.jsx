@@ -13,7 +13,7 @@ function Navigation() {
     await signOut()
   }
 
-  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/tag-management'
+  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/shopping-list' || location.pathname === '/tag-management'
 
   // Close more menu when screen size changes
   useEffect(() => {
@@ -130,6 +130,22 @@ function Navigation() {
                 <span>History</span>
               </Link>
               <Link
+                to="/shopping-list"
+                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
+                  location.pathname === '/shopping-list'
+                    ? 'bg-white/10 text-white'
+                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
+                }`}
+                onClick={() => setIsMoreMenuOpen(false)}
+              >
+                <span className="mr-2" aria-hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
+                  </svg>
+                </span>
+                <span>Shopping</span>
+              </Link>
+              <Link
                 to="/tag-management"
                 className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
                   location.pathname === '/tag-management'
@@ -183,6 +199,21 @@ function Navigation() {
               </svg>
             </span>
             <span>Plans</span>
+          </Link>
+
+          {/* Shopping List (show until viewport < 400px) */}
+          <Link
+            to="/shopping-list"
+            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
+              location.pathname === '/shopping-list' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="mb-1" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
+              </svg>
+            </span>
+            <span>Shopping</span>
           </Link>
 
           {/* Recipes (show until viewport < 400px) */}

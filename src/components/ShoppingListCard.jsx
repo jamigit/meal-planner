@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { shoppingListService } from '../services/shoppingListService.js'
+import ImportShoppingListModal from './ImportShoppingListModal.jsx'
+import Button from './ui/Button'
 
 function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = false }) {
   const [shoppingList, setShoppingList] = useState({})
@@ -7,6 +9,8 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
   const [groupByRecipe, setGroupByRecipe] = useState(false)
   const [excludePantry, setExcludePantry] = useState(true)
   const [copySuccess, setCopySuccess] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importSuccess, setImportSuccess] = useState(false)
 
   useEffect(() => {
     if (recipes && recipes.length > 0) {
@@ -101,11 +105,25 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
     )
   }
 
+  const handleImportComplete = (importedCount) => {
+    setImportSuccess(true)
+    setTimeout(() => setImportSuccess(false), 3000)
+  }
+
   return (
     <div className={`card ${className}`}>
       {showTitle && (
         <div className="mb-2">
           <h3 className="text-h5 font-heading font-black text-text-primary">Shopping List</h3>
+        </div>
+      )}
+
+      {/* Import Success Message */}
+      {importSuccess && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-sm text-green-800">
+            ✓ Successfully added items to your shopping list!
+          </p>
         </div>
       )}
 
@@ -139,19 +157,30 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
           <span>Show pantry</span>
         </label>
 
-        <button
-          onClick={handleCopyToClipboard}
-          disabled={loading || getTotalItems() === 0}
-          className={`ml-auto px-3 py-1 text-sm rounded-md font-medium transition-colors border-2 border-black bg-white text-black disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${
-            copySuccess ? 'opacity-80' : 'hover:bg-gray-50'
-          }`}
-        >
-          {copySuccess ? (
-            '✓ Copied!'
-          ) : (
-            <span className="inline-flex items-center gap-1"><span className="material-symbols-rounded text-sm">content_copy</span>Copy</span>
-          )}
-        </button>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={handleCopyToClipboard}
+            disabled={loading || getTotalItems() === 0}
+            className={`px-3 py-1 text-sm rounded-md font-medium transition-colors border-2 border-black bg-white text-black disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${
+              copySuccess ? 'opacity-80' : 'hover:bg-gray-50'
+            }`}
+          >
+            {copySuccess ? (
+              '✓ Copied!'
+            ) : (
+              <span className="inline-flex items-center gap-1"><span className="material-symbols-rounded text-sm">content_copy</span>Copy</span>
+            )}
+          </button>
+
+          <Button
+            onClick={() => setShowImportModal(true)}
+            disabled={loading || getTotalItems() === 0}
+            variant="secondary"
+            size="sm"
+          >
+            Add to Shopping List
+          </Button>
+        </div>
       </div>
 
       {/* Content */}
@@ -220,19 +249,16 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
                                     }).join(' | ')})
                                   </div>
                                 )}
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* Import Modal */}
+      <ImportShoppingListModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        generatedList={shoppingList}
+        onImportComplete={handleImportComplete}
+      />
     </div>
   )
 }
