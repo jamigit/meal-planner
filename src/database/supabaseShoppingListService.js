@@ -18,42 +18,101 @@ class SupabaseShoppingListService {
     }
   }
 
-  // Get or create user's main shopping list
-  async getShoppingList() {
+  // Get all shopping lists for user
+  async getAllLists() {
     try {
       const userId = await this.getUserId()
       
-      // Try to get existing shopping list
-      const { data: existingList, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from(this.listsTableName)
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle()
 
-      if (fetchError) {
-        throw fetchError
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Failed to get shopping lists:', error)
+      throw error
+    }
+  }
+
+  // Get or create user's main shopping list (for backward compatibility)
+  async getShoppingList() {
+    try {
+      const lists = await this.getAllLists()
+      
+      // If no lists exist, create one
+      if (lists.length === 0) {
+        return await this.createList('My Shopping List')
       }
 
-      // If no list exists, create one
-      if (!existingList) {
-        const { data: newList, error: createError } = await supabase
-          .from(this.listsTableName)
-          .insert({
-            user_id: userId,
-            name: 'My Shopping List'
-          })
-          .select()
-          .single()
-
-        if (createError) throw createError
-        return newList
-      }
-
-      return existingList
+      // Return the first (oldest) list
+      return lists[0]
     } catch (error) {
       console.error('Failed to get shopping list:', error)
+      throw error
+    }
+  }
+
+  // Create new shopping list
+  async createList(name) {
+    try {
+      const userId = await this.getUserId()
+      
+      const { data, error } = await supabase
+        .from(this.listsTableName)
+        .insert({
+          user_id: userId,
+          name: name || 'New Shopping List'
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Failed to create shopping list:', error)
+      throw error
+    }
+  }
+
+  // Update shopping list
+  async updateList(listId, updates) {
+    try {
+      const userId = await this.getUserId()
+      
+      const { data, error } = await supabase
+        .from(this.listsTableName)
+        .update(updates)
+        .eq('id', listId)
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Failed to update shopping list:', error)
+      throw error
+    }
+  }
+
+  // Delete shopping list
+  async deleteList(listId) {
+    try {
+      const userId = await this.getUserId()
+      
+      const { error } = await supabase
+        .from(this.listsTableName)
+        .delete()
+        .eq('id', listId)
+        .eq('user_id', userId)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Failed to delete shopping list:', error)
       throw error
     }
   }
@@ -68,6 +127,7 @@ class SupabaseShoppingListService {
         .select('*')
         .eq('shopping_list_id', listId)
         .eq('user_id', userId)
+        .order('sort_order', { ascending: true })
         .order('category', { ascending: true })
         .order('created_at', { ascending: true })
 
@@ -98,7 +158,8 @@ class SupabaseShoppingListService {
         unit: validateStringField(itemData.unit, 'unit', false),
         category: validateStringField(itemData.category, 'category', false) || 'Other',
         notes: validateStringField(itemData.notes, 'notes', false),
-        checked: false
+        checked: false,
+        sort_order: 0 // Default sort order, will be updated by reorderItems if needed
       }
 
       const { data, error } = await supabase
@@ -253,6 +314,68 @@ class SupabaseShoppingListService {
       return true
     } catch (error) {
       console.error('Failed to bulk uncheck items:', error)
+      throw error
+    }
+  }
+
+  // Reorder items within a category
+  async reorderItems(listId, itemIds) {
+    try {
+      const userId = await this.getUserId()
+      
+      // Update the sort_order for each item
+      const updates = itemIds.map((itemId, index) => ({
+        id: itemId,
+        sort_order: index,
+        updated_at: new Date().toISOString()
+      }))
+
+      // Batch update all items
+      for (const update of updates) {
+        const { error } = await supabase
+          .from(this.itemsTableName)
+          .update({ 
+            sort_order: update.sort_order,
+            updated_at: update.updated_at
+          })
+          .eq('id', update.id)
+          .eq('shopping_list_id', listId)
+          .eq('user_id', userId)
+
+        if (error) throw error
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to reorder items:', error)
+      throw error
+    }
+  }
+
+  // Move item between categories
+  async moveItemToCategory(itemId, newCategory, newSortOrder = null) {
+    try {
+      const userId = await this.getUserId()
+      
+      const updateData = {
+        category: newCategory,
+        updated_at: new Date().toISOString()
+      }
+
+      if (newSortOrder !== null) {
+        updateData.sort_order = newSortOrder
+      }
+
+      const { error } = await supabase
+        .from(this.itemsTableName)
+        .update(updateData)
+        .eq('id', itemId)
+        .eq('user_id', userId)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Failed to move item to category:', error)
       throw error
     }
   }

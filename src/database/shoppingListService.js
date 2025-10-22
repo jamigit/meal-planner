@@ -19,27 +19,81 @@ class ShoppingListService {
     }
   }
 
-  // Get or create user's main shopping list
+  // Get all shopping lists
+  async getAllLists() {
+    try {
+      const lists = await this.db.persistentShoppingLists.toArray()
+      return lists.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    } catch (error) {
+      console.error('Failed to get shopping lists:', error)
+      return []
+    }
+  }
+
+  // Get or create user's main shopping list (for backward compatibility)
   async getShoppingList() {
     try {
-      // For IndexedDB, we'll use a single default list
-      // In a real app, you might want to support multiple lists
-      let list = await this.db.persistentShoppingLists.get(1)
+      const lists = await this.getAllLists()
       
-      if (!list) {
-        const now = new Date().toISOString()
-        const id = await this.db.persistentShoppingLists.add({
-          id: 1,
-          name: 'My Shopping List',
-          created_at: now,
-          updated_at: now
-        })
-        list = await this.db.persistentShoppingLists.get(id)
+      // If no lists exist, create one
+      if (lists.length === 0) {
+        return await this.createList('My Shopping List')
       }
-      
-      return list
+
+      // Return the first (oldest) list
+      return lists[0]
     } catch (error) {
       console.error('Failed to get shopping list:', error)
+      throw error
+    }
+  }
+
+  // Create new shopping list
+  async createList(name) {
+    try {
+      const now = new Date().toISOString()
+      const id = await this.db.persistentShoppingLists.add({
+        name: name || 'New Shopping List',
+        created_at: now,
+        updated_at: now
+      })
+      return await this.db.persistentShoppingLists.get(id)
+    } catch (error) {
+      console.error('Failed to create shopping list:', error)
+      throw error
+    }
+  }
+
+  // Update shopping list
+  async updateList(listId, updates) {
+    try {
+      const normalizedUpdates = {
+        ...updates,
+        updated_at: new Date().toISOString()
+      }
+
+      await this.db.persistentShoppingLists.update(listId, normalizedUpdates)
+      return await this.db.persistentShoppingLists.get(listId)
+    } catch (error) {
+      console.error('Failed to update shopping list:', error)
+      throw error
+    }
+  }
+
+  // Delete shopping list
+  async deleteList(listId) {
+    try {
+      // Delete all items first
+      await this.db.persistentShoppingListItems
+        .where('shopping_list_id')
+        .equals(listId)
+        .delete()
+      
+      // Delete the list
+      await this.db.persistentShoppingLists.delete(listId)
+      return true
+    } catch (error) {
+      console.error('Failed to delete shopping list:', error)
       throw error
     }
   }
@@ -50,7 +104,7 @@ class ShoppingListService {
       const items = await this.db.persistentShoppingListItems
         .where('shopping_list_id')
         .equals(listId)
-        .sortBy('category')
+        .sortBy('sort_order')
       
       return items.map(item => this.normalizeItem(item))
     } catch (error) {
@@ -77,6 +131,7 @@ class ShoppingListService {
         notes: validateStringField(itemData.notes, 'notes', false),
         checked: false,
         checked_at: null,
+        sort_order: 0, // Default sort order, will be updated by reorderItems if needed
         created_at: now,
         updated_at: now
       }
@@ -209,6 +264,53 @@ class ShoppingListService {
       return true
     } catch (error) {
       console.error('Failed to bulk uncheck items:', error)
+      throw error
+    }
+  }
+
+  // Reorder items within a category
+  async reorderItems(listId, itemIds) {
+    try {
+      const now = new Date().toISOString()
+      
+      // Update the sort_order for each item
+      for (let i = 0; i < itemIds.length; i++) {
+        await this.db.persistentShoppingListItems
+          .where('id')
+          .equals(itemIds[i])
+          .modify({ 
+            sort_order: i,
+            updated_at: now
+          })
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to reorder items:', error)
+      throw error
+    }
+  }
+
+  // Move item between categories
+  async moveItemToCategory(itemId, newCategory, newSortOrder = null) {
+    try {
+      const updateData = {
+        category: newCategory,
+        updated_at: new Date().toISOString()
+      }
+
+      if (newSortOrder !== null) {
+        updateData.sort_order = newSortOrder
+      }
+
+      await this.db.persistentShoppingListItems
+        .where('id')
+        .equals(itemId)
+        .modify(updateData)
+
+      return true
+    } catch (error) {
+      console.error('Failed to move item to category:', error)
       throw error
     }
   }

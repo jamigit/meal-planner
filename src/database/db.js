@@ -92,6 +92,16 @@ class MealPlannerDB extends Dexie {
       persistentShoppingLists: '++id, name, created_at, updated_at',
       persistentShoppingListItems: '++id, shopping_list_id, name, quantity, unit, category, checked, checked_at, notes, created_at, updated_at'
     })
+
+    // Version 10: Add sort_order to shopping list items
+    this.version(10).stores({
+      recipes: '++id, name, url, tags, cuisine_tags, ingredient_tags, convenience_tags, ingredients, instructions, prep_time, cook_time, servings, created_at, updated_at',
+      weeklyPlans: '++id, meals, notes, name, is_current, created_at',
+      mealHistory: '++id, recipe_id, week_date, eaten_date, created_at',
+      shoppingLists: '++id, weekly_plan_id, items, created_at',
+      persistentShoppingLists: '++id, name, created_at, updated_at',
+      persistentShoppingListItems: '++id, shopping_list_id, name, quantity, unit, category, checked, checked_at, notes, sort_order, created_at, updated_at'
+    })
   }
 }
 

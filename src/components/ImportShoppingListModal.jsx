@@ -8,7 +8,8 @@ function ImportShoppingListModal({
   isOpen, 
   onClose, 
   generatedList, 
-  onImportComplete 
+  onImportComplete,
+  targetListId = null // Optional: specify which list to import to
 }) {
   const [selectedItems, setSelectedItems] = useState(new Set())
   const [isImporting, setIsImporting] = useState(false)
@@ -71,7 +72,18 @@ function ImportShoppingListModal({
       const shoppingListService = await serviceSelector.getShoppingListService()
       
       // Get or create shopping list
-      const shoppingList = await shoppingListService.getShoppingList()
+      let shoppingList
+      if (targetListId) {
+        // Use specified list
+        const allLists = await shoppingListService.getAllLists()
+        shoppingList = allLists.find(list => list.id === targetListId)
+        if (!shoppingList) {
+          throw new Error('Target shopping list not found')
+        }
+      } else {
+        // Use default list (backward compatibility)
+        shoppingList = await shoppingListService.getShoppingList()
+      }
       
       // Convert selected items to shopping list items
       const itemsToImport = []
