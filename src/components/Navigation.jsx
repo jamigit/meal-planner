@@ -13,7 +13,7 @@ function Navigation() {
     await signOut()
   }
 
-  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history'
+  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/tag-management'
 
   // Close more menu when screen size changes
   useEffect(() => {
@@ -115,7 +115,7 @@ function Navigation() {
               </Link>
               <Link
                 to="/meal-history"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
+                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
                   location.pathname === '/meal-history'
                     ? 'bg-white/10 text-white'
                     : 'text-stone-200 hover:bg-white/10 hover:text-white'
@@ -128,6 +128,22 @@ function Navigation() {
                   </svg>
                 </span>
                 <span>History</span>
+              </Link>
+              <Link
+                to="/tag-management"
+                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
+                  location.pathname === '/tag-management'
+                    ? 'bg-white/10 text-white'
+                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
+                }`}
+                onClick={() => setIsMoreMenuOpen(false)}
+              >
+                <span className="mr-2" aria-hidden>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                  </svg>
+                </span>
+                <span>Tags</span>
               </Link>
             </div>
           </div>

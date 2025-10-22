@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { serviceSelector } from '../services/serviceSelector.js'
-import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
+import { TAG_TAXONOMY, getCategoryDisplayName, getCategoryColorClasses } from '../constants/recipeTags.js'
 import CategorizedTags from './CategorizedTags'
 import { getRecipeSelectionClasses, getTagFilterClasses, getModalClasses } from '../utils/colorMigration'
 import { joinClasses, colors, typography } from '../utils/designSystem'
@@ -80,9 +80,10 @@ function RecipeSelector({ isOpen, onClose, onSelectRecipes, selectedMealIds = []
 
   // Get categorized tags for filtering
   const categorizedTags = {
-    [TAG_CATEGORIES.CUISINE]: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
-    [TAG_CATEGORIES.INGREDIENTS]: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
-    [TAG_CATEGORIES.CONVENIENCE]: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    cuisine_tags: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
+    ingredient_tags: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
+    convenience_tags: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    dietary_tags: [...new Set(recipes.flatMap(recipe => recipe.dietary_tags || []))].sort(),
     legacy: [...new Set(recipes.flatMap(recipe => recipe.tags || []))].sort()
   }
 

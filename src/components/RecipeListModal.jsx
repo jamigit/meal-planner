@@ -2,13 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { recipeService } from '../database/recipeService.js'
 import { debounce } from '../utils/performance.js'
 import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
+import { TAG_TAXONOMY } from '../constants/recipeTags.js'
 
 export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMealIds = [] }) {
   const [recipes, setRecipes] = useState([])
   const [filteredRecipes, setFilteredRecipes] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCuisines, setSelectedCuisines] = useState([])
-  const [selectedTags, setSelectedTags] = useState([])
+  const [selectedIngredientTags, setSelectedIngredientTags] = useState([])
+  const [selectedConvenienceTags, setSelectedConvenienceTags] = useState([])
   const [selectedDietary, setSelectedDietary] = useState([])
   const [isLoading, setIsLoading] = useState(false)
 
@@ -22,7 +24,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
   // Filter recipes when search term or filters change
   useEffect(() => {
     filterRecipes()
-  }, [recipes, searchTerm, selectedCuisines, selectedTags, selectedDietary])
+  }, [recipes, searchTerm, selectedCuisines, selectedIngredientTags, selectedConvenienceTags, selectedDietary])
 
   const loadRecipes = async () => {
     setIsLoading(true)
@@ -56,26 +58,29 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
       )
     }
 
-    // Filter by tags (OR logic - recipe matches if it has ANY of the selected tags)
-    if (selectedTags.length > 0) {
+    // Filter by ingredient tags (OR logic - recipe matches if it has ANY of the selected ingredient tags)
+    if (selectedIngredientTags.length > 0) {
       filtered = filtered.filter(recipe =>
-        recipe.ingredient_tags?.some(tag => selectedTags.includes(tag)) ||
-        recipe.convenience_tags?.some(tag => selectedTags.includes(tag)) ||
-        recipe.tags?.some(tag => selectedTags.includes(tag))
+        recipe.ingredient_tags?.some(tag => selectedIngredientTags.includes(tag))
       )
     }
 
-    // Filter by dietary (OR logic - recipe matches if it has ANY of the selected dietary options)
+    // Filter by convenience tags (OR logic - recipe matches if it has ANY of the selected convenience tags)
+    if (selectedConvenienceTags.length > 0) {
+      filtered = filtered.filter(recipe =>
+        recipe.convenience_tags?.some(tag => selectedConvenienceTags.includes(tag))
+      )
+    }
+
+    // Filter by dietary tags (OR logic - recipe matches if it has ANY of the selected dietary options)
     if (selectedDietary.length > 0) {
       filtered = filtered.filter(recipe =>
-        recipe.ingredient_tags?.some(tag => selectedDietary.includes(tag)) ||
-        recipe.convenience_tags?.some(tag => selectedDietary.includes(tag)) ||
-        recipe.tags?.some(tag => selectedDietary.includes(tag))
+        recipe.dietary_tags?.some(tag => selectedDietary.includes(tag))
       )
     }
 
     setFilteredRecipes(filtered)
-  }, [recipes, searchTerm, selectedCuisines, selectedTags, selectedDietary])
+  }, [recipes, searchTerm, selectedCuisines, selectedIngredientTags, selectedConvenienceTags, selectedDietary])
 
   // Debounced search
   const debouncedSearch = useCallback(
@@ -99,17 +104,27 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
     }
   }
 
-  // Get unique cuisines, tags, and dietary options for filter dropdowns
-  const cuisines = [...new Set(recipes.flatMap(r => r.cuisine_tags || []))].sort()
-  const tags = [...new Set([
-    ...recipes.flatMap(r => r.ingredient_tags || []),
-    ...recipes.flatMap(r => r.convenience_tags || []),
-    ...recipes.flatMap(r => r.tags || [])
+  // Get unique cuisines, ingredient tags, convenience tags, and dietary options for filter dropdowns
+  // Use taxonomy as source of truth, but also include any tags found in recipes
+  const cuisines = [...new Set([
+    ...TAG_TAXONOMY.cuisine_tags,
+    ...recipes.flatMap(r => r.cuisine_tags || [])
   ])].sort()
   
-  // Common dietary options that might appear in tags
-  const dietaryOptions = ['Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Keto', 'Paleo', 'Vegan', 'Low-Sodium', 'Sugar-Free', 'Vegetarian', 'Low-Carb', 'High-Protein']
-    .filter(option => tags.includes(option)) // Only show dietary options that actually exist in the recipes
+  const ingredientTags = [...new Set([
+    ...TAG_TAXONOMY.ingredient_tags,
+    ...recipes.flatMap(r => r.ingredient_tags || [])
+  ])].sort()
+  
+  const convenienceTags = [...new Set([
+    ...TAG_TAXONOMY.convenience_tags,
+    ...recipes.flatMap(r => r.convenience_tags || [])
+  ])].sort()
+  
+  const dietaryOptions = [...new Set([
+    ...TAG_TAXONOMY.dietary_tags,
+    ...recipes.flatMap(r => r.dietary_tags || [])
+  ])].sort()
 
   if (!isOpen) return null
 
@@ -159,11 +174,19 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
             />
             
             <MultiSelectDropdown
-              label="Filter by Tag"
-              placeholder="All tags"
-              options={tags}
-              selectedValues={selectedTags}
-              onChange={setSelectedTags}
+              label="Filter by Ingredient"
+              placeholder="All ingredients"
+              options={ingredientTags}
+              selectedValues={selectedIngredientTags}
+              onChange={setSelectedIngredientTags}
+            />
+            
+            <MultiSelectDropdown
+              label="Filter by Convenience"
+              placeholder="All convenience"
+              options={convenienceTags}
+              selectedValues={selectedConvenienceTags}
+              onChange={setSelectedConvenienceTags}
             />
             
             <MultiSelectDropdown

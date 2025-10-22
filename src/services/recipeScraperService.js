@@ -1,4 +1,6 @@
-export async function scrapeRecipeFromUrl(url, signal) {
+import { recipeTagSuggestionService } from './recipeTagSuggestionService.js'
+
+export async function scrapeRecipeFromUrl(url, signal, autoTag = false) {
   if (!url || typeof url !== 'string') {
     throw new Error('URL required')
   }
@@ -17,6 +19,26 @@ export async function scrapeRecipeFromUrl(url, signal) {
     err.code = code
     throw err
   }
+
+  // Add auto-tagging if requested
+  if (autoTag) {
+    try {
+      const suggestedTags = await recipeTagSuggestionService.suggestTagsForRecipe(data)
+      if (suggestedTags.success) {
+        data.suggested_tags = suggestedTags.data
+        data.tags_auto_suggested = true
+      } else {
+        console.warn('Auto-tagging failed:', suggestedTags.error)
+        data.suggested_tags = suggestedTags.fallback || {}
+        data.tags_auto_suggested = false
+      }
+    } catch (error) {
+      console.warn('Auto-tagging error:', error)
+      data.suggested_tags = {}
+      data.tags_auto_suggested = false
+    }
+  }
+
   return data
 }
 

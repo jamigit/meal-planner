@@ -18,6 +18,7 @@ import MealHistory from './components/MealHistory'
 import Login from './components/Login'
 import Styleguide from './components/Styleguide'
 import DesignSystemTest from './components/DesignSystemTest'
+import TagManagement from './components/TagManagement'
 
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
@@ -101,6 +102,17 @@ function AppContent() {
                 transition={pageTransition}
               >
                 <MealHistory />
+              </motion.div>
+            } />
+            <Route path="/tag-management" element={
+              <motion.div
+                initial="initial"
+                animate="in"
+                exit="out"
+                variants={pageVariants}
+                transition={pageTransition}
+              >
+                <TagManagement />
               </motion.div>
             } />
             <Route path="/styleguide" element={

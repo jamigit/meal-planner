@@ -12,12 +12,13 @@ import ShoppingListCard from './ShoppingListCard.jsx'
 import SavePlanTransition from './SavePlanTransition.jsx'
 import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 import { useNavigate } from 'react-router-dom'
+import { TAG_TAXONOMY } from '../constants/recipeTags.js'
 
 // State management with reducer
 const initialState = {
   selectedMeals: [],
   suggestions: { meals: [], overview: '', error: null },
-  preferences: { userPrompt: '', cuisines: [], tags: [], dietary: [] },
+  preferences: { userPrompt: '', cuisines: [], ingredient_tags: [], convenience_tags: [], dietary_tags: [] },
   plan: { name: '', notes: '' },
   activeTab: 'selected', // 'selected' or 'ingredients'
   allRecipes: [],
@@ -350,25 +351,33 @@ export default function MealPlannerV2() {
               <MultiSelectDropdown
                 label="Cuisines"
                 placeholder="Select cuisines..."
-                options={['Italian', 'Asian', 'Mexican', 'Mediterranean', 'American', 'Indian', 'Thai', 'Chinese', 'Japanese', 'French']}
+                options={TAG_TAXONOMY.cuisine_tags}
                 selectedValues={state.preferences.cuisines || []}
                 onChange={(cuisines) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines } })}
               />
               
               <MultiSelectDropdown
-                label="Tags"
-                placeholder="Select tags..."
-                options={['Quick', 'Easy', 'Healthy', 'Comfort', 'Spicy', 'Vegetarian', 'One-Pot', 'Low-Carb', 'High-Protein', 'Budget-Friendly']}
-                selectedValues={state.preferences.tags || []}
-                onChange={(tags) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { tags } })}
+                label="Main Ingredients"
+                placeholder="Select ingredients..."
+                options={TAG_TAXONOMY.ingredient_tags}
+                selectedValues={state.preferences.ingredient_tags || []}
+                onChange={(ingredient_tags) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { ingredient_tags } })}
+              />
+              
+              <MultiSelectDropdown
+                label="Convenience"
+                placeholder="Select convenience..."
+                options={TAG_TAXONOMY.convenience_tags}
+                selectedValues={state.preferences.convenience_tags || []}
+                onChange={(convenience_tags) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { convenience_tags } })}
               />
               
               <MultiSelectDropdown
                 label="Dietary"
                 placeholder="Select dietary..."
-                options={['Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Keto', 'Paleo', 'Vegan', 'Low-Sodium', 'Sugar-Free']}
-                selectedValues={state.preferences.dietary || []}
-                onChange={(dietary) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { dietary } })}
+                options={TAG_TAXONOMY.dietary_tags}
+                selectedValues={state.preferences.dietary_tags || []}
+                onChange={(dietary_tags) => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { dietary_tags } })}
               />
             </div>
           </div>
@@ -376,7 +385,7 @@ export default function MealPlannerV2() {
           {/* Clear All Preferences Button */}
           <div className="flex justify-center mt-4">
             <button
-              onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines: [], tags: [], dietary: [] } })}
+              onClick={() => dispatch({ type: 'UPDATE_PREFERENCES', preferences: { cuisines: [], ingredient_tags: [], convenience_tags: [], dietary_tags: [] } })}
               className="btn-outline-black-sm"
             >
               Clear All Preferences

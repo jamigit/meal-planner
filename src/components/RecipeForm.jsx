@@ -1,23 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
 import { scrapeRecipeFromUrl } from '../services/recipeScraperService.js'
+import { recipeTagSuggestionService } from '../services/recipeTagSuggestionService.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  TAG_CATEGORIES,
+  TAG_TAXONOMY,
   CUISINE_TAGS,
   INGREDIENT_TAGS,
   CONVENIENCE_TAGS,
+  DIETARY_TAGS,
   getCategoryDisplayName,
   getCategoryColorClasses
-} from '../constants/tagCategories.js'
+} from '../constants/recipeTags.js'
 
 function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   const [formData, setFormData] = useState({
     name: recipe?.name || '',
     url: recipe?.url || '',
     tags: recipe?.tags?.join(', ') || '',
-    cuisine_tags: recipe?.cuisine_tags || [],
-    ingredient_tags: recipe?.ingredient_tags || [],
-    convenience_tags: recipe?.convenience_tags || [],
+    cuisine_tags: Array.isArray(recipe?.cuisine_tags) ? recipe.cuisine_tags : [],
+    ingredient_tags: Array.isArray(recipe?.ingredient_tags) ? recipe.ingredient_tags : [],
+    convenience_tags: Array.isArray(recipe?.convenience_tags) ? recipe.convenience_tags : [],
+    dietary_tags: Array.isArray(recipe?.dietary_tags) ? recipe.dietary_tags : [],
     ingredients: recipe?.ingredients && recipe?.ingredients.length > 0 ? recipe.ingredients : [''],
     instructions: recipe?.instructions && recipe?.instructions.length > 0 ? recipe.instructions : [''],
     prep_time: recipe?.prep_time || '',
@@ -28,6 +31,8 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   const [errors, setErrors] = useState({})
   const [isScraping, setIsScraping] = useState(false)
   const [scrapeError, setScrapeError] = useState(null)
+  const [isAutoTagging, setIsAutoTagging] = useState(false)
+  const [autoTagError, setAutoTagError] = useState(null)
   const abortRef = useRef(null)
 
   // Update form data when recipe prop changes
@@ -37,9 +42,10 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
         name: recipe.name || '',
         url: recipe.url || '',
         tags: recipe.tags?.join(', ') || '',
-        cuisine_tags: recipe.cuisine_tags || [],
-        ingredient_tags: recipe.ingredient_tags || [],
-        convenience_tags: recipe.convenience_tags || [],
+        cuisine_tags: Array.isArray(recipe.cuisine_tags) ? recipe.cuisine_tags : [],
+        ingredient_tags: Array.isArray(recipe.ingredient_tags) ? recipe.ingredient_tags : [],
+        convenience_tags: Array.isArray(recipe.convenience_tags) ? recipe.convenience_tags : [],
+        dietary_tags: Array.isArray(recipe.dietary_tags) ? recipe.dietary_tags : [],
         ingredients: recipe.ingredients && recipe.ingredients.length > 0 ? recipe.ingredients : [''],
         instructions: recipe.instructions && recipe.instructions.length > 0 ? recipe.instructions : [''],
         prep_time: recipe.prep_time || '',
@@ -55,6 +61,7 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
         cuisine_tags: [],
         ingredient_tags: [],
         convenience_tags: [],
+        dietary_tags: [],
         ingredients: [''],
         instructions: [''],
         prep_time: '',
@@ -231,6 +238,65 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
       setScrapeError(friendly)
     } finally {
       setIsScraping(false)
+    }
+  }
+
+  const handleAutoTag = async () => {
+    // Check if we have enough data to suggest tags
+    if (!formData.name || (!formData.ingredients || formData.ingredients.length === 0 || formData.ingredients[0] === '')) {
+      setAutoTagError('Please enter recipe name and ingredients first')
+      return
+    }
+
+    try {
+      setAutoTagError(null)
+      setIsAutoTagging(true)
+
+      // Create a recipe object for the AI to analyze
+      const recipeForAnalysis = {
+        name: formData.name,
+        ingredients: formData.ingredients.filter(ing => ing.trim() !== ''),
+        instructions: formData.instructions.filter(inst => inst.trim() !== ''),
+        prep_time: parseInt(formData.prep_time) || null,
+        cook_time: parseInt(formData.cook_time) || null
+      }
+
+      const result = await recipeTagSuggestionService.suggestTagsForRecipe(recipeForAnalysis)
+      
+      if (result.success) {
+        // Apply suggested tags to form
+        setFormData(prev => ({
+          ...prev,
+          cuisine_tags: [...new Set([...(prev.cuisine_tags || []), ...(result.data.cuisine_tags || [])])],
+          ingredient_tags: [...new Set([...(prev.ingredient_tags || []), ...(result.data.ingredient_tags || [])])],
+          convenience_tags: [...new Set([...(prev.convenience_tags || []), ...(result.data.convenience_tags || [])])],
+          dietary_tags: [...new Set([...(prev.dietary_tags || []), ...(result.data.dietary_tags || [])])]
+        }))
+        
+        // Show success message
+        if (result.cached) {
+          console.log('Tags loaded from cache')
+        }
+      } else if (result.fallback) {
+        // Use fallback suggestions
+        setFormData(prev => ({
+          ...prev,
+          cuisine_tags: [...new Set([...(prev.cuisine_tags || []), ...(result.fallback.cuisine_tags || [])])],
+          ingredient_tags: [...new Set([...(prev.ingredient_tags || []), ...(result.fallback.ingredient_tags || [])])],
+          convenience_tags: [...new Set([...(prev.convenience_tags || []), ...(result.fallback.convenience_tags || [])])],
+          dietary_tags: [...new Set([...(prev.dietary_tags || []), ...(result.fallback.dietary_tags || [])])]
+        }))
+        
+        // Show fallback message
+        setAutoTagError(result.error || 'Using smart suggestions instead of AI')
+      } else {
+        setAutoTagError(result.error || 'Failed to get tag suggestions')
+      }
+    } catch (error) {
+      console.error('Auto-tagging error:', error)
+      setAutoTagError('Failed to get tag suggestions. Please try again.')
+    } finally {
+      setIsAutoTagging(false)
     }
   }
 
@@ -452,13 +518,47 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
 
             {/* Categorized Tags */}
             <div className="space-y-6">
-              <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                Recipe Categories
-              </h3>
+              <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Recipe Categories
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleAutoTag}
+                  disabled={isAutoTagging || !formData.name || !formData.ingredients || formData.ingredients[0] === ''}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isAutoTagging ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      🤖 AI Suggest Tags
+                    </>
+                  )}
+                </button>
+              </div>
 
-              {renderTagCategory(TAG_CATEGORIES.CUISINE, CUISINE_TAGS)}
-              {renderTagCategory(TAG_CATEGORIES.INGREDIENTS, INGREDIENT_TAGS)}
-              {renderTagCategory(TAG_CATEGORIES.CONVENIENCE, CONVENIENCE_TAGS)}
+              {autoTagError && (
+                <div className={`border rounded-lg p-3 ${
+                  autoTagError.includes('smart suggestions') || autoTagError.includes('unavailable')
+                    ? 'bg-yellow-50 border-yellow-200'
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <p className={`text-sm ${
+                    autoTagError.includes('smart suggestions') || autoTagError.includes('unavailable')
+                      ? 'text-yellow-700'
+                      : 'text-red-600'
+                  }`}>{autoTagError}</p>
+                </div>
+              )}
+
+              {renderTagCategory('cuisine', CUISINE_TAGS)}
+              {renderTagCategory('ingredient', INGREDIENT_TAGS)}
+              {renderTagCategory('convenience', CONVENIENCE_TAGS)}
+              {renderTagCategory('dietary', DIETARY_TAGS)}
             </div>
 
             {/* Ingredients */}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { serviceSelector } from '../services/serviceSelector.js'
-import { TAG_CATEGORIES, getCategoryDisplayName, getCategoryColorClasses } from '../constants/tagCategories.js'
+import { TAG_TAXONOMY, getCategoryDisplayName, getCategoryColorClasses } from '../constants/recipeTags.js'
 import CSVUpload from './CSVUpload'
 import RecipeCard from './RecipeCard'
 import RecipeForm from './RecipeForm'
 import TagMigrationModal from './TagMigrationModal'
+import BulkRecipeScraper from './BulkRecipeScraper'
 
 function RecipeList() {
   const [recipes, setRecipes] = useState([])
@@ -16,6 +17,7 @@ function RecipeList() {
   const [showMigrationModal, setShowMigrationModal] = useState(false)
   const [showImportSidebar, setShowImportSidebar] = useState(false)
   const [isFilterExpanded, setIsFilterExpanded] = useState(false)
+  const [showBulkScraper, setShowBulkScraper] = useState(false)
 
   const loadRecipes = async () => {
     const recipeService = await serviceSelector.getRecipeService()
@@ -80,17 +82,19 @@ function RecipeList() {
 
   // Get categorized tags for filtering
   const categorizedTags = {
-    [TAG_CATEGORIES.CUISINE]: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
-    [TAG_CATEGORIES.INGREDIENTS]: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
-    [TAG_CATEGORIES.CONVENIENCE]: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    cuisine_tags: [...new Set(recipes.flatMap(recipe => recipe.cuisine_tags || []))].sort(),
+    ingredient_tags: [...new Set(recipes.flatMap(recipe => recipe.ingredient_tags || []))].sort(),
+    convenience_tags: [...new Set(recipes.flatMap(recipe => recipe.convenience_tags || []))].sort(),
+    dietary_tags: [...new Set(recipes.flatMap(recipe => recipe.dietary_tags || []))].sort(),
     legacy: [...new Set(recipes.flatMap(recipe => recipe.tags || []))].sort()
   }
 
   // Get all tags for filtering (fallback)
   const allTags = [
-    ...categorizedTags[TAG_CATEGORIES.CUISINE],
-    ...categorizedTags[TAG_CATEGORIES.INGREDIENTS],
-    ...categorizedTags[TAG_CATEGORIES.CONVENIENCE],
+    ...categorizedTags.cuisine_tags,
+    ...categorizedTags.ingredient_tags,
+    ...categorizedTags.convenience_tags,
+    ...categorizedTags.dietary_tags,
     ...categorizedTags.legacy
   ]
 
@@ -123,6 +127,7 @@ function RecipeList() {
         <div className="flex flex-wrap gap-3 mt-3">
           <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
           <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
+          <button onClick={() => setShowBulkScraper(true)} className="btn-outline-black">🤖 Bulk Scraper + AI Tags</button>
         </div>
       </div>
 

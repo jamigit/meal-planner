@@ -1,4 +1,4 @@
-import { TAG_CATEGORIES } from '../constants/tagCategories.js'
+import { TAG_TAXONOMY } from '../constants/recipeTags.js'
 
 function CategorizedTags({ recipe, className = '', showLegacy = false }) {
   const {

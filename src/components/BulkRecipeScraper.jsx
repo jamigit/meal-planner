@@ -7,6 +7,7 @@ function BulkRecipeScraper({ isOpen, onClose }) {
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [results, setResults] = useState([])
   const [csvData, setCsvData] = useState('')
+  const [autoTag, setAutoTag] = useState(true)
 
   const processInput = async () => {
     if (!input.trim()) return
@@ -25,7 +26,7 @@ function BulkRecipeScraper({ isOpen, onClose }) {
       try {
         console.log(`🔄 Processing ${i + 1}/${lines.length}: ${line}`)
         
-        const result = await processLine(line)
+        const result = await processLine(line, autoTag)
         if (result) {
           processedRecipes.push(result)
           setResults(prev => [...prev, result])
@@ -55,25 +56,25 @@ function BulkRecipeScraper({ isOpen, onClose }) {
     console.log('✅ Bulk processing completed!')
   }
 
-  const processLine = async (line) => {
+  const processLine = async (line, autoTag = false) => {
     const isUrl = /^https?:\/\//.test(line)
     
     if (isUrl) {
       console.log(`🌐 Scraping URL: ${line}`)
-      return await processUrl(line)
+      return await processUrl(line, autoTag)
     } else {
       console.log(`📝 Generating recipe for: ${line}`)
       return await processRecipeName(line)
     }
   }
 
-  const processUrl = async (url) => {
+  const processUrl = async (url, autoTag = false) => {
     try {
       // Scrape recipe data
-      const scrapedData = await scrapeRecipe(url)
+      const scrapedData = await scrapeRecipe(url, autoTag)
       
-      // Generate AI tags for scraped data
-      const aiTags = await generateAITags(scrapedData)
+      // Generate AI tags for scraped data (if not already auto-tagged)
+      const aiTags = scrapedData.suggested_tags || await generateAITags(scrapedData)
       
       return {
         name: scrapedData.name || 'Unknown Recipe',
@@ -118,11 +119,11 @@ function BulkRecipeScraper({ isOpen, onClose }) {
     }
   }
 
-  const scrapeRecipe = async (url) => {
+  const scrapeRecipe = async (url, autoTag = false) => {
     const response = await fetch('/api/scrape-recipe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ url, autoTag })
     })
 
     if (!response.ok) {
@@ -276,6 +277,23 @@ Thai Green Curry
 https://foodnetwork.com/recipe/lasagna
 Mushroom Risotto`}
                 />
+              </div>
+              
+              {/* Auto-tag checkbox */}
+              <div className="flex items-center space-x-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="autoTag"
+                  checked={autoTag}
+                  onChange={(e) => setAutoTag(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="autoTag" className="text-sm font-medium text-gray-700">
+                  🤖 Auto-suggest tags using AI
+                </label>
+                <span className="text-xs text-gray-500">
+                  (Analyzes recipes and suggests appropriate tags)
+                </span>
               </div>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

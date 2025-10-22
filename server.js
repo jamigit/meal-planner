@@ -198,10 +198,81 @@ function isHttpUrlSafe(raw) {
   }
 }
 
+// Tag suggestion function for server-side use
+async function suggestTagsForRecipe(recipe) {
+  try {
+    const apiKey = process.env.VITE_CLAUDE_API_KEY || process.env.CLAUDE_API_KEY
+    if (!apiKey) {
+      throw new Error('Claude API key not configured')
+    }
+
+    const prompt = `You are a recipe categorization expert. Analyze this recipe and suggest tags.
+
+RULES:
+- Select tags ONLY from the provided taxonomy below
+- Maximum 3 tags per category, ideally 1-2
+- Only select clearly applicable tags
+- Return JSON only, no other text
+
+RECIPE:
+Name: ${recipe.name || 'Unknown'}
+Ingredients: ${(recipe.ingredients || []).join(', ')}
+Instructions: ${(recipe.instructions || []).join(' ')}
+Prep Time: ${recipe.prep_time || 'Unknown'} min
+Cook Time: ${recipe.cook_time || 'Unknown'} min
+
+TAXONOMY:
+cuisine_tags: Italian, Asian, Mexican, Mediterranean, American, Indian, French, Caribbean, Latin American, European
+ingredient_tags: Chicken, Beef, Pork, Seafood, Vegetarian, Vegetable, Pasta, Rice, Soup, Salad, Sandwich, Egg, Beans, Grains, Tofu
+convenience_tags: Quick, Easy, One-Pot, Slow-Cooker, Instant-Pot, No-Cook, Make-Ahead, Freezer-Friendly, Meal-Prep, Budget-Friendly, Oven-Baked, Stovetop, Grilled, Comfort-Food
+dietary_tags: Gluten-Free, Dairy-Free, Vegan, Vegetarian, Low-Carb, High-Protein, Keto, Paleo, Healthy, Light, Spicy, Kid-Friendly
+
+RESPONSE (JSON only):
+{
+  "cuisine_tags": [],
+  "ingredient_tags": [],
+  "convenience_tags": [],
+  "dietary_tags": []
+}`
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Claude API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const content = data.content?.[0]?.text || ''
+    
+    // Parse JSON response
+    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error('No JSON found in response')
+    }
+
+    return JSON.parse(jsonMatch[0])
+  } catch (error) {
+    console.error('Tag suggestion error:', error)
+    throw error
+  }
+}
+
 // Recipe scrape endpoint (JSON-LD first)
 app.post('/api/scrape-recipe', rateLimit, async (req, res) => {
   try {
-    const { url } = req.body || {}
+    const { url, autoTag = false } = req.body || {}
     if (!url || !isHttpUrlSafe(url)) {
       return res.status(400).json({ code: 'INVALID_URL', error: 'Invalid or unsupported URL' })
     }
@@ -304,6 +375,20 @@ app.post('/api/scrape-recipe', rateLimit, async (req, res) => {
 
     // Cache and return
     scrapeCache.set(url, { data: normalized, ts: Date.now() })
+    
+    // Add auto-tagging if requested
+    if (autoTag) {
+      try {
+        const suggestedTags = await suggestTagsForRecipe(normalized)
+        normalized.suggested_tags = suggestedTags
+        normalized.tags_auto_suggested = true
+      } catch (error) {
+        console.warn('Auto-tagging failed:', error)
+        normalized.suggested_tags = {}
+        normalized.tags_auto_suggested = false
+      }
+    }
+    
     return res.json({ source_url: url, ...normalized })
 
   } catch (error) {
@@ -454,6 +539,73 @@ function normalizeSpoonacular(data) {
   const image_url = data.image || null
   return { name, ingredients, instructions, prep_time, cook_time, servings, image_url }
 }
+
+// Tag suggestion endpoint
+app.post('/api/suggest-tags', rateLimit, async (req, res) => {
+  try {
+    const { prompt } = req.body
+
+    if (!prompt) {
+      return res.status(400).json({ error: 'Prompt is required' })
+    }
+
+    const apiKey = process.env.VITE_CLAUDE_API_KEY || process.env.CLAUDE_API_KEY
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: 'Claude API key not configured'
+      })
+    }
+
+    console.log('🤖 Tag suggestion request received')
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1000,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Claude API error:', response.status, errorText)
+      return res.status(response.status).json({
+        error: `Claude API error: ${response.status}`,
+        details: errorText
+      })
+    }
+
+    const data = await response.json()
+    const content = data.content?.[0]?.text || ''
+
+    console.log('✅ Tag suggestion completed')
+
+    res.json({
+      success: true,
+      response: content,
+      usage: data.usage
+    })
+
+  } catch (error) {
+    console.error('Tag suggestion error:', error)
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error.message
+    })
+  }
+})
 
 app.listen(port, () => {
   console.log(`🚀 Claude API proxy server running on http://localhost:${port}`)
