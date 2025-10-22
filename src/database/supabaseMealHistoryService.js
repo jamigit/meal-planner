@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase.js'
 import { authService } from '../services/authService.js'
+import { recipeService } from './recipeService.js'
 
 class SupabaseMealHistoryService {
   constructor() {
@@ -54,43 +55,30 @@ class SupabaseMealHistoryService {
       // Validate recipe exists
       const recipeExists = await this.validateRecipeId(recipeId)
       if (!recipeExists) {
-        console.warn(`Recipe with ID ${recipeId} not found in Supabase. Attempting to create a placeholder entry...`)
+        console.warn(`Recipe with ID ${recipeId} not found in Supabase. Attempting to sync from IndexedDB...`)
         
-        // Try to create a placeholder recipe entry for this meal
+        // Try to fetch recipe from IndexedDB and sync to Supabase
         try {
-          const { data: placeholderRecipe, error: recipeError } = await supabase
-            .from('recipes')
-            .insert({
-              user_id: userId,
-              name: `Unknown Recipe (ID: ${recipeId})`,
-              url: null,
-              ingredients: ['Recipe data not available'],
-              instructions: ['This recipe was marked as eaten but the original recipe data is not available in Supabase.'],
-              prep_time: null,
-              cook_time: null,
-              servings: null,
-              cuisine_tags: [],
-              ingredient_tags: [],
-              convenience_tags: [],
-              tags: ['placeholder']
-            })
-            .select()
-
-          if (recipeError) {
-            console.error('Failed to create placeholder recipe:', recipeError)
-            throw new Error(`Recipe with ID ${recipeId} does not exist in Supabase and could not create placeholder. This might be a recipe from IndexedDB that hasn't been synced yet.`)
+          const localRecipe = await recipeService.getById(recipeId)
+          if (localRecipe) {
+            console.log(`Found recipe in IndexedDB: ${localRecipe.name}. Syncing to Supabase...`)
+            
+            // Import the Supabase recipe service to sync the recipe
+            const { supabaseRecipeService } = await import('./supabaseRecipeService.js')
+            const supabaseRecipeServiceInstance = new supabaseRecipeService()
+            
+            // Sync the recipe to Supabase with the same ID
+            const syncedRecipe = await supabaseRecipeServiceInstance.add(localRecipe)
+            console.log(`Successfully synced recipe to Supabase: ${syncedRecipe.id}`)
+            
+            // Use the synced recipe ID
+            recipeId = syncedRecipe.id
+          } else {
+            throw new Error(`Recipe with ID ${recipeId} not found in IndexedDB or Supabase. This recipe may have been deleted.`)
           }
-
-          if (!placeholderRecipe || placeholderRecipe.length === 0) {
-            throw new Error('Placeholder recipe creation returned no data')
-          }
-
-          console.log('Created placeholder recipe:', placeholderRecipe[0].id)
-          // Use the new placeholder recipe ID
-          recipeId = placeholderRecipe[0].id
-        } catch (placeholderError) {
-          console.error('Failed to create placeholder recipe:', placeholderError)
-          throw new Error(`Recipe with ID ${recipeId} does not exist in Supabase. This might be a recipe from IndexedDB that hasn't been synced yet.`)
+        } catch (syncError) {
+          console.error('Failed to sync recipe from IndexedDB:', syncError)
+          throw new Error(`Recipe with ID ${recipeId} not found and could not be synced. Please re-add this recipe to your collection before marking as eaten.`)
         }
       }
 

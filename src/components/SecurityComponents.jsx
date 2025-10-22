@@ -434,7 +434,7 @@ export function LoginAttemptTracker({
  * @returns {JSX.Element}
  */
 export function SecurityHeaders({ 
-  contentSecurityPolicy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; connect-src 'self' https://*.supabase.co https://*.netlify.app https://*.netlify.com http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://api.fontshare.com;",
+  contentSecurityPolicy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com; connect-src 'self' https://*.supabase.co https://*.netlify.app https://*.netlify.com https://api.emailjs.com http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://api.fontshare.com;",
   xContentTypeOptions = 'nosniff',
   referrerPolicy = 'strict-origin-when-cross-origin'
 }) {
