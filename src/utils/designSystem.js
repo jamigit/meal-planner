@@ -159,3 +159,23 @@ export const cardVariants = {
   surface: 'bg-surface-light text-text-primary',
   dark: 'bg-surface-dark text-text-onDark border-2 border-border-dark'
 }
+
+// Message variants
+export const messageVariants = {
+  success: 'message-success',
+  warning: 'message-warning',
+  error: 'message-error',
+  info: 'message-info'
+}
+
+// Input variants
+export const inputVariants = {
+  standard: 'input-standard',
+  error: 'input-standard border-red-500 focus:ring-red-500'
+}
+
+// Surface variants
+export const surfaceVariants = {
+  page: 'surface-page',
+  elevated: 'surface-elevated'
+}

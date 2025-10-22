@@ -4,6 +4,7 @@ import { TAG_TAXONOMY } from '../constants/recipeTags.js'
 import { getCategoryDisplayName, getCategoryColorClasses } from '../constants/recipeTags.js'
 import { tagManagementService } from '../services/tagManagementService.js'
 import { tagAnalytics } from '../utils/tagAnalytics.js'
+import { PageContainer, PageHeader, PageSection } from './layout'
 
 export default function TagManagement() {
   const [tagUsage, setTagUsage] = useState({})
@@ -203,7 +204,7 @@ export default function TagManagement() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen surface-page p-6">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
@@ -219,18 +220,14 @@ export default function TagManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tag Management</h1>
-          <p className="text-gray-600">
-            Manage your recipe tags: rename, delete, add new tags, or merge similar ones.
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="Tag Management"
+        subtitle="Manage your recipe tags: rename, delete, add new tags, or merge similar ones."
+      />
 
-        {/* Search and Actions */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      {/* Search and Actions */}
+      <PageSection variant="card">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex-1 max-w-md">
               <input
@@ -261,15 +258,15 @@ export default function TagManagement() {
               )}
             </div>
           </div>
-        </div>
+        </PageSection>
 
         {/* Tag Categories */}
         <div className="space-y-6">
           {Object.entries(filteredTags()).map(([category, tags]) => (
-            <div key={category} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div key={category} className="surface-elevated rounded-lg shadow-sm overflow-hidden">
               {/* Category Header */}
               <div
-                className="px-6 py-4 bg-gray-50 border-b cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-6 py-4 surface-page border-b cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => toggleCategory(category)}
               >
                 <div className="flex items-center justify-between">
@@ -406,7 +403,7 @@ export default function TagManagement() {
         </div>
 
         {/* Summary */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+        <div className="mt-8 surface-elevated rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Tag Summary</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {Object.entries(TAG_TAXONOMY).map(([category, tags]) => (
@@ -417,7 +414,6 @@ export default function TagManagement() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
+      </PageContainer>
+    )
+  }

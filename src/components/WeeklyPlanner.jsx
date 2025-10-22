@@ -8,9 +8,11 @@ import RecipeSelector from './RecipeSelector'
 import AISuggestionModal from './AISuggestionModal'
 import ShoppingList from './ShoppingList'
 import ShoppingListCard from './ShoppingListCard'
+import { PageContainer, PageHeader, PageSection } from './layout'
 import CategorizedTags from './CategorizedTags'
 import RecipeCard from './RecipeCard'
 import SavePlanTransition from './SavePlanTransition'
+import Message from './ui/Message.jsx'
 
 function WeeklyPlanner() {
   const navigate = useNavigate()
@@ -411,20 +413,14 @@ function WeeklyPlanner() {
   }
 
   return (
-    <div className="mt-16 md:mt-24 relative pb-[200px]">
-      <img
-        src="/images/kiwi-hero.png"
-        alt="Kiwi hero"
-        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-4 max-[500px]:right-2 md:-right-10 w-60 max-[500px]:w-48 h-60 max-[500px]:h-48 md:w-80 md:h-80 object-contain transform -scale-x-100 z-[-1]"
+    <PageContainer>
+      <PageHeader
+        title={weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
+        showHeroImage={true}
       />
-      <div className="mt-16 mb-10 relative z-10">
-        <h2 className="font-heading text-display-2 uppercase text-black">
-          {weeklyPlan.name ? `${weeklyPlan.name} - Weekly Planner` : 'Weekly Planner'}
-        </h2>
-      </div>
 
       {/* AI Suggestion Section */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         <h3 className="text-h3 font-heading font-black mb-4 flex items-center gap-2"><span className="material-symbols-rounded text-[28px]">robot_2</span> AI-Powered Meal Suggestions</h3>
         <p className="text-black mb-4">
           Get personalized meal recommendations based on your history and preferences
@@ -567,12 +563,11 @@ function WeeklyPlanner() {
             <>Get AI Suggestions</>
           )}
         </motion.button>
-      </div>
-
+      </PageSection>
 
       {/* Selected Meals and Shopping List Section - Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div className="card">
+        <PageSection variant="card">
           <h3 className="text-h5 font-heading font-black mb-4">
             {weeklyPlan.name ? `${weeklyPlan.name} - Selected Meals` : 'Selected Meals'}
           </h3>
@@ -663,7 +658,7 @@ function WeeklyPlanner() {
           >
             Select Meals
           </button>
-        </div>
+        </PageSection>
 
         {/* Shopping List Card */}
         <div>
@@ -676,7 +671,7 @@ function WeeklyPlanner() {
       </div>
 
       {/* Notes Section - Full Width */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         <h3 className="text-h5 font-heading font-black mb-4">Notes</h3>
         <textarea
           value={weeklyPlan.notes}
@@ -684,10 +679,10 @@ function WeeklyPlanner() {
           placeholder="Add any notes about your meal plan..."
           className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-      </div>
+      </PageSection>
 
       {/* Meal Plan Name Section - Full Width */}
-      <div className="card">
+      <PageSection variant="card">
         <h3 className="text-h5 font-heading font-black mb-4">Meal Plan Name (Optional)</h3>
         <p className="text-black mb-4">
           Give your meal plan a custom name. If left blank, it will use a default name with the creation date.
@@ -699,7 +694,7 @@ function WeeklyPlanner() {
           placeholder="e.g., 'Healthy Week', 'Quick Meals', 'Family Favorites'"
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-      </div>
+      </PageSection>
 
       <RecipeSelector
         isOpen={isRecipeSelectorOpen}
@@ -796,7 +791,7 @@ function WeeklyPlanner() {
         message={transitionMessage}
       />
 
-    </div>
+    </PageContainer>
   )
 }
 

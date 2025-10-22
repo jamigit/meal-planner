@@ -19,7 +19,21 @@ export default {
           light: '#fef9c2',
           card: '#ffdd60',
           dark: '#0c0a09',
-          overlay: 'rgba(0, 0, 0, 0.5)'
+          overlay: 'rgba(0, 0, 0, 0.5)',
+          page: '#fef9c2',        // bg-surface-page (replaces bg-gray-50 for pages)
+          elevated: '#ffffff'     // bg-surface-elevated (replaces bg-white)
+        },
+        
+        // Semantic message colors
+        message: {
+          success: '#dcfce7',     // message-success (replaces bg-green-50)
+          'success-text': '#166534',
+          warning: '#fef3c7',     // message-warning (replaces bg-yellow-50)
+          'warning-text': '#92400e',
+          error: '#fee2e2',       // message-error (replaces bg-red-50)
+          'error-text': '#991b1b',
+          info: '#dbeafe',        // message-info (replaces bg-blue-50)
+          'info-text': '#1e40af'
         },
         
         // Text colors (flattened for better Tailwind class generation)

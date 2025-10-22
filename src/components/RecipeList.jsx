@@ -7,6 +7,7 @@ import RecipeCard from './RecipeCard'
 import RecipeForm from './RecipeForm'
 import TagMigrationModal from './TagMigrationModal'
 import BulkRecipeScraper from './BulkRecipeScraper'
+import { PageContainer, PageHeader, PageSection } from './layout'
 
 function RecipeList() {
   const [recipes, setRecipes] = useState([])
@@ -137,19 +138,20 @@ function RecipeList() {
 
 
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="font-heading text-display-2 uppercase text-black">Recipes</h2>
-        <div className="flex flex-wrap gap-3 mt-3">
-          <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
-          <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
-          <button onClick={() => setShowBulkScraper(true)} className="btn-outline-black">🤖 Bulk Scraper + AI Tags</button>
-        </div>
-      </div>
-
+    <PageContainer>
+      <PageHeader
+        title="Recipes"
+        actions={
+          <div className="flex flex-wrap gap-3">
+            <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
+            <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
+            <button onClick={() => setShowBulkScraper(true)} className="btn-outline-black">🤖 Bulk Scraper + AI Tags</button>
+          </div>
+        }
+      />
 
       {/* Search and Filter */}
-      <div className="mb-6 space-y-4">
+      <PageSection>
         {/* Search and Filter Controls - Side by Side */}
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -157,7 +159,7 @@ function RecipeList() {
             placeholder="Search recipes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 p-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-black"
+            className="flex-1 input-standard"
           />
 
           {/* Filter Toggle Button */}
@@ -233,7 +235,7 @@ function RecipeList() {
             {selectedTag && ` tagged with "${selectedTag}"`}
           </p>
         ) : null}
-      </div>
+      </PageSection>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredRecipes.length === 0 ? (
@@ -317,7 +319,7 @@ function RecipeList() {
           />
         )}
       </AnimatePresence>
-    </div>
+    </PageContainer>
   )
 }
 

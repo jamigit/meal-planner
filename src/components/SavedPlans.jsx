@@ -4,6 +4,7 @@ import { serviceSelector } from '../services/serviceSelector.js'
 import { emailService } from '../services/emailService.js'
 import ShoppingListCard from './ShoppingListCard'
 import RecipeCard from './RecipeCard'
+import { PageContainer, PageHeader, PageSection } from './layout'
 
 function SavedPlans() {
   const [savedPlans, setSavedPlans] = useState([])
@@ -153,19 +154,21 @@ function SavedPlans() {
   }
 
   return (
-    <div className="relative">
-      <div className="mb-2">
-        <h2 className="font-heading text-display-2 uppercase text-text-primary">Saved Plans</h2>
-      </div>
-      <p className="text-black mb-4">{savedPlans.length} saved plan{savedPlans.length !== 1 ? 's' : ''}</p>
+    <PageContainer>
+      <PageHeader
+        title="Saved Plans"
+        subtitle={`${savedPlans.length} saved plan${savedPlans.length !== 1 ? 's' : ''}`}
+      />
 
       {savedPlans.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-black mb-4">No saved plans yet.</p>
-          <p className="text-sm text-gray-400">
-            Create a weekly plan and save it to see it here.
-          </p>
-        </div>
+        <PageSection>
+          <div className="text-center py-12">
+            <p className="text-black mb-4">No saved plans yet.</p>
+            <p className="text-sm text-gray-400">
+              Create a weekly plan and save it to see it here.
+            </p>
+          </div>
+        </PageSection>
       ) : (
         <div className="space-y-6">
           {savedPlans.map((plan) => (
@@ -177,7 +180,7 @@ function SavedPlans() {
                       {plan.name?.toString().trim() || `Plan from ${formatDate(plan.created_at)}`}
                     </h3>
                     {plan.is_current && (
-                      <span className="bg-white text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                      <span className="surface-elevated text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                         Current
                       </span>
                     )}
@@ -195,7 +198,7 @@ function SavedPlans() {
                 <div className="relative">
                   <button
                     onClick={() => toggleDropdown(plan.id)}
-                    className="w-8 h-8 border-2 border-black rounded bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                    className="w-8 h-8 border-2 border-black rounded surface-elevated hover:bg-gray-50 transition-colors flex items-center justify-center"
                     title="More actions"
                   >
                     <span className="text-black text-lg leading-none">⋮</span>
@@ -210,7 +213,7 @@ function SavedPlans() {
                       />
                       
                       {/* Dropdown menu */}
-                      <div className="absolute right-0 top-10 z-20 bg-white border-2 border-black rounded-lg shadow-lg py-1 min-w-[160px]">
+                      <div className="absolute right-0 top-10 z-20 surface-elevated border-2 border-black rounded-lg shadow-lg py-1 min-w-[160px]">
                         <button
                           onClick={() => {
                             handleResendEmail(plan)
@@ -257,7 +260,7 @@ function SavedPlans() {
                   <button
                     onClick={() => setActiveTab(plan.id, 'meals')}
                     className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                      getActiveTab(plan.id) === 'meals' ? 'bg-white text-black shadow' : 'text-black'
+                      getActiveTab(plan.id) === 'meals' ? 'surface-elevated text-black shadow' : 'text-black'
                     }`}
                   >
                     Meals ({plan.meals?.length || 0})
@@ -265,7 +268,7 @@ function SavedPlans() {
                   <button
                     onClick={() => setActiveTab(plan.id, 'shopping')}
                     className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                      getActiveTab(plan.id) === 'shopping' ? 'bg-white text-black shadow' : 'text-black'
+                      getActiveTab(plan.id) === 'shopping' ? 'surface-elevated text-black shadow' : 'text-black'
                     }`}
                   >
                     Shopping List
@@ -278,7 +281,7 @@ function SavedPlans() {
                 <div className="mb-4">
                   <div className="grid grid-cols-1 gap-3">
                     {plan.meals.map((meal, index) => (
-                      <div key={meal.id || index} className={`flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg ${plan.is_current ? 'bg-white' : 'bg-gray-50'}`}>
+                      <div key={meal.id || index} className={`flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg ${plan.is_current ? 'surface-elevated' : 'surface-page'}`}>
                         <div className="mb-3 md:mb-0 md:flex-1">
                           <span className="font-heading font-black break-words whitespace-normal text-black">{meal.name}</span>
                         </div>
@@ -326,7 +329,7 @@ function SavedPlans() {
               {plan.notes && (
                 <div>
                   <h4 className="text-h6 font-heading font-black text-text-primary mb-2">Notes:</h4>
-                  <p className="text-black bg-gray-50 p-3 rounded whitespace-pre-wrap">
+                  <p className="text-black surface-page p-3 rounded whitespace-pre-wrap">
                     {plan.notes}
                   </p>
                 </div>
@@ -391,7 +394,7 @@ function SavedPlans() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageContainer>
   )
 }
 

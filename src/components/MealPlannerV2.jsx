@@ -14,6 +14,8 @@ import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 import CategorizedTags from './CategorizedTags.jsx'
 import { useNavigate } from 'react-router-dom'
 import { TAG_TAXONOMY } from '../constants/recipeTags.js'
+import { PageContainer, PageHeader, PageSection } from './layout'
+import Message from './ui/Message.jsx'
 
 // Local storage key for persisting planner state
 const PLANNER_STORAGE_KEY = 'meal-planner-v2-state'
@@ -346,17 +348,11 @@ export default function MealPlannerV2() {
   )
 
   return (
-    <div className="mt-16 md:mt-24 relative pb-[200px]">
-      <img
-        src="/images/kiwi-hero.png"
-        alt="Kiwi hero"
-        className="pointer-events-none select-none absolute -top-28 max-[500px]:-top-20 md:-top-40 right-4 max-[500px]:right-2 md:-right-10 w-60 max-[500px]:w-48 h-60 max-[500px]:h-48 md:w-80 md:h-80 object-contain transform -scale-x-100 z-[-1]"
-      />
-      <div className="mt-16 mb-10 relative z-10">
-        <div className="flex justify-between items-center">
-          <h1 className="font-heading text-display-2 uppercase text-black">
-            AI Meal Planner
-          </h1>
+    <PageContainer>
+      <PageHeader
+        title="AI Meal Planner"
+        showHeroImage={true}
+        actions={
           <button
             onClick={() => {
               dispatch({ type: 'CLEAR_ALL' })
@@ -366,11 +362,11 @@ export default function MealPlannerV2() {
           >
             Start Again
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* User Preferences Section */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
           <span className="material-symbols-rounded text-[28px]">tune</span>
           Your Preferences
@@ -462,10 +458,10 @@ export default function MealPlannerV2() {
             <>Suggest 8 Meals</>
           )}
         </motion.button>
-      </div>
+      </PageSection>
 
       {/* Suggestions Section */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
           <span className="material-symbols-rounded text-[28px]">lightbulb</span>
           AI Suggestions
@@ -480,110 +476,118 @@ export default function MealPlannerV2() {
         )}
 
         {!isLoading && state.suggestions.error && (
-          <div className="bg-yellow-50 p-4 rounded-md mb-4">
-            <p className="text-yellow-800">{state.suggestions.error}</p>
-            <p className="text-sm text-yellow-700 mt-1">Using fallback suggestions</p>
+          <Message variant="warning" className="mb-4">
+            <p>{state.suggestions.error}</p>
+            <p className="text-sm mt-1">Using fallback suggestions</p>
             <button 
               onClick={handleGetSuggestions} 
               className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
             >
               Try Again
             </button>
-          </div>
+          </Message>
         )}
 
         {!isLoading && state.suggestions.overview && (
-          <div className="bg-blue-50 p-4 rounded-md mb-4">
-            <p className="text-blue-800 font-medium">{state.suggestions.overview}</p>
-          </div>
+          <Message variant="info" className="mb-4">
+            <p className="font-medium">{state.suggestions.overview}</p>
+          </Message>
         )}
 
         {!isLoading && state.suggestions.meals.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="space-y-3">
             {state.suggestions.meals.map((meal) => (
-              <div key={meal.id} className="!bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                <h3 className="font-medium text-black text-sm mb-2 line-clamp-2">{meal.name}</h3>
-                <div className="mb-3">
-                  <CategorizedTags recipe={meal} className="text-xs" />
+              <div key={meal.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg surface-page">
+                <div className="mb-3 md:mb-0 md:flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-heading font-black break-words whitespace-normal text-black">{meal.name}</span>
+                    {meal.prep_time && (
+                      <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full">
+                        {meal.prep_time} min prep
+                      </span>
+                    )}
+                    {meal.cook_time && (
+                      <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full">
+                        {meal.cook_time} min cook
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2">
+                    <CategorizedTags recipe={meal} className="text-xs" />
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleAddMeal(meal)}
-                  disabled={state.selectedMeals.find(m => m.id === meal.id)}
-                  className="w-full px-3 py-1.5 border-2 border-black text-black bg-white rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed text-xs font-medium transition-colors"
-                >
-                  {state.selectedMeals.find(m => m.id === meal.id) ? 'Added' : 'Add to Plan'}
-                </button>
+
+                <div className="flex items-center justify-end md:justify-start space-x-2 md:ml-4">
+                  <button
+                    onClick={() => handleAddMeal(meal)}
+                    disabled={state.selectedMeals.find(m => m.id === meal.id)}
+                    className={`px-3 py-1.5 border-2 rounded-md text-xs font-medium transition-colors ${
+                      state.selectedMeals.find(m => m.id === meal.id)
+                        ? 'bg-green-500 text-white border-green-500 cursor-not-allowed'
+                        : 'border-black text-black surface-elevated hover:bg-gray-50'
+                    }`}
+                  >
+                    {state.selectedMeals.find(m => m.id === meal.id) ? (
+                      <span className="flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Added
+                      </span>
+                    ) : (
+                      'Add to Plan'
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
 
         {!isLoading && !state.suggestions.meals.length && !state.suggestions.error && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-text-secondary">
             <div className="text-4xl mb-4">🤖</div>
             <h3 className="text-lg font-medium mb-2">Ready to suggest meals</h3>
             <p>Enter your preferences and click 'Suggest 8 Meals' to get started</p>
           </div>
         )}
-      </div>
+      </PageSection>
 
       {/* Success/Error Messages */}
       {state.successMessage && (
-        <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">{state.successMessage}</p>
-            </div>
-          </div>
-        </div>
+        <Message variant="success" className="mb-6">
+          <p className="text-sm font-medium">{state.successMessage}</p>
+        </Message>
       )}
       
       {state.errorMessage && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-red-800">{state.errorMessage}</p>
-            </div>
-          </div>
-        </div>
+        <Message variant="error" className="mb-6">
+          <p className="text-sm font-medium">{state.errorMessage}</p>
+        </Message>
       )}
 
       {/* Selected Meals and Recipe Browser - Tabbed Interface */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6 pt-6">
+        <div className="mb-4">
+          <div className="relative inline-flex bg-[#e7911f] rounded-full p-1">
             <button
               onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', tab: 'selected' })}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                state.activeTab === 'selected'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                state.activeTab === 'selected' ? 'surface-elevated text-black shadow' : 'text-black'
               }`}
             >
               Selected Meals ({state.selectedMeals.length})
             </button>
             <button
               onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', tab: 'ingredients' })}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                state.activeTab === 'ingredients'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                state.activeTab === 'ingredients' ? 'surface-elevated text-black shadow' : 'text-black'
               }`}
             >
               Ingredients
             </button>
-          </nav>
+          </div>
         </div>
         
         {/* Tab Content */}
@@ -602,26 +606,31 @@ export default function MealPlannerV2() {
               </div>
               
               {state.selectedMeals.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="space-y-3">
                   {state.selectedMeals.map((meal) => (
-                    <div key={meal.id} className="!bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-black text-sm line-clamp-2 flex-1 mr-2">{meal.name}</h3>
-                        <button
-                          onClick={() => handleRemoveMeal(meal.id)}
-                          className="text-red-500 hover:text-red-700 text-xs font-medium"
-                        >
-                          ✕
-                        </button>
+                    <div key={meal.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-3 rounded-lg surface-page">
+                      <div className="mb-3 md:mb-0 md:flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-heading font-black break-words whitespace-normal text-black">{meal.name}</span>
+                          {meal.prep_time && (
+                            <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full">
+                              {meal.prep_time} min prep
+                            </span>
+                          )}
+                          {meal.cook_time && (
+                            <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full">
+                              {meal.cook_time} min cook
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2">
+                          <CategorizedTags recipe={meal} className="text-xs" />
+                        </div>
                       </div>
-                      
-                      <div className="mb-3">
-                        <CategorizedTags recipe={meal} className="text-xs" />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
+
+                      <div className="flex items-center justify-end md:justify-start space-x-2 md:ml-4">
                         <div className="flex items-center space-x-2">
-                          <label htmlFor={`scaling-${meal.id}`} className="text-xs font-medium text-gray-600">Servings:</label>
+                          <label htmlFor={`scaling-${meal.id}`} className="text-xs font-medium text-text-secondary">Servings:</label>
                           <select
                             id={`scaling-${meal.id}`}
                             value={meal.scaling || 1}
@@ -633,12 +642,19 @@ export default function MealPlannerV2() {
                             ))}
                           </select>
                         </div>
+                        
+                        <button
+                          onClick={() => handleRemoveMeal(meal.id)}
+                          className="text-red-500 hover:text-red-700 text-sm font-medium px-2 py-1"
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-text-secondary">
                   <div className="text-4xl mb-4">🍽️</div>
                   <h3 className="text-lg font-medium mb-2">No meals selected yet</h3>
                   <p>Add meals from the suggestions above or click "Add Recipes" to browse all recipes</p>
@@ -656,10 +672,10 @@ export default function MealPlannerV2() {
             </div>
           )}
         </div>
-      </div>
+      </PageSection>
 
       {/* Plan Details Section */}
-      <div className="card mb-6">
+      <PageSection variant="card">
         <h2 className="text-h3 font-heading font-black mb-4 flex items-center gap-2">
           <span className="material-symbols-rounded text-[28px]">edit_note</span>
           Plan Details
@@ -674,7 +690,7 @@ export default function MealPlannerV2() {
               id="planName"
               type="text"
               placeholder="e.g., 'Week of Jan 15th', 'Healthy Week', 'Quick Meals'"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full input-standard"
               value={state.plan.name}
               onChange={(e) => dispatch({ type: 'UPDATE_PLAN', plan: { name: e.target.value } })}
             />
@@ -694,26 +710,28 @@ export default function MealPlannerV2() {
             />
           </div>
         </div>
-      </div>
+      </PageSection>
 
       {/* Save Buttons */}
-      <div className="flex justify-center space-x-4">
-        <button
-          onClick={handleSavePlan}
-          disabled={state.selectedMeals.length === 0 || isLoading}
-          className="btn-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Saving...' : 'Save Plan'}
-        </button>
-        
-        <button
-          onClick={handleSaveAndEmailPlan}
-          disabled={state.selectedMeals.length === 0 || isLoading}
-          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Saving...' : 'Save & Email'}
-        </button>
-      </div>
+      <PageSection>
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={handleSavePlan}
+            disabled={state.selectedMeals.length === 0 || isLoading}
+            className="btn-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Saving...' : 'Save Plan'}
+          </button>
+          
+          <button
+            onClick={handleSaveAndEmailPlan}
+            disabled={state.selectedMeals.length === 0 || isLoading}
+            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Saving...' : 'Save & Email'}
+          </button>
+        </div>
+      </PageSection>
 
       {/* Recipe List Modal */}
       <RecipeListModal
@@ -730,6 +748,6 @@ export default function MealPlannerV2() {
         message={state.transitionMessage}
       />
 
-    </div>
+    </PageContainer>
   )
 }

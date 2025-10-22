@@ -11,6 +11,8 @@ import {
   getCategoryDisplayName,
   getCategoryColorClasses
 } from '../constants/recipeTags.js'
+import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
+import Message from './ui/Message.jsx'
 
 function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   const [formData, setFormData] = useState({
@@ -131,47 +133,24 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
   }
 
   // Categorized tag handlers
-  const handleTagToggle = (category, tag) => {
-    const categoryField = `${category}_tags`
-    const currentTags = formData[categoryField] || []
-
-    const newTags = currentTags.includes(tag)
-      ? currentTags.filter(t => t !== tag)
-      : [...currentTags, tag]
-
-    setFormData(prev => ({ ...prev, [categoryField]: newTags }))
-  }
-
   const renderTagCategory = (category, availableTags) => {
     const categoryField = `${category}_tags`
     const selectedTags = formData[categoryField] || []
 
     return (
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          {getCategoryDisplayName(category)}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {availableTags.map(tag => {
-            const isSelected = selectedTags.includes(tag)
-            const colorClasses = getCategoryColorClasses(category)
-
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => handleTagToggle(category, tag)}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                  isSelected
-                    ? colorClasses
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
-                }`}
-              >
-                {tag}
-              </button>
-            )
-          })}
-        </div>
+        <MultiSelectDropdown
+          label={getCategoryDisplayName(category)}
+          placeholder={`Select ${getCategoryDisplayName(category).toLowerCase()}`}
+          options={availableTags}
+          selectedValues={selectedTags}
+          onChange={(newSelectedTags) => {
+            setFormData(prev => ({
+              ...prev,
+              [categoryField]: newSelectedTags
+            }))
+          }}
+        />
       </div>
     )
   }
@@ -363,7 +342,7 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
           
           {/* Sidebar */}
           <motion.div 
-            className="fixed inset-y-0 right-0 w-96 bg-white shadow-xl border-l border-gray-200 flex flex-col"
+            className="fixed inset-y-0 right-0 w-96 surface-elevated shadow-xl border-l border-gray-200 flex flex-col"
             style={{ zIndex: 1001 }}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -376,7 +355,7 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
             }}
           >
             {/* Fixed Header */}
-            <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-white z-10">
+            <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 surface-elevated z-10">
               <div className="flex justify-between items-center">
                 <h2 className="text-h3 font-heading font-black text-text-primary">
                   {recipe ? 'Edit Recipe' : 'Add New Recipe'}
@@ -397,9 +376,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
               <form onSubmit={handleSubmit} className="space-y-6">
 
           {errors.submit && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            <Message variant="error">
               {errors.submit}
-            </div>
+            </Message>
           )}
 
           <div className="space-y-6">
@@ -542,17 +521,9 @@ function RecipeForm({ recipe = null, onSave, onCancel, isOpen }) {
               </div>
 
               {autoTagError && (
-                <div className={`border rounded-lg p-3 ${
-                  autoTagError.includes('smart suggestions') || autoTagError.includes('unavailable')
-                    ? 'bg-yellow-50 border-yellow-200'
-                    : 'bg-red-50 border-red-200'
-                }`}>
-                  <p className={`text-sm ${
-                    autoTagError.includes('smart suggestions') || autoTagError.includes('unavailable')
-                      ? 'text-yellow-700'
-                      : 'text-red-600'
-                  }`}>{autoTagError}</p>
-                </div>
+                <Message variant={autoTagError.includes('smart suggestions') || autoTagError.includes('unavailable') ? 'warning' : 'error'}>
+                  {autoTagError}
+                </Message>
               )}
 
               {renderTagCategory('cuisine', CUISINE_TAGS)}

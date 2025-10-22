@@ -7,6 +7,7 @@
 
 import React from 'react'
 import { XSSPrevention, csrfProtection, secureAuth, FileUploadSecurity } from '../utils/security.js'
+import Message from './ui/Message.jsx'
 
 /**
  * Secure text display component that prevents XSS
@@ -405,7 +406,7 @@ export function LoginAttemptTracker({
 
   return (
     <div className={`login-lockout ${className}`}>
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+      <Message variant="error">
         <div className="flex">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -423,7 +424,7 @@ export function LoginAttemptTracker({
             </div>
           </div>
         </div>
-      </div>
+      </Message>
     </div>
   )
 }

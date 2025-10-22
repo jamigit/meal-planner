@@ -150,13 +150,13 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
+      <div className="surface-elevated rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-3 border-b border-gray-200">
           <h2 className="text-h3 font-heading font-black">Browse All Recipes</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
+            className="text-text-tertiary hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,120 +165,129 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-black mb-2">
-                Search Recipes
-              </label>
-              <input
-                id="search"
-                type="text"
-                placeholder="Search by name, ingredients, or tags..."
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onChange={handleSearchChange}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Filters */}
+          <div className="p-4 border-b border-gray-200 bg-white">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label htmlFor="search" className="block text-sm font-medium text-black mb-2">
+                  Search Recipes
+                </label>
+                <input
+                  id="search"
+                  type="text"
+                  placeholder="Search by name, ingredients, or tags..."
+                  className="w-full input-standard"
+                  onChange={handleSearchChange}
+                />
+              </div>
+              
+              <MultiSelectDropdown
+                label="Filter by Cuisine"
+                placeholder="All cuisines"
+                options={cuisines}
+                selectedValues={selectedCuisines}
+                onChange={setSelectedCuisines}
+              />
+              
+              <MultiSelectDropdown
+                label="Filter by Ingredient"
+                placeholder="All ingredients"
+                options={ingredientTags}
+                selectedValues={selectedIngredientTags}
+                onChange={setSelectedIngredientTags}
+              />
+              
+              <MultiSelectDropdown
+                label="Filter by Convenience"
+                placeholder="All convenience"
+                options={convenienceTags}
+                selectedValues={selectedConvenienceTags}
+                onChange={setSelectedConvenienceTags}
+              />
+              
+              <MultiSelectDropdown
+                label="Filter by Dietary"
+                placeholder="All dietary"
+                options={dietaryOptions}
+                selectedValues={selectedDietary}
+                onChange={setSelectedDietary}
               />
             </div>
-            
-            <MultiSelectDropdown
-              label="Filter by Cuisine"
-              placeholder="All cuisines"
-              options={cuisines}
-              selectedValues={selectedCuisines}
-              onChange={setSelectedCuisines}
-            />
-            
-            <MultiSelectDropdown
-              label="Filter by Ingredient"
-              placeholder="All ingredients"
-              options={ingredientTags}
-              selectedValues={selectedIngredientTags}
-              onChange={setSelectedIngredientTags}
-            />
-            
-            <MultiSelectDropdown
-              label="Filter by Convenience"
-              placeholder="All convenience"
-              options={convenienceTags}
-              selectedValues={selectedConvenienceTags}
-              onChange={setSelectedConvenienceTags}
-            />
-            
-            <MultiSelectDropdown
-              label="Filter by Dietary"
-              placeholder="All dietary"
-              options={dietaryOptions}
-              selectedValues={selectedDietary}
-              onChange={setSelectedDietary}
-            />
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+          {/* Recipe List */}
+          <div className="p-6">
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading recipes...</p>
+              <p className="text-text-secondary">Loading recipes...</p>
             </div>
           ) : filteredRecipes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-text-secondary">
               <div className="text-4xl mb-4">🔍</div>
               <h3 className="text-lg font-medium mb-2">No recipes found</h3>
               <p>Try adjusting your search terms or filters</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
               {filteredRecipes.map((recipe) => {
                 const isSelected = selectedMealIds.includes(recipe.id)
                 return (
-                  <div key={recipe.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <h3 className="font-semibold text-gray-900 mb-2">{recipe.name}</h3>
-                    
-                    <div className="text-sm text-gray-600 mb-3">
-                      {recipe.cuisine_tags?.length > 0 && (
-                        <div className="mb-1">
-                          <span className="font-medium">Cuisine:</span> {recipe.cuisine_tags.join(', ')}
-                        </div>
-                      )}
-                      {recipe.ingredient_tags?.length > 0 && (
-                        <div className="mb-1">
-                          <span className="font-medium">Tags:</span> {recipe.ingredient_tags.slice(0, 3).join(', ')}
-                        </div>
-                      )}
-                      {recipe.prep_time && (
-                        <div className="mb-1">
-                          <span className="font-medium">Prep:</span> {recipe.prep_time} min
-                        </div>
-                      )}
-                      {recipe.cook_time && (
-                        <div className="mb-1">
-                          <span className="font-medium">Cook:</span> {recipe.cook_time} min
-                        </div>
-                      )}
+                  <div key={recipe.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-900 truncate">{recipe.name}</h3>
+                        {recipe.prep_time && (
+                          <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
+                            {recipe.prep_time} min prep
+                          </span>
+                        )}
+                        {recipe.cook_time && (
+                          <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
+                            {recipe.cook_time} min cook
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-xs text-gray-600">
+                        {recipe.cuisine_tags?.length > 0 && (
+                          <span className="mr-3">
+                            <span className="font-medium">Cuisine:</span> {recipe.cuisine_tags.join(', ')}
+                          </span>
+                        )}
+                        {recipe.ingredient_tags?.length > 0 && (
+                          <span className="mr-3">
+                            <span className="font-medium">Tags:</span> {recipe.ingredient_tags.slice(0, 3).join(', ')}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
-                    <button
-                      onClick={() => handleAddMeal(recipe)}
-                      disabled={isSelected}
-                      className={`w-full px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                          : 'btn-secondary'
-                      }`}
-                    >
-                      {isSelected ? 'Already Added' : 'Add to Plan'}
-                    </button>
+                    <div className="ml-4 flex-shrink-0">
+                      <button
+                        onClick={() => handleAddMeal(recipe)}
+                        disabled={isSelected}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                          isSelected
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'btn-secondary'
+                        }`}
+                      >
+                        {isSelected ? 'Added' : 'Add'}
+                      </button>
+                    </div>
                   </div>
                 )
               })}
             </div>
           )}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex justify-end p-3 border-t border-gray-200 bg-white">
           <button
             onClick={onClose}
             className="btn-tertiary"

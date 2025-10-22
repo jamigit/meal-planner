@@ -162,4 +162,40 @@
   .tag-legacy {
     @apply inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm border border-gray-200 font-tag;
   }
+
+  /* Surface utilities */
+  .surface-page {
+    @apply bg-surface-page;
+  }
+  
+  .surface-elevated {
+    @apply bg-surface-elevated;
+  }
+  
+  /* Message boxes */
+  .message-success {
+    @apply bg-message-success text-message-success-text border border-green-200 rounded-lg p-4;
+  }
+  
+  .message-warning {
+    @apply bg-message-warning text-message-warning-text border border-yellow-200 rounded-lg p-4;
+  }
+  
+  .message-error {
+    @apply bg-message-error text-message-error-text border border-red-200 rounded-lg p-4;
+  }
+  
+  .message-info {
+    @apply bg-message-info text-message-info-text border border-blue-200 rounded-lg p-4;
+  }
+  
+  /* Form input standard */
+  .input-standard {
+    @apply p-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-black bg-white;
+  }
+  
+  /* Card elevated (white cards) */
+  .card-elevated {
+    @apply bg-surface-elevated rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow;
+  }
 }
