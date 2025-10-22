@@ -14,7 +14,10 @@ function RecipeList() {
   const [showForm, setShowForm] = useState(false)
   const [editingRecipe, setEditingRecipe] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTags, setSelectedTags] = useState([])
+  const [selectedCuisineTags, setSelectedCuisineTags] = useState([])
+  const [selectedIngredientTags, setSelectedIngredientTags] = useState([])
+  const [selectedConvenienceTags, setSelectedConvenienceTags] = useState([])
+  const [selectedDietaryTags, setSelectedDietaryTags] = useState([])
   const [showMigrationModal, setShowMigrationModal] = useState(false)
   const [showImportSidebar, setShowImportSidebar] = useState(false)
 
@@ -117,16 +120,29 @@ function RecipeList() {
 
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-    if (selectedTags.length === 0) return matchesSearch
+    // Check if any tags are selected
+    const hasAnySelectedTags = selectedCuisineTags.length > 0 || 
+                             selectedIngredientTags.length > 0 || 
+                             selectedConvenienceTags.length > 0 || 
+                             selectedDietaryTags.length > 0
 
-    // Check if any of the selected tags match any category (OR logic)
-    const matchesAnyTag = selectedTags.some(selectedTag =>
-      recipe.tags?.includes(selectedTag) ||
-      recipe.cuisine_tags?.includes(selectedTag) ||
-      recipe.ingredient_tags?.includes(selectedTag) ||
-      recipe.convenience_tags?.includes(selectedTag) ||
-      recipe.dietary_tags?.includes(selectedTag)
-    )
+    if (!hasAnySelectedTags) return matchesSearch
+
+    // Check if recipe matches any of the selected tags (OR logic across all categories)
+    const matchesCuisineTags = selectedCuisineTags.length === 0 || 
+                              selectedCuisineTags.some(tag => recipe.cuisine_tags?.includes(tag))
+    
+    const matchesIngredientTags = selectedIngredientTags.length === 0 || 
+                                 selectedIngredientTags.some(tag => recipe.ingredient_tags?.includes(tag))
+    
+    const matchesConvenienceTags = selectedConvenienceTags.length === 0 || 
+                                  selectedConvenienceTags.some(tag => recipe.convenience_tags?.includes(tag))
+    
+    const matchesDietaryTags = selectedDietaryTags.length === 0 || 
+                              selectedDietaryTags.some(tag => recipe.dietary_tags?.includes(tag))
+
+    // Recipe matches if it has at least one tag from any selected category
+    const matchesAnyTag = matchesCuisineTags || matchesIngredientTags || matchesConvenienceTags || matchesDietaryTags
 
     return matchesSearch && matchesAnyTag
   })
@@ -153,30 +169,85 @@ function RecipeList() {
 
       {/* Search and Filter */}
       <PageSection>
-        {/* Search and Filter Controls - Side by Side */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        {/* Search Input */}
+        <div className="mb-4">
           <input
             type="text"
             placeholder="Search recipes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 input-standard"
-          />
-
-          <MultiSelectDropdown
-            label="Filter by Tags"
-            placeholder="All tags"
-            options={allTags}
-            selectedValues={selectedTags}
-            onChange={setSelectedTags}
+            className="w-full max-w-md input-standard"
           />
         </div>
 
+        {/* Tag Filter Dropdowns */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Cuisine Tags */}
+            <MultiSelectDropdown
+              label="Cuisines"
+              placeholder="All cuisines"
+              options={categorizedTags.cuisine_tags}
+              selectedValues={selectedCuisineTags}
+              onChange={setSelectedCuisineTags}
+            />
+
+            {/* Ingredient Tags */}
+            <MultiSelectDropdown
+              label="Ingredients"
+              placeholder="All ingredients"
+              options={categorizedTags.ingredient_tags}
+              selectedValues={selectedIngredientTags}
+              onChange={setSelectedIngredientTags}
+            />
+
+            {/* Convenience Tags */}
+            <MultiSelectDropdown
+              label="Convenience"
+              placeholder="All convenience"
+              options={categorizedTags.convenience_tags}
+              selectedValues={selectedConvenienceTags}
+              onChange={setSelectedConvenienceTags}
+            />
+
+            {/* Dietary Tags */}
+            <MultiSelectDropdown
+              label="Dietary"
+              placeholder="All dietary"
+              options={categorizedTags.dietary_tags}
+              selectedValues={selectedDietaryTags}
+              onChange={setSelectedDietaryTags}
+            />
+          </div>
+
+          {/* Clear All Filters Button */}
+          {(selectedCuisineTags.length > 0 || selectedIngredientTags.length > 0 || 
+            selectedConvenienceTags.length > 0 || selectedDietaryTags.length > 0) && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  setSelectedCuisineTags([])
+                  setSelectedIngredientTags([])
+                  setSelectedConvenienceTags([])
+                  setSelectedDietaryTags([])
+                }}
+                className="btn-outline-black-sm"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Results Summary */}
-        {searchTerm || selectedTags.length > 0 ? (
+        {(searchTerm || selectedCuisineTags.length > 0 || selectedIngredientTags.length > 0 || 
+          selectedConvenienceTags.length > 0 || selectedDietaryTags.length > 0) ? (
           <div className="mt-4 text-sm text-text-secondary">
             Showing {filteredRecipes.length} of {recipes.length} recipes
-            {selectedTags.length > 0 && ` tagged with "${selectedTags.join(', ')}"`}
+            {selectedCuisineTags.length > 0 && ` • Cuisines: ${selectedCuisineTags.join(', ')}`}
+            {selectedIngredientTags.length > 0 && ` • Ingredients: ${selectedIngredientTags.join(', ')}`}
+            {selectedConvenienceTags.length > 0 && ` • Convenience: ${selectedConvenienceTags.join(', ')}`}
+            {selectedDietaryTags.length > 0 && ` • Dietary: ${selectedDietaryTags.join(', ')}`}
           </div>
         ) : null}
       </PageSection>

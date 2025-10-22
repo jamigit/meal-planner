@@ -11,6 +11,64 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 **Target Users**: Solo user and partner (personal use)
 **Problem**: Currently spending up to 30 minutes weekly deciding on 4 dinner meals, experiencing decision paralysis, and managing recipes across multiple Google Drive documents.
 
+## Tech Stack
+
+### Frontend
+- **React 18** - Modern UI library with hooks and concurrent features
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework with custom design system
+- **Framer Motion** - Smooth animations and transitions
+- **React Router** - Client-side routing for SPA navigation
+
+### Backend & Database
+- **Supabase** - PostgreSQL database with real-time subscriptions and authentication
+- **IndexedDB** - Local browser storage for offline-first functionality
+- **Dexie.js** - IndexedDB wrapper for easier database operations
+
+### AI & External Services
+- **Claude API** - Anthropic's AI for meal suggestions and recipe analysis
+- **EmailJS** - Client-side email service for meal plan sharing
+- **Recipe Scraper** - Custom Node.js service for extracting recipe data from URLs
+
+### Development & Build Tools
+- **Node.js** - Runtime for development server and build processes
+- **Express.js** - Lightweight web server for API proxy
+- **Vitest** - Fast unit testing framework
+- **MSW** - API mocking for testing
+- **ESLint** - Code linting and formatting
+- **PostCSS** - CSS processing and optimization
+
+### PWA & Performance
+- **Vite PWA Plugin** - Progressive Web App capabilities
+- **Workbox** - Service worker management and caching strategies
+- **Service Workers** - Offline functionality and background sync
+- **Web App Manifest** - App installation and native-like experience
+
+### State Management & Architecture
+- **React Context** - Global state management for authentication and app state
+- **Custom Hooks** - Reusable logic for data fetching and state management
+- **Service Layer Pattern** - Clean separation between UI and business logic
+- **Error Boundaries** - Graceful error handling and recovery
+
+### Design System & UI Components
+- **Custom Design Tokens** - Centralized colors, typography, and spacing
+- **Component Library** - Reusable UI components with consistent styling
+- **Responsive Design** - Mobile-first approach with Tailwind breakpoints
+- **Accessibility** - WCAG compliance with semantic HTML and ARIA attributes
+
+### Data & Validation
+- **JSDoc Types** - Type definitions for data models
+- **Runtime Validation** - Data integrity checks and error handling
+- **Schema Migration** - Database versioning and data transformation
+- **Optimistic Updates** - Immediate UI feedback with rollback capabilities
+
+### Security & Performance
+- **Content Security Policy** - XSS protection and resource restrictions
+- **Input Sanitization** - Protection against malicious user input
+- **Request Deduplication** - Prevents duplicate API calls
+- **Memory Leak Prevention** - Proper cleanup of event listeners and subscriptions
+- **Network Resilience** - Offline detection and retry mechanisms
+
 ### Core Features
 - **Recipe Management**: Store recipes with name, URL, and intelligent AI-generated tags
 - **Weekly Meal Selection**: Choose 4 recipes for the week with notes

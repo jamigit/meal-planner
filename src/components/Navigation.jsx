@@ -204,7 +204,7 @@ function Navigation() {
           {/* History (show until viewport < 400px) */}
           <Link
             to="/meal-history"
-            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl ${
+            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
               location.pathname === '/meal-history' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -214,6 +214,21 @@ function Navigation() {
               </svg>
             </span>
             <span>History</span>
+          </Link>
+
+          {/* Tags (show until viewport < 400px) */}
+          <Link
+            to="/tag-management"
+            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl ${
+              location.pathname === '/tag-management' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <span className="mb-1" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+              </svg>
+            </span>
+            <span>Tags</span>
           </Link>
 
           {/* More Menu (only under 400px) */}
