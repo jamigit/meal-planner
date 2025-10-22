@@ -6,7 +6,7 @@ import CSVUpload from './CSVUpload'
 import RecipeCard from './RecipeCard'
 import RecipeForm from './RecipeForm'
 import TagMigrationModal from './TagMigrationModal'
-import BulkRecipeScraper from './BulkRecipeScraper'
+import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 import { PageContainer, PageHeader, PageSection } from './layout'
 
 function RecipeList() {
@@ -14,11 +14,9 @@ function RecipeList() {
   const [showForm, setShowForm] = useState(false)
   const [editingRecipe, setEditingRecipe] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTag, setSelectedTag] = useState('')
+  const [selectedTags, setSelectedTags] = useState([])
   const [showMigrationModal, setShowMigrationModal] = useState(false)
   const [showImportSidebar, setShowImportSidebar] = useState(false)
-  const [isFilterExpanded, setIsFilterExpanded] = useState(false)
-  const [showBulkScraper, setShowBulkScraper] = useState(false)
 
   const loadRecipes = async () => {
     const recipeService = await serviceSelector.getRecipeService()
@@ -119,16 +117,18 @@ function RecipeList() {
 
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-    if (!selectedTag) return matchesSearch
+    if (selectedTags.length === 0) return matchesSearch
 
-    // Check if tag matches any category
-    const matchesTag =
+    // Check if any of the selected tags match any category (OR logic)
+    const matchesAnyTag = selectedTags.some(selectedTag =>
       recipe.tags?.includes(selectedTag) ||
       recipe.cuisine_tags?.includes(selectedTag) ||
       recipe.ingredient_tags?.includes(selectedTag) ||
-      recipe.convenience_tags?.includes(selectedTag)
+      recipe.convenience_tags?.includes(selectedTag) ||
+      recipe.dietary_tags?.includes(selectedTag)
+    )
 
-    return matchesSearch && matchesTag
+    return matchesSearch && matchesAnyTag
   })
 
   const handleMigrationComplete = () => {
@@ -141,14 +141,15 @@ function RecipeList() {
     <PageContainer>
       <PageHeader
         title="Recipes"
-        actions={
-          <div className="flex flex-wrap gap-3">
-            <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
-            <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
-            <button onClick={() => setShowBulkScraper(true)} className="btn-outline-black">🤖 Bulk Scraper + AI Tags</button>
-          </div>
-        }
       />
+
+      {/* Action Buttons - Below title on medium and smaller */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-3">
+          <button onClick={handleAddRecipe} className="btn-secondary">Add Recipe</button>
+          <button onClick={() => setShowImportSidebar(true)} className="btn-outline-black">Import Recipes</button>
+        </div>
+      </div>
 
       {/* Search and Filter */}
       <PageSection>
@@ -162,78 +163,21 @@ function RecipeList() {
             className="flex-1 input-standard"
           />
 
-          {/* Filter Toggle Button */}
-          <button
-            onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-            className="flex items-center justify-between p-3 bg-white rounded-lg text-sm font-bold text-black hover:bg-gray-50 transition-colors font-tag border-2 border-black sm:min-w-[200px]"
-          >
-            <span>Filter by Tags {selectedTag && `(${selectedTag})`}</span>
-            <span className="material-symbols-rounded text-[20px]">{isFilterExpanded ? 'expand_less' : 'expand_more'}</span>
-          </button>
+          <MultiSelectDropdown
+            label="Filter by Tags"
+            placeholder="All tags"
+            options={allTags}
+            selectedValues={selectedTags}
+            onChange={setSelectedTags}
+          />
         </div>
 
-        {/* Filter Accordion */}
-        <div>
-
-          {/* Categorized Tag Filters - Collapsible */}
-          {isFilterExpanded && (
-            <div className="space-y-3 p-4 border-2 border-black rounded-lg bg-white">
-              {/* All Tags Button */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSelectedTag('')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  !selectedTag
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-black hover:bg-gray-200'
-                  }`}
-                >
-                  All Recipes ({recipes.length})
-                </button>
-              </div>
-
-              {/* Category Sections */}
-              {Object.entries(categorizedTags).map(([category, tags]) => {
-                if (tags.length === 0) return null
-
-                const isLegacy = category === 'legacy'
-                const displayName = isLegacy ? 'Other Tags' : getCategoryDisplayName(category)
-                const colorClasses = isLegacy ? 'bg-gray-100 text-black border-gray-200' : getCategoryColorClasses(category)
-
-                return (
-                  <div key={category} className="space-y-2">
-                    <h4 className="text-sm font-bold text-black flex items-center gap-2 font-tag">
-                      <span className={`w-3 h-3 rounded-full ${colorClasses.split(' ')[0]}`}></span>
-                      {displayName} ({tags.length})
-                    </h4>
-                    <div className="flex flex-wrap gap-2 ml-5">
-                      {tags.map(tag => (
-                        <button
-                          key={tag}
-                          onClick={() => setSelectedTag(tag)}
-                          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-                            selectedTag === tag
-                              ? colorClasses
-                              : 'bg-gray-50 text-black border-gray-200 hover:bg-gray-100'
-                          }`}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {searchTerm || selectedTag ? (
-          <p className="text-sm text-black">
+        {/* Results Summary */}
+        {searchTerm || selectedTags.length > 0 ? (
+          <div className="mt-4 text-sm text-text-secondary">
             Showing {filteredRecipes.length} of {recipes.length} recipes
-            {searchTerm && ` matching "${searchTerm}"`}
-            {selectedTag && ` tagged with "${selectedTag}"`}
-          </p>
+            {selectedTags.length > 0 && ` tagged with "${selectedTags.join(', ')}"`}
+          </div>
         ) : null}
       </PageSection>
 

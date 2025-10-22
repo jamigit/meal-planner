@@ -6,7 +6,7 @@ class ClaudeAiService {
     this.apiKey = import.meta.env.VITE_CLAUDE_API_KEY
     
     // Auto-detect production environment and set appropriate API URL
-    const isProduction = import.meta.env.PROD
+    const isProduction = import.meta.env.PROD && !window.location.hostname.includes('localhost')
     const customApiBase = import.meta.env.VITE_API_BASE
     
     if (customApiBase) {
@@ -17,7 +17,7 @@ class ClaudeAiService {
       this.apiUrl = netlifyUrl
     } else {
       // Development fallback
-      this.apiUrl = 'http://localhost:3001/api/claude'
+      this.apiUrl = 'http://localhost:3002/api/claude'
     }
     
     this.model = 'claude-3-5-sonnet-20241022'

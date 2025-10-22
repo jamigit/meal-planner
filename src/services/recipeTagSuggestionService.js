@@ -117,7 +117,7 @@ RESPONSE (JSON only):
    * @returns {Promise<string>} API response
    */
   async callClaudeAPI(prompt) {
-    const apiBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:3001'
+    const apiBase = (import.meta && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:3002'
     
     try {
       const response = await fetch(`${apiBase}/api/suggest-tags`, {

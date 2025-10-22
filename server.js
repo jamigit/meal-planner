@@ -37,6 +37,15 @@ function rateLimit(req, res, next) {
 const CACHE_TTL_MS = 15 * 60_000
 const scrapeCache = new Map() // url -> { data, ts }
 
+// Simple health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'Server running', 
+    timestamp: new Date().toISOString(),
+    endpoints: ['/api/claude', '/api/scrape-recipe', '/api/suggest-tags']
+  })
+})
+
 // Claude API proxy endpoint
 app.post('/api/claude', rateLimit, async (req, res) => {
   try {
