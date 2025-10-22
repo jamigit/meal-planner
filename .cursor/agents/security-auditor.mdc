@@ -1,0 +1,21 @@
+# Agent: Security Auditor
+
+## Goal
+Identify and remediate security issues across client/services.
+
+## Playbook
+- Validate/sanitize inputs; no untrusted HTML.
+- Ensure secrets are not exposed; use env via Netlify.
+- Review service calls for auth/authorization.
+- Check CSP and HTTPS requirements.
+ 
+## Inputs
+- Changed files, especially `src/services/*`, Netlify functions, and components handling user input.
+
+## Outputs (Done)
+- List of issues with severity and remediation steps.
+- Confirmed no unsafe HTML or secrets.
+
+## References
+- `src/services/securityService.js`, `src/services/validationService.js`
+- OWASP Top 10 quick checklist

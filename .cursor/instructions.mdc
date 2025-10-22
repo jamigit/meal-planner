@@ -1,0 +1,93 @@
+---
+title: Cursor Instructions
+owner: Jamie Barter
+updated: 2025-10-22
+---
+
+# Purpose
+Guardrails for AI-assisted work in this repo. Align with Jamie Barter’s account rules while fitting this Vite + React app.
+
+# Persona
+- AI acts as a senior React engineer.
+- Be explicit and concise; ask to clarify when ambiguous.
+- Prefer production-ready code and add tests alongside changes.
+
+# Workflow
+## Planner → Executor
+1) Planner
+- Clarify ambiguity, propose phases, identify risks, and list impacted files.
+- Produce a short plan before edits.
+2) Executor
+- Implement iteratively with small, verifiable edits.
+- Run tests where applicable; keep diffs focused.
+
+### Planner checklist
+- Scope clarified (who/what/where)
+- Acceptance criteria defined
+- Impacted files listed
+- Risks and mitigations noted
+
+### Executor checklist
+- Add/adjust tests for behavior
+- Keep edits small and isolated
+- Update docs when patterns change
+- Run validation gates before finishing
+
+### How to invoke
+- Commands: see `../commands.json` (Run tests, Lint, Build)
+- Agents: see `../agents/*` (refactorer, test-writer, security-auditor, doc-writer)
+
+### Optional pre-commit (documented only)
+Use a git hook or Husky to run lint and tests before commit:
+`eslint . && vitest --run`
+
+## Phases (example)
+- Phase 1: Discovery (read files, confirm architecture/constraints)
+- Phase 2: Tests (add or update failing tests)
+- Phase 3: Implementation (small edits per concern)
+- Phase 4: Validation (lint, tests, review)
+
+# Project Conventions
+- Tooling: Vite, React 18, Vitest, ESLint, Prettier, Tailwind.
+- State: Local component state + service layer; avoid duplicating server data.
+- Services: Use `src/services/*` with a selector to switch implementations (Supabase/IndexedDB/mock).
+- Accessibility: Semantic HTML, keyboard support, proper labeling, avoid unnecessary ARIA.
+- Security: Sanitize user input; avoid unsafe HTML; follow OWASP basics.
+
+References: `../architecture.mdc`, `../rules/global.mdc`, `../../patterns.md`, `../../docs/rules-feedback.md`
+
+# Testing
+- Framework: Vitest + Testing Library.
+- Co-locate tests next to code: `<file>.test.jsx|js`.
+- Minimum: cover critical paths and add tests for regressions.
+
+# Code Style
+- Prefer descriptive names; avoid single-letter identifiers.
+- Early returns over deep nesting.
+- Comments only for non-obvious intent or constraints.
+- Keep imports ordered: React, external packages, internal aliases, parents, siblings.
+
+# AI Collaboration Rules
+- Maintain project context integrity; do not invent files or APIs.
+- If a file is missing, ask to create it explicitly.
+- Do not introduce TypeScript unless requested (project is currently JS).
+- Prefer Server/Network calls via existing service layer.
+- Avoid `.then` chains; use async/await.
+
+# Required Artifacts per Feature/Refactor
+- Tests for critical behavior.
+- Minimal documentation updates in `instructions.mdc`, `architecture.mdc`, or `patterns.md` when patterns change.
+
+# Validation Checklist
+- Lint passes.
+- Tests pass.
+- No new accessibility regressions (labels/semantics/keyboard).
+- Input handling safe; no unsanitized HTML.
+
+# @ai-context
+- Key files: `src/services/*`, `src/components/*`, `src/database/*`, `src/hooks/*`.
+- External: Supabase (auth + Postgres), Dexie/IndexedDB, Netlify Functions proxy for AI.
+
+# @ai-technical-debt
+- When taking shortcuts, annotate in PR with `@ai-technical-debt(priority, effort, impact)` and rationale.
+

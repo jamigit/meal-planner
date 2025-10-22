@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "name": "Run tests",
+      "command": "npm run test:run --silent",
+      "nonInteractive": true
+    },
+    {
+      "name": "Lint",
+      "command": "npm run lint --silent",
+      "nonInteractive": true
+    },
+    {
+      "name": "Build",
+      "command": "npm run build --silent",
+      "nonInteractive": true
+    }
+  ]
+}

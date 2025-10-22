@@ -1,0 +1,19 @@
+# Create Component Procedure
+
+1. Create component in `src/components/<Name>.jsx`.
+2. Use functional component with hooks.
+3. Add accessibility: roles, labels, keyboard focus.
+4. Add test `src/components/__tests__/<Name>.test.jsx`.
+5. Use service layer for data; no direct storage calls.
+6. Validate props and sanitize any user-provided HTML.
+7. Example test skeleton:
+```js
+import { render, screen } from '@testing-library/react';
+import UserEvent from '@testing-library/user-event';
+import { MyComponent } from '../MyComponent';
+
+test('renders heading', () => {
+  render(<MyComponent />);
+  expect(screen.getByRole('heading', { name: /my component/i })).toBeInTheDocument();
+});
+```

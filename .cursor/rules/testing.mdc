@@ -1,0 +1,10 @@
+# Testing Rules
+
+- Vitest + Testing Library.
+- Test behavior, not implementation details.
+- Query by role/name/label; avoid test IDs unless necessary.
+- Co-locate tests: `<file>.test.jsx|js`.
+- Cover critical paths and regressions; keep tests deterministic.
+ - Organize fixtures under `src/tests/fixtures` and mocks under `src/tests/mocks`.
+ - Minimum critical coverage: routes, services, and regression fixes.
+ - In CI or pre-commit, avoid watch mode: `vitest --run`.

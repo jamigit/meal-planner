@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vscode/
+.DS_Store
+coverage/
+playwright-report/
+*.log
+**/*.snap
+**/*.map
+.env*
+netlify/functions/node_modules/
+temp-output.css

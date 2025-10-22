@@ -1,0 +1,18 @@
+# Agent: Doc Writer
+
+## Goal
+Document features, patterns, and architectural decisions succinctly.
+
+## Playbook
+- Update `patterns.md` and `architecture.mdc` when patterns/flows change.
+- Keep docs concise; link to code rather than duplicating it.
+- Add rationale and tradeoffs where relevant.
+ 
+## Inputs
+- PR diff, feature description, and any new patterns introduced.
+
+## Outputs (Done)
+- Updated docs with links to code; rationale captured succinctly.
+
+## References
+- `.cursor/instructions.mdc`, `.cursor/architecture.mdc`, `patterns.md`, `docs/rules-feedback.md`

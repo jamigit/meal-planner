@@ -69,7 +69,41 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 - **Memory Leak Prevention** - Proper cleanup of event listeners and subscriptions
 - **Network Resilience** - Offline detection and retry mechanisms
 
-### Core Features
+## 📚 Documentation
+
+### Project Information Files
+The project uses a structured documentation approach:
+
+#### Core Documentation
+- **README.md** - Project overview, tech stack, and quick start guide
+- **docs/architecture.md** - System architecture and data flow
+- **docs/data-models.md** - Database schemas and data structures
+- **docs/design-system.md** - UI components and design tokens
+- **docs/pwa.md** - Progressive Web App configuration and setup
+- **docs/ai-services.md** - AI service integration and architecture
+- **docs/security.md** - Security implementation and best practices
+- **docs/testing.md** - Testing framework and strategies
+- **docs/network-resilience.md** - Offline handling and network resilience
+
+#### Specialized Documentation
+- **docs/checklists/crud-quality.md** - CRUD app quality checklist
+- **docs/migrations/** - Database migration documentation
+- **docs/adr/** - Architecture Decision Records
+- **docs/features/** - Feature-specific documentation
+
+#### Feature Documentation
+- **docs/features/shopping-list.md** - Shopping List feature implementation
+- **docs/features/ai-meal-planner-v2.md** - AI Meal Planner V2 feature
+- **docs/features/tag-management.md** - Tag Management System
+
+#### Architecture Decision Records (ADRs)
+- **docs/adr/ADR-0001-dual-storage.md** - Dual Storage Architecture (Supabase + IndexedDB)
+- **docs/adr/ADR-0002-ai-proxy.md** - AI Service Architecture (Node.js Proxy)
+
+#### Migration Documentation
+- **docs/migrations/2025-10-22-shopping-list.md** - Shopping List Tables Migration
+
+## Core Features
 - **Recipe Management**: Store recipes with name, URL, and intelligent AI-generated tags
 - **Weekly Meal Selection**: Choose 4 recipes for the week with notes
 - **AI Meal Planner V2**: Intelligent 8-meal suggestions based on preferences and meal history

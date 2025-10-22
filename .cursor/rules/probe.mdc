@@ -1,0 +1,9 @@
+# Probe Checklist (Before Editing)
+
+- What files/functions are involved?
+- Are there existing services to reuse?
+- Any security or accessibility implications?
+- What tests exist or need to be added?
+- Validation steps after change?
+ - Performance impact? Any heavy loops or re-renders?
+ - Data boundaries? Any unsafe HTML or unvalidated inputs?

@@ -1,0 +1,75 @@
+---
+title: Architecture (AI-friendly)
+source: docs/architecture.md
+updated: 2025-10-22
+---
+
+# System Overview
+This file mirrors `docs/architecture.md` with AI annotations for quick navigation.
+
+## System Components
+- Frontend: React 18 (Vite), Tailwind, React Router, Framer Motion.
+- Backend/DB: Supabase (Postgres, RLS), IndexedDB via Dexie for guests.
+- Services: AI via Netlify Function proxy to Claude, EmailJS, Recipe Scraper.
+
+## Data Flow
+User → React Component → Service Layer → Storage Layer
+                                   ↓
+                             Service Selector
+                                   ↓
+                   Supabase | IndexedDB | AI Service
+
+## Service Layer Pattern
+```javascript
+// Service selector automatically chooses implementation
+const service = await serviceSelector.getRecipeService();
+const recipes = await service.getAll();
+```
+
+Services provided:
+- `getRecipeService()` – Recipe CRUD
+- `getWeeklyPlanService()` – Meal planning
+- `getMealHistoryService()` – Tracking
+- `getShoppingListService()` – Shopping list
+
+## Dual Storage Strategy
+- Supabase (auth): realtime, RLS, Postgres, auth.
+- IndexedDB (guest): offline-first, local-only, auto-migrate on login.
+
+## Request Flows
+AI Meal Suggestions
+1) `MealPlannerV2` collects preferences
+2) `aiMealPlannerService.generateEightMealSuggestions()`
+3) Service targets proxy (local dev vs Netlify)
+4) Proxy calls Claude, returns parsed suggestions
+5) UI updates with loading/error states
+
+Data Sync
+1) Component → Service
+2) Selector chooses storage
+3) Write to active storage
+4) Supabase: realtime broadcast; IndexedDB: local
+5) On auth: migration to Supabase
+
+## Security
+- CSP, input sanitization, Supabase RLS, HTTPS-only PWA.
+
+## Performance
+- SW caching, request deduping, cleanup to avoid leaks, optimistic updates, bundle splitting.
+
+---
+
+# @ai-context
+- Services: `src/services/*`, `src/database/*`, `src/lib/supabase.js`
+- Components: `src/components/*`
+- Hooks: `src/hooks/*`
+
+# @ai-dependencies
+- Supabase (auth, Postgres realtime)
+- Netlify Functions proxy for Claude API
+- Dexie/IndexedDB for offline
+
+# Notes for AI
+- Always route data access through services; avoid direct storage calls in components.
+- Use existing selectors rather than branching by auth state in components.
+

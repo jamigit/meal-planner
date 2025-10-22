@@ -1,0 +1,12 @@
+# Global Repo Rules
+
+- Be explicit, concise, and technical.
+- Ask clarifying questions before guessing.
+- Use service layer for all data access.
+- Prefer async/await; avoid .then chains.
+- Semantic HTML, keyboard navigation, proper labeling.
+- Sanitize inputs; avoid unsafe HTML.
+- Co-locate tests next to code; test behavior, not implementation.
+- Validation gates: eslint, vitest, accessibility sanity checks.
+- Import order: React, external, internal (@/), parent, sibling.
+- Reference `../instructions.mdc`, `../architecture.mdc`, and repo `patterns.md`.

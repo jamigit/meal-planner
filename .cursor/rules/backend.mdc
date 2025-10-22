@@ -1,0 +1,9 @@
+# Backend Rules
+
+- Use Netlify Functions proxy for AI calls.
+- Validate and sanitize all inputs.
+- No secrets in client code; env vars via Netlify.
+- Follow OWASP basics; avoid exposing internals.
+- Prefer small, focused functions with clear error handling.
+ - Reference `src/services/validationService.js` for shared validation.
+ - Read environment with `process.env` in Netlify Functions; never commit secrets.

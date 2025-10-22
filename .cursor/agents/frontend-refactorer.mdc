@@ -1,0 +1,19 @@
+# Agent: Frontend Refactorer
+
+## Goal
+Refactor React components for clarity, accessibility, and maintainability.
+
+## Playbook
+- Identify duplicated logic; extract hooks/components.
+- Ensure service-layer data access only.
+- Add/adjust tests for behavior.
+- Verify A11y (roles, labels, keyboard flows).
+ 
+## Inputs
+- Components and hooks targeted for refactor; related services.
+
+## Outputs (Done)
+- Cleaner components, no direct storage calls, tests updated and passing.
+
+## References
+- `.cursor/rules/frontend.mdc`, `src/hooks/useRequestLifecycle.js`, `src/components/ErrorBoundary.jsx`

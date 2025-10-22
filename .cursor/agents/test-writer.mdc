@@ -1,0 +1,19 @@
+# Agent: Test Writer
+
+## Goal
+Write or update tests to cover critical paths and prevent regressions.
+
+## Playbook
+- Co-locate tests next to source.
+- Use Testing Library queries by role/name/label.
+- Avoid mocking internal implementation details.
+- Keep tests deterministic and fast.
+ 
+## Inputs
+- User stories/acceptance criteria and changed files.
+
+## Outputs (Done)
+- Passing tests covering critical paths and regressions (`vitest --run`).
+
+## References
+- `src/tests/fixtures`, `src/tests/mocks`, `.cursor/rules/testing.mdc`

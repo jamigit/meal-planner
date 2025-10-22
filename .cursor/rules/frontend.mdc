@@ -1,0 +1,33 @@
+# Frontend Rules
+
+- Functional React components with hooks.
+- Local UI state in components; data via services.
+- Use `useRequestLifecycle` for async UX.
+- Accessibility first: roles, names, labels; keyboard traps prohibited.
+- Avoid direct storage calls in components.
+- Co-locate tests; use Testing Library queries by role/name/label.
+ - Import order: React, external, internal (@/), parent, sibling.
+ - Wrap route-level UI in `src/components/ErrorBoundary.jsx`.
+ - Example lifecycle:
+```js
+const { status, error, start, resolve, reject } = useRequestLifecycle();
+async function handleSave(input) {
+  start();
+  try {
+    const svc = await serviceSelector.getRecipeService();
+    await svc.create(input);
+    resolve();
+  } catch (e) {
+    reject(e);
+  }
+}
+```
+ 
+Import order example:
+```js
+import React from 'react';
+import { useMemo } from 'react';
+import serviceSelector from '@/services/serviceSelector';
+import Parent from '../Parent';
+import './styles.css';
+```
