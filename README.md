@@ -12,8 +12,11 @@ This is a simple tool for managing recipes and selecting 4 meals for weekly plan
 **Problem**: Currently spending up to 30 minutes weekly deciding on 4 dinner meals, experiencing decision paralysis, and managing recipes across multiple Google Drive documents.
 
 ### Core Features
-- **Recipe Management**: Store recipes with name, URL, and tags
+- **Recipe Management**: Store recipes with name, URL, and intelligent AI-generated tags
 - **Weekly Meal Selection**: Choose 4 recipes for the week with notes
+- **AI Meal Planner V2**: Intelligent 8-meal suggestions based on preferences and meal history
+- **Auto-Tagging System**: Claude AI-powered recipe analysis with smart fallback suggestions
+- **Tag Management**: Comprehensive tag taxonomy with analytics and management tools
 - **Saved Plans**: View and manage all previous weekly plans
 - **Cloud Data Sync**: Real-time synchronization across all devices
 - **Secure Authentication**: Password-protected access with Supabase
@@ -521,6 +524,15 @@ The goal is to get a working meal planner quickly, then enhance it iteratively b
 - Supabase authentication
 - Real-time sync between devices
 - Shared planning between partners
+
+### Phase 5: Progressive Web App (PWA) 🚀 Planned
+- **App Installability**: Install as native app on mobile and desktop
+- **Offline Functionality**: Full CRUD operations without internet connection
+- **Background Sync**: Queue operations when offline, sync when online
+- **Push Notifications**: Weekly meal planning reminders
+- **App-like Experience**: Standalone mode with custom splash screens
+- **Performance**: Sub-second load times with intelligent caching
+- **Update Management**: Seamless app updates with user notifications
 
 ### UI/UX Improvements
 - Drag-and-drop meal planning interface
@@ -1326,6 +1338,34 @@ The application now includes all critical production-ready features:
 - **Virtual scrolling** for long lists
 - **Lazy loading** with Intersection Observer
 - **Bundle analysis** and performance monitoring
+
+### 🚀 Recent Updates & Improvements
+
+#### **AI-Powered Auto-Tagging System** (Latest)
+- **Claude API Integration**: Intelligent recipe analysis using Claude 3.5 Sonnet
+- **Smart Fallback System**: Keyword-based suggestions when AI is unavailable
+- **Comprehensive Tag Taxonomy**: 4 categories (Cuisine, Ingredients, Convenience, Dietary) with 51 total tags
+- **Caching & Performance**: 15-minute cache with rate limiting (10 requests/minute)
+- **Error Resilience**: Graceful degradation with user-friendly error messages
+
+#### **Enhanced Tag Management**
+- **Tag Management UI**: Dedicated interface for renaming, deleting, and merging tags
+- **Tag Analytics**: Usage statistics, trend analysis, and cleanup recommendations
+- **Migration Tools**: Automated migration from legacy tag system to new taxonomy
+- **Multi-Select Dropdowns**: Improved filtering with OR logic for broader search results
+
+#### **AI Meal Planner V2** (Primary Planning Tool)
+- **Intelligent Meal Suggestions**: AI-powered 8-meal recommendations based on preferences and history
+- **Additive Filtering**: OR logic for preferences (Italian OR Asian OR Quick) to expand search space
+- **Background Sync**: Offline-capable with automatic sync when connection restored
+- **Enhanced UX**: Tabbed interface with Selected Meals, Ingredients, and Recipe Browser
+- **Save & Email Integration**: Seamless workflow with celebratory transitions
+
+#### **Production Stability Fixes**
+- **TypeError Prevention**: Fixed "not iterable" errors with comprehensive null checks
+- **API Model Updates**: Updated Claude API from deprecated model to current version
+- **Field Name Consistency**: Resolved tag category field name mismatches
+- **Array Safety**: Added Array.isArray() checks throughout form handling
 
 ### 🧪 Testing & Quality Assurance
 
