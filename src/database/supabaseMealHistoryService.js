@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase.js'
 import { authService } from '../services/authService.js'
 import { recipeService } from './recipeService.js'
+import { supabaseRecipeService } from './supabaseRecipeService.js'
 
 class SupabaseMealHistoryService {
   constructor() {
@@ -53,34 +54,57 @@ class SupabaseMealHistoryService {
       const weekDate = this.getWeekStartDate(new Date(actualEatenDate))
 
       // Validate recipe exists
+      console.log(`🔍 Validating recipe ID: ${recipeId} (type: ${typeof recipeId})`)
       const recipeExists = await this.validateRecipeId(recipeId)
+      console.log(`🔍 Recipe exists in Supabase: ${recipeExists}`)
+      
       if (!recipeExists) {
         console.warn(`Recipe with ID ${recipeId} not found in Supabase. Attempting to sync from IndexedDB...`)
         
         // Try to fetch recipe from IndexedDB and sync to Supabase
         try {
+          console.log(`🔍 Attempting to fetch recipe ${recipeId} from IndexedDB...`)
           const localRecipe = await recipeService.getById(recipeId)
+          console.log(`🔍 Local recipe result:`, localRecipe)
+          
           if (localRecipe) {
             console.log(`Found recipe in IndexedDB: ${localRecipe.name}. Syncing to Supabase...`)
+            console.log(`🔍 Local recipe data:`, {
+              id: localRecipe.id,
+              name: localRecipe.name,
+              ingredients: localRecipe.ingredients?.length,
+              tags: localRecipe.tags?.length
+            })
             
-            // Import the Supabase recipe service to sync the recipe
-            const { supabaseRecipeService } = await import('./supabaseRecipeService.js')
-            const supabaseRecipeServiceInstance = new supabaseRecipeService()
-            
-            // Sync the recipe to Supabase with the same ID
-            const syncedRecipe = await supabaseRecipeServiceInstance.add(localRecipe)
-            console.log(`Successfully synced recipe to Supabase: ${syncedRecipe.id}`)
+            // Create Supabase recipe service instance to sync the recipe
+            const syncedRecipe = await supabaseRecipeService.add(localRecipe)
+            console.log(`Successfully synced recipe to Supabase:`, syncedRecipe)
             
             // Use the synced recipe ID
             recipeId = syncedRecipe.id
+            console.log(`🔍 Updated recipeId to: ${recipeId}`)
           } else {
+            console.error(`❌ Recipe with ID ${recipeId} not found in IndexedDB`)
             throw new Error(`Recipe with ID ${recipeId} not found in IndexedDB or Supabase. This recipe may have been deleted.`)
           }
         } catch (syncError) {
           console.error('Failed to sync recipe from IndexedDB:', syncError)
+          console.error('Sync error details:', {
+            message: syncError.message,
+            stack: syncError.stack,
+            recipeId: recipeId
+          })
           throw new Error(`Recipe with ID ${recipeId} not found and could not be synced. Please re-add this recipe to your collection before marking as eaten.`)
         }
       }
+
+      console.log(`🔍 Final recipeId before insert: ${recipeId}`)
+      console.log(`🔍 Inserting meal history with:`, {
+        user_id: userId,
+        recipe_id: recipeId,
+        week_date: weekDate,
+        eaten_date: actualEatenDate
+      })
 
       const { data, error } = await supabase
         .from(this.tableName)
@@ -93,7 +117,12 @@ class SupabaseMealHistoryService {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('❌ Supabase insert error:', error)
+        throw error
+      }
+      
+      console.log('✅ Successfully added meal to history:', data)
       return data
     } catch (error) {
       console.error('Failed to add meal to history:', error)

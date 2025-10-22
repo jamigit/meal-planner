@@ -21,6 +21,7 @@ export const NETWORK_CONFIG = {
   PING_INTERVAL: 10000, // 10 seconds
   PING_TIMEOUT: 5000, // 5 seconds
   PING_URL: '/api/ping', // Health check endpoint
+  ENABLE_PING: false, // Disable ping for static builds
   
   // Queue configuration
   MAX_QUEUE_SIZE: 100,
@@ -114,6 +115,13 @@ export class NetworkStateManager {
    * @returns {Promise<boolean>} Whether network is connected
    */
   async checkConnectivity() {
+    // If ping is disabled, just use navigator.onLine
+    if (!NETWORK_CONFIG.ENABLE_PING) {
+      const isConnected = navigator.onLine
+      this.updateConnectionState(isConnected)
+      return isConnected
+    }
+
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), NETWORK_CONFIG.PING_TIMEOUT)
@@ -164,6 +172,11 @@ export class NetworkStateManager {
    * Starts periodic ping interval
    */
   startPingInterval() {
+    // Only start ping interval if ping is enabled
+    if (!NETWORK_CONFIG.ENABLE_PING) {
+      return
+    }
+    
     this.pingInterval = setInterval(() => {
       this.checkConnectivity()
     }, NETWORK_CONFIG.PING_INTERVAL)
