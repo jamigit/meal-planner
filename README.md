@@ -76,6 +76,7 @@ The project uses a structured documentation approach:
 
 #### Core Documentation
 - **README.md** - Project overview, tech stack, and quick start guide
+- **docs/env-setup.md** - Environment variables and local/prod setup
 - **docs/architecture.md** - System architecture and data flow
 - **docs/data-models.md** - Database schemas and data structures
 - **docs/design-system.md** - UI components and design tokens

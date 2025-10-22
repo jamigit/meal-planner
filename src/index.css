@@ -165,11 +165,11 @@
 
   /* Surface utilities */
   .surface-page {
-    @apply bg-surface-page;
+    background-color: theme('colors.surface.page');
   }
   
   .surface-elevated {
-    @apply bg-surface-elevated;
+    background-color: theme('colors.surface.elevated');
   }
   
   /* Message boxes */

@@ -239,9 +239,9 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
                                   <div className="text-black text-xs mt-1">
                                     ({item.sources.map(source => {
                                       // Extract amount from original string or use item name if no amount
-                                      const match = source.original.match(/^([\d\/\.\s]+(?:cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|ounce|oz|can|bottle|jar|bag|bunch|head|clove|cloves)?)\s*/i)
-                                      if (match && match[1].trim()) {
-                                        return match[1].trim()
+                                      const match = source.original.match(/^[\d\/\.\s]+(?:cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|ounce|oz|can|bottle|jar|bag|bunch|head|clove|cloves)?\s*/i)
+                                      if (match && match[0].trim()) {
+                                        return match[0].trim()
                                       } else {
                                         // If no amount found, use the item name
                                         return item.item
@@ -249,9 +249,21 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
                                     }).join(' | ')})
                                   </div>
                                 )}
-        </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
+        
       </div>
-
+      
       {/* Import Modal */}
       <ImportShoppingListModal
         isOpen={showImportModal}

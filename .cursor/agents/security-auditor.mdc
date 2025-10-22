@@ -15,6 +15,7 @@ Identify and remediate security issues across client/services.
 ## Outputs (Done)
 - List of issues with severity and remediation steps.
 - Confirmed no unsafe HTML or secrets.
+- Validation gates pass (lint + `vitest --run`).
 
 ## References
 - `src/services/securityService.js`, `src/services/validationService.js`

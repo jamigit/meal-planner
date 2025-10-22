@@ -26,6 +26,7 @@ Guardrails for AI-assisted work in this repo. Align with Jamie Barter’s accoun
 - Acceptance criteria defined
 - Impacted files listed
 - Risks and mitigations noted
+- Identify affected user flows; add/update E2E tests first
 
 ### Executor checklist
 - Add/adjust tests for behavior
@@ -36,6 +37,12 @@ Guardrails for AI-assisted work in this repo. Align with Jamie Barter’s accoun
 ### How to invoke
 - Commands: see `../commands.json` (Run tests, Lint, Build)
 - Agents: see `../agents/*` (refactorer, test-writer, security-auditor, doc-writer)
+
+#### Agent index
+- Frontend Refactorer: use for duplication, prop bloat, slow renders
+- Test Writer: use for new features, bug fixes, IO changes
+- Security Auditor: use for user input, HTML/AI output, auth/storage work
+- Doc Writer: use when patterns or data flows change
 
 ### Optional pre-commit (documented only)
 Use a git hook or Husky to run lint and tests before commit:

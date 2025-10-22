@@ -95,6 +95,7 @@ Before marking any task complete:
 - [ ] **Input handling safe** (no unsanitized HTML)
 - [ ] **Service layer used** for data access
 - [ ] **Error boundaries** in place
+ - [ ] **Critical end-to-end user flows covered** (happy path + key failure paths)
 
 ## Documentation References
 - **Architecture**: `./.cursor/architecture.mdc` (AI-friendly), `./docs/architecture.md` (original)
@@ -119,7 +120,19 @@ Before marking any task complete:
 
 ## Agents and Tools
 - Commands: see `./.cursor/commands.json`
-- Agents: `./.cursor/agents/*` (refactorer, test-writer, security-auditor, doc-writer)
+- Agents (usage and links):
+  - Frontend Refactorer → `./.cursor/agents/frontend-refactorer.mdc`
+    - Use when: duplication/prop bloat/slow renders
+    - Done: lint+tests green; no direct storage calls; a11y verified
+  - Test Writer → `./.cursor/agents/test-writer.mdc`
+    - Use when: new features, bug fixes, IO changes
+    - Done: `vitest --run` green; covers critical path/regression
+  - Security Auditor → `./.cursor/agents/security-auditor.mdc`
+    - Use when: handling user input/HTML, AI outputs, auth/storage changes
+    - Done: no unsafe HTML; inputs validated; secrets absent; CSP documented
+  - Doc Writer → `./.cursor/agents/doc-writer.mdc`
+    - Use when: data flow/patterns change or new services added
+    - Done: docs updated with links; rationale captured
 
 ## Technical Debt
 When taking shortcuts, annotate with:

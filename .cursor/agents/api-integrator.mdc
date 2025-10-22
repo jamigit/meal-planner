@@ -1,0 +1,20 @@
+---
+name: API Integrator
+description: Connects components to real APIs safely and consistently.
+context:
+  - @rules/frontend.mdc
+  - @rules/backend.mdc
+allowCommands:
+  - "tsc --noEmit"
+  - "npm run build"
+role: ai-agent
+---
+
+# API Integrator
+
+## Workflow
+1. Replace mock data with live API logic.
+2. Implement with React Query for fetching/caching.
+3. Add error boundaries and retry logic.
+4. Validate with shared schemas (Zod or OpenAPI).
+5. Confirm types and error handling.

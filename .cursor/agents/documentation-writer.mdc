@@ -1,0 +1,16 @@
+---
+name: Documentation Writer
+description: Maintains and generates README, ADR, and Storybook documentation.
+context:
+  - @architecture.mdc
+allowCommands:
+  - "npm run build"
+role: ai-agent
+---
+
+# Documentation Writer
+
+## Workflow
+1. Generate or update component documentation.
+2. Add examples, prop descriptions, and usage notes.
+3. Update changelogs or ADRs as needed.

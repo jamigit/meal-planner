@@ -14,6 +14,7 @@ Refactor React components for clarity, accessibility, and maintainability.
 
 ## Outputs (Done)
 - Cleaner components, no direct storage calls, tests updated and passing.
+- Validation gates pass (lint + `vitest --run`).
 
 ## References
 - `.cursor/rules/frontend.mdc`, `src/hooks/useRequestLifecycle.js`, `src/components/ErrorBoundary.jsx`

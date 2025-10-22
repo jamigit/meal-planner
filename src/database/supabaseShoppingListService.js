@@ -28,9 +28,11 @@ class SupabaseShoppingListService {
         .from(this.listsTableName)
         .select('*')
         .eq('user_id', userId)
-        .single()
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      if (fetchError) {
         throw fetchError
       }
 

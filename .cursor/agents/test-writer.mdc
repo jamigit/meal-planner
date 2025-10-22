@@ -1,19 +1,26 @@
-# Agent: Test Writer
+---
+name: Test Writer
+description: Writes and runs unit/integration tests for React apps.
+context:
+  - @rules/testing.mdc
+allowCommands:
+  - "vitest run"
+role: ai-agent
+---
 
-## Goal
-Write or update tests to cover critical paths and prevent regressions.
+# Test Writer
 
-## Playbook
-- Co-locate tests next to source.
-- Use Testing Library queries by role/name/label.
-- Avoid mocking internal implementation details.
-- Keep tests deterministic and fast.
- 
-## Inputs
-- User stories/acceptance criteria and changed files.
+## Workflow
+1. Write Vitest + Testing Library tests for given code.
+2. Cover edge cases, loading, and error states.
+3. Run and iterate until passing.
+4. Summarize coverage improvements.
+
+## Triggers
+- New features, bug fixes, or IO changes.
+- Any change impacting a user flow — write/extend end-to-end (E2E-style) tests first.
 
 ## Outputs (Done)
-- Passing tests covering critical paths and regressions (`vitest --run`).
-
-## References
-- `src/tests/fixtures`, `src/tests/mocks`, `.cursor/rules/testing.mdc`
+- `vitest --run` passes.
+- Critical paths covered, including E2E-style user flows (happy path + key failure paths).
+- Tests are deterministic and behavior-focused.

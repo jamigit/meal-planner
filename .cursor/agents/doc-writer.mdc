@@ -13,6 +13,7 @@ Document features, patterns, and architectural decisions succinctly.
 
 ## Outputs (Done)
 - Updated docs with links to code; rationale captured succinctly.
+- Validation gates pass (lint + `vitest --run`).
 
 ## References
 - `.cursor/instructions.mdc`, `.cursor/architecture.mdc`, `patterns.md`, `docs/rules-feedback.md`

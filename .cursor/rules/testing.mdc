@@ -8,3 +8,9 @@
  - Organize fixtures under `src/tests/fixtures` and mocks under `src/tests/mocks`.
  - Minimum critical coverage: routes, services, and regression fixes.
  - In CI or pre-commit, avoid watch mode: `vitest --run`.
+
+## Test Strategy
+- Prefer end-to-end user flow tests for critical journeys (happy path and key failure paths).
+- Simulate flows with Testing Library where feasible (navigate, fill forms, submit, assert outcomes).
+- For multi-screen flows, assert visible state and persistence via service layer effects.
+- Add at least one failure/edge case per critical flow (validation error, network error).

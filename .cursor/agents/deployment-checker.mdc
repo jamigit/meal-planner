@@ -1,0 +1,19 @@
+---
+name: Deployment Checker
+description: Validates that builds, environment configs, and deployments are secure and stable.
+context:
+  - @rules/backend.mdc
+  - @rules/global.mdc
+allowCommands:
+  - "npm run build"
+  - "npm audit --production"
+role: ai-agent
+---
+
+# Deployment Checker
+
+## Workflow
+1. Verify build output and environment variable safety.
+2. Check for missing env vars or secrets.
+3. Confirm minification, CSP headers, and source map handling.
+4. Summarize readiness for production.
