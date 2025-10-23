@@ -1,5 +1,6 @@
 import React from 'react'
-import { SortableContext, verticalListSortingStrategy, useDroppable } from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useDroppable } from '@dnd-kit/core'
 import DraggableShoppingListItem from './DraggableShoppingListItem.jsx'
 
 function SortableCategorySection({ 

@@ -15,6 +15,7 @@ class ShoppingListService {
       unit: validateStringField(item.unit, 'unit', false),
       category: validateStringField(item.category, 'category', false) || 'Other',
       notes: validateStringField(item.notes, 'notes', false),
+      meal_role: validateStringField(item.meal_role, 'meal_role', false) || 'general',
       checked: Boolean(item.checked)
     }
   }
@@ -129,6 +130,7 @@ class ShoppingListService {
         unit: validateStringField(itemData.unit, 'unit', false),
         category: validateStringField(itemData.category, 'category', false) || 'Other',
         notes: validateStringField(itemData.notes, 'notes', false),
+        meal_role: validateStringField(itemData.meal_role, 'meal_role', false) || 'general',
         checked: false,
         checked_at: null,
         sort_order: 0, // Default sort order, will be updated by reorderItems if needed
@@ -172,6 +174,10 @@ class ShoppingListService {
       
       if (updates.notes !== undefined) {
         normalizedUpdates.notes = validateStringField(updates.notes, 'notes', false)
+      }
+      
+      if (updates.meal_role !== undefined) {
+        normalizedUpdates.meal_role = validateStringField(updates.meal_role, 'meal_role', false) || 'general'
       }
 
       await this.db.persistentShoppingListItems.update(itemId, normalizedUpdates)

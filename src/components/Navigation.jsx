@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from '../lib/supabase.js'
 
 function Navigation() {
   const location = useLocation()
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
+  const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false)
   const { signOut } = useAuth()
   const supabaseConfigured = isSupabaseConfigured()
 
@@ -13,19 +13,19 @@ function Navigation() {
     await signOut()
   }
 
-  const isMoreActive = location.pathname === '/recipes' || location.pathname === '/meal-history' || location.pathname === '/shopping-list' || location.pathname === '/tag-management'
+  const isHamburgerActive = location.pathname === '/meal-history' || location.pathname === '/tag-management'
 
-  // Close more menu when screen size changes
+  // Close hamburger menu when screen size changes
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 400 && isMoreMenuOpen) {
-        setIsMoreMenuOpen(false)
+      if (window.innerWidth >= 400 && isHamburgerMenuOpen) {
+        setIsHamburgerMenuOpen(false)
       }
     }
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [isMoreMenuOpen])
+  }, [isHamburgerMenuOpen])
 
   return (
     <>
@@ -92,78 +92,7 @@ function Navigation() {
 
       {/* Sticky Bottom Navigation (mobile + desktop) */}
       <div className="fixed bottom-4 left-0 right-0 md:bottom-4 z-50 flex justify-center pointer-events-none">
-        <div className="inline-flex w-[90vw] max-w-md bg-stone-900 border border-stone-800 shadow-lg pointer-events-auto font-heading uppercase overflow-hidden rounded-2xl">
-        {/* More Menu Overlay */}
-        {isMoreMenuOpen && (
-          <div className="absolute bottom-full left-4 right-4 mb-2 bg-stone-900 border border-stone-800 shadow-lg z-50 rounded-2xl overflow-hidden hidden max-[400px]:block">
-            <div className="flex flex-col text-stone-200">
-              <Link
-                to="/recipes"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
-                  location.pathname === '/recipes'
-                    ? 'bg-white/10 text-white'
-                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
-                }`}
-                onClick={() => setIsMoreMenuOpen(false)}
-              >
-                <span className="mr-2" aria-hidden>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 4h9a2 2 0 0 1 2 2v12h1a1 1 0 1 1 0 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v12h9V6H6Zm2 2h5v2H8V8Zm0 4h5v2H8v-2Z"/>
-                  </svg>
-                </span>
-                <span>Recipes</span>
-              </Link>
-              <Link
-                to="/meal-history"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
-                  location.pathname === '/meal-history'
-                    ? 'bg-white/10 text-white'
-                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
-                }`}
-                onClick={() => setIsMoreMenuOpen(false)}
-              >
-                <span className="mr-2" aria-hidden>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 8a1 0 0 1 1 1v3.586l2.121 2.121a1 1 0 0 1-1.414 1.414l-2.414-2.414A2 2 0 0 1 10 12V9a1 1 0 0 1 1-1Zm0-6a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/>
-                  </svg>
-                </span>
-                <span>History</span>
-              </Link>
-              <Link
-                to="/shopping-list"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
-                  location.pathname === '/shopping-list'
-                    ? 'bg-white/10 text-white'
-                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
-                }`}
-                onClick={() => setIsMoreMenuOpen(false)}
-              >
-                <span className="mr-2" aria-hidden>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"/>
-                  </svg>
-                </span>
-                <span>Shopping</span>
-              </Link>
-              <Link
-                to="/tag-management"
-                className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
-                  location.pathname === '/tag-management'
-                    ? 'bg-white/10 text-white'
-                    : 'text-stone-200 hover:bg-white/10 hover:text-white'
-                }`}
-                onClick={() => setIsMoreMenuOpen(false)}
-              >
-                <span className="mr-2" aria-hidden>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                  </svg>
-                </span>
-                <span>Tags</span>
-              </Link>
-            </div>
-          </div>
-        )}
+        <div className="inline-flex w-[90vw] max-w-md bg-stone-900 border border-stone-800 shadow-lg pointer-events-auto font-heading uppercase rounded-2xl">
 
         {/* Bottom Nav Tabs */}
         <div className="flex items-center justify-around flex-1">
@@ -216,10 +145,10 @@ function Navigation() {
             <span>Shopping</span>
           </Link>
 
-          {/* Recipes (show until viewport < 400px) */}
+          {/* Recipes */}
           <Link
             to="/recipes"
-            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
+            className={`flex flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
               location.pathname === '/recipes' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
             }`}
           >
@@ -232,58 +161,72 @@ function Navigation() {
           </Link>
 
 
-          {/* History (show until viewport < 400px) */}
-          <Link
-            to="/meal-history"
-            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors border-r border-white/30 ${
-              location.pathname === '/meal-history' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <span className="mb-1" aria-hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 8a1 1 0 0 1 1 1v3.586l2.121 2.121a1 1 0 0 1-1.414 1.414l-2.414-2.414A2 2 0 0 1 10 12V9a1 1 0 0 1 1-1Zm0-6a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/>
-              </svg>
-            </span>
-            <span>History</span>
-          </Link>
 
-          {/* Tags (show until viewport < 400px) */}
-          <Link
-            to="/tag-management"
-            className={`flex max-[400px]:hidden flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl ${
-              location.pathname === '/tag-management' ? 'bg-white/10 text-white' : 'text-stone-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <span className="mb-1" aria-hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-            </span>
-            <span>Tags</span>
-          </Link>
 
-          {/* More Menu (only under 400px) */}
-          <button
-            onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-            className={`hidden max-[400px]:flex flex-col items-center justify-center flex-1 h-16 p-3 text-[10px] font-medium transition-colors rounded-r-2xl ${
-              isMoreActive || isMoreMenuOpen
-                ? 'bg-white/10 text-white'
-                : 'text-stone-200 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <span className="mb-1" aria-hidden>
-              {isMoreMenuOpen ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
-                </svg>
-              )}
-            </span>
-            <span>More</span>
-          </button>
+          {/* Hamburger Menu */}
+          <div className="relative z-50">
+            <button
+              onClick={() => setIsHamburgerMenuOpen(!isHamburgerMenuOpen)}
+              className={`flex flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl ${
+                isHamburgerActive || isHamburgerMenuOpen
+                  ? 'bg-white/10 text-white'
+                  : 'text-stone-200 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              <span className="mb-1" aria-hidden>
+                {isHamburgerMenuOpen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
+                    <path d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
+                    <path d="M3 12h18M3 6h18M3 18h18"/>
+                  </svg>
+                )}
+              </span>
+              <span className="text-white">Menu</span>
+            </button>
+            
+            {/* Hamburger Menu Popup */}
+            {isHamburgerMenuOpen && (
+              <div className="absolute bottom-full right-0 mb-2 bg-stone-900 border border-stone-800 shadow-lg z-[60] rounded-2xl overflow-hidden min-w-[200px]">
+                <div className="flex flex-col text-stone-200">
+                  <Link
+                    to="/meal-history"
+                    className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors border-b border-white/30 ${
+                      location.pathname === '/meal-history'
+                        ? 'bg-white/10 text-white'
+                        : 'text-stone-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                    onClick={() => setIsHamburgerMenuOpen(false)}
+                  >
+                    <span className="mr-2" aria-hidden>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 8a1 1 0 0 1 1 1v3.586l2.121 2.121a1 1 0 0 1-1.414 1.414l-2.414-2.414A2 2 0 0 1 10 12V9a1 1 0 0 1 1-1zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/>
+                      </svg>
+                    </span>
+                    <span>History</span>
+                  </Link>
+                  <Link
+                    to="/tag-management"
+                    className={`flex items-center justify-center h-16 p-3 text-[10px] font-medium transition-colors ${
+                      location.pathname === '/tag-management'
+                        ? 'bg-white/10 text-white'
+                        : 'text-stone-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                    onClick={() => setIsHamburgerMenuOpen(false)}
+                  >
+                    <span className="mr-2" aria-hidden>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                      </svg>
+                    </span>
+                    <span>Tags</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         </div>
       </div>

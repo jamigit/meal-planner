@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
-import { mealHistoryService } from '../database/mealHistoryService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
+
+// @ai-technical-debt(low, low, low) - Debug component bypasses service layer for direct access
+// This is acceptable for debug utilities but should be documented
 
 function MealHistoryDebug() {
   const [stats, setStats] = useState(null)
@@ -10,6 +13,10 @@ function MealHistoryDebug() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // @ai-context: Debug component needs direct database access for analytics
+        // Using serviceSelector would require authentication checks that aren't needed here
+        const mealHistoryService = await serviceSelector.getMealHistoryService()
+        
         // Load statistics
         const statsData = await mealHistoryService.getStatistics()
         setStats(statsData)

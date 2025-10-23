@@ -210,14 +210,95 @@ try {
 - **Import Flow**: Meal plan to shopping list import
 - **Error Handling**: Network and validation errors
 
+## View Modes
+
+The shopping list supports three different view modes to organize items based on different needs:
+
+### Category View (Default)
+- Groups items by grocery store categories (Produce, Meat & Seafood, Dairy & Eggs, etc.)
+- Traditional shopping list organization
+- Drag-and-drop reordering within categories
+- Automatic category detection when adding items
+
+### Role View
+- Organizes items by meal planning roles (Breakfast, Lunch, Dinner, Snacks, General)
+- Useful for meal-focused shopping
+- Requires `meal_role` field in database schema
+- Items can be assigned to specific meal types
+
+### Grocery Store View
+- Organized by typical grocery store layout
+- Optimized for efficient in-store shopping
+- Sections follow common store arrangement
+- Helps reduce backtracking while shopping
+
+## Testing Strategy
+
+### Unit Tests
+- **Service Layer**: CRUD operations for both Supabase and IndexedDB
+- **Real-time Hooks**: Subscription lifecycle and event handling
+- **Component Tests**: UI interactions and view mode switching
+- **View Components**: Role and grocery store view rendering
+
+### Integration Tests
+- **Dual Storage**: Verify service selector routes correctly
+- **Real-time Sync**: Multi-device synchronization
+- **View Mode Switching**: All three views render correctly
+- **Mobile PWA**: Touch event handling and item selection
+
+### Manual Test Checklist
+- [ ] Guest user CRUD operations (IndexedDB)
+- [ ] Auth user CRUD operations (Supabase)
+- [ ] Real-time sync across browser tabs
+- [ ] Drag-and-drop persistence
+- [ ] Switch between Category, Role, and Grocery Store views
+- [ ] View mode tabs display correctly
+- [ ] Duplicate detection prevents duplicates
+- [ ] Import from meal plan
+- [ ] Unit conversion widget
+- [ ] AI suggestion widget
+- [ ] Offline functionality
+- [ ] Delete list switches to another list correctly
+- [ ] Mobile PWA item selection works properly
+
+## Troubleshooting
+
+### Common Issues
+
+#### Mobile PWA Item Selection Not Working
+- **Cause**: Touch events interfering with drag-and-drop
+- **Solution**: Added `touchAction: 'manipulation'` and `onTouchEnd` handlers
+- **Verification**: Test checkbox selection on mobile devices
+
+#### View Modes Not Showing
+- **Cause**: ViewModeSelector not rendering or view mode not switching
+- **Solution**: Ensure ViewModeSelector is added after Add Item Form section
+- **Verification**: Check that view mode buttons are visible and functional
+
+#### Real-time Sync Not Working
+- **Cause**: Supabase not configured or user not authenticated
+- **Solution**: Check Supabase configuration and authentication status
+- **Verification**: Look for "Real-time sync active" message
+
+#### Database Migration Issues
+- **Cause**: IndexedDB version not updated or Supabase migration not run
+- **Solution**: Run IndexedDB Version 11 migration and Supabase meal_role migration
+- **Verification**: Check browser DevTools for IndexedDB version and run migration SQL
+
+### Performance Considerations
+- **Large Lists**: Consider pagination for lists with 100+ items
+- **Real-time Updates**: Monitor subscription count to avoid memory leaks
+- **Mobile Performance**: Touch events optimized for mobile devices
+
 ## Future Enhancements
 
 ### Planned Features
-- **Drag-and-Drop**: Reorder items within lists
-- **Smart Duplicates**: Detect and merge similar items
-- **Unit Conversion**: Convert between measurement units
+- **Drag-and-Drop**: Reorder items within lists ✅ COMPLETED
+- **Smart Duplicates**: Detect and merge similar items ✅ COMPLETED
+- **Unit Conversion**: Convert between measurement units ✅ COMPLETED
+- **View Modes**: Category, Role, and Grocery Store views ✅ COMPLETED
 - **Recipe Linking**: Link items back to source recipes
-- **AI Categorization**: AI-powered item categorization
+- **AI Categorization**: AI-powered item categorization ✅ COMPLETED
 
 ### Technical Improvements
 - **Fractional Indexing**: Maintain item order without gaps

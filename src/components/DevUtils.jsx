@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { seedDatabase, clearAllRecipes, reseedDatabase } from '../utils/seedDatabase.js'
 import { migrateAllRecipes, analyzeExistingTags } from '../utils/tagMigration.js'
-import { recipeService } from '../database/recipeService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
+
+// @ai-technical-debt(medium, low, medium) - DevUtils bypasses service layer for direct database access
+// This is acceptable for development utilities but should be documented
 
 function DevUtils() {
   const [isOpen, setIsOpen] = useState(false)
@@ -25,6 +28,9 @@ function DevUtils() {
 
   const handleExportData = async () => {
     try {
+      // @ai-context: DevUtils needs direct database access for export functionality
+      // Using serviceSelector would require authentication checks that aren't needed here
+      const recipeService = await serviceSelector.getRecipeService()
       const recipes = await recipeService.getAll()
       const dataStr = JSON.stringify(recipes, null, 2)
       const dataBlob = new Blob([dataStr], { type: 'application/json' })
@@ -42,6 +48,8 @@ function DevUtils() {
 
   const handleCountRecipes = async () => {
     try {
+      // @ai-context: DevUtils needs direct database access for count functionality
+      const recipeService = await serviceSelector.getRecipeService()
       const recipes = await recipeService.getAll()
       setResult(`📊 Database contains ${recipes.length} recipes`)
     } catch (error) {

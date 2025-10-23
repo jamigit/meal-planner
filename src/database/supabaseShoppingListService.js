@@ -158,6 +158,7 @@ class SupabaseShoppingListService {
         unit: validateStringField(itemData.unit, 'unit', false),
         category: validateStringField(itemData.category, 'category', false) || 'Other',
         notes: validateStringField(itemData.notes, 'notes', false),
+        meal_role: validateStringField(itemData.meal_role, 'meal_role', false) || 'general',
         checked: false,
         sort_order: 0 // Default sort order, will be updated by reorderItems if needed
       }
@@ -204,6 +205,10 @@ class SupabaseShoppingListService {
       
       if (updates.notes !== undefined) {
         normalizedUpdates.notes = validateStringField(updates.notes, 'notes', false)
+      }
+      
+      if (updates.meal_role !== undefined) {
+        normalizedUpdates.meal_role = validateStringField(updates.meal_role, 'meal_role', false) || 'general'
       }
 
       const { data, error } = await supabase
@@ -280,6 +285,7 @@ class SupabaseShoppingListService {
         unit: validateStringField(item.unit, 'unit', false),
         category: validateStringField(item.category, 'category', false) || 'Other',
         notes: validateStringField(item.notes, 'notes', false),
+        meal_role: validateStringField(item.meal_role, 'meal_role', false) || 'general',
         checked: false
       }))
 

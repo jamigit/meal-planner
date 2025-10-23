@@ -13,10 +13,10 @@ import ShoppingListManager from './ShoppingListManager.jsx'
 import DuplicateDetectionModal from './DuplicateDetectionModal.jsx'
 import SortableCategorySection from './SortableCategorySection.jsx'
 import UnitConversionWidget from './UnitConversionWidget.jsx'
-import AISuggestionWidget from './AISuggestionWidget.jsx'
 import ViewModeSelector, { VIEW_MODES } from './ViewModeSelector.jsx'
 import RoleStructuredView from './RoleStructuredView.jsx'
 import GroceryStoreView from './GroceryStoreView.jsx'
+import DraggableShoppingListItem from './DraggableShoppingListItem.jsx'
 import Button from './ui/Button'
 import Input from './ui/Input'
 import Message from './ui/Message'
@@ -51,7 +51,8 @@ function ShoppingListPage() {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false)
   const [pendingItem, setPendingItem] = useState(null)
   const [detectedDuplicates, setDetectedDuplicates] = useState([])
-  const [viewMode, setViewMode] = useState(VIEW_MODES.CATEGORY.id)
+  const [viewMode, setViewMode] = useState(VIEW_MODES.GENERAL.id)
+  const [newItemRows, setNewItemRows] = useState([{ id: 1, name: '', quantity: '', unit: '', category: 'Other' }])
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -65,8 +66,8 @@ function ShoppingListPage() {
   const {
     items,
     itemsByCategory,
-    uncheckedItems,
-    checkedItems,
+    uncheckedItems: allUncheckedItems,
+    checkedItems: allCheckedItems,
     isLoading,
     isConnected,
     totalItems,
@@ -75,6 +76,31 @@ function ShoppingListPage() {
   } = useShoppingList(currentList?.id, {
     enableRealtime: !!currentList?.id
   })
+
+  // Helper functions to filter items by source
+  const isMealPlanItem = (item) => {
+    return item.notes && (item.notes.includes('From') || item.notes.includes('recipe'))
+  }
+  
+  const isCustomItem = (item) => {
+    return !isMealPlanItem(item)
+  }
+
+  // Filter items based on view mode and source
+  const getFilteredItems = (items) => {
+    switch (viewMode) {
+      case VIEW_MODES.GENERAL.id:
+        return items.filter(isCustomItem)
+      case VIEW_MODES.MEALS.id:
+        return items.filter(isMealPlanItem)
+      case VIEW_MODES.GROCERY.id:
+      default:
+        return items
+    }
+  }
+
+  const uncheckedItems = getFilteredItems(allUncheckedItems)
+  const checkedItems = getFilteredItems(allCheckedItems)
 
   // Load lists and set current list on mount
   useEffect(() => {
@@ -101,32 +127,67 @@ function ShoppingListPage() {
     }
   }
 
-  const handleAddItem = async (e) => {
-    e.preventDefault()
-    
-    if (!newItem.name.trim()) {
-      setError('Item name is required')
-      return
-    }
+  const handleAddNewRow = () => {
+    const newId = Math.max(...newItemRows.map(row => row.id)) + 1
+    setNewItemRows(prev => [{ id: newId, name: '', quantity: '', unit: '', category: 'Other' }, ...prev])
+  }
 
-    if (!currentList) {
-      setError('No shopping list selected')
-      return
-    }
+  const handleUpdateNewItemRow = (id, field, value) => {
+    setNewItemRows(prev => prev.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ))
+  }
 
-    // Check for duplicates
-    const duplicates = findDuplicates(newItem.name, items, 0.7)
-    
-    if (duplicates.length > 0) {
-      // Show duplicate detection modal
-      setPendingItem({ ...newItem })
-      setDetectedDuplicates(duplicates)
-      setShowDuplicateModal(true)
-      return
-    }
+  const handleSubmitNewItemRow = async (rowId) => {
+    const row = newItemRows.find(r => r.id === rowId)
+    if (!row || !row.name.trim()) return
 
-    // No duplicates found, add directly
-    await addItemDirectly(newItem)
+    try {
+      setIsAdding(true)
+      setError(null)
+      
+      // Auto-detect category if not set
+      const category = row.category === 'Other' ? detectCategory(row.name) : row.category
+      
+      const shoppingListService = await serviceSelector.getShoppingListService()
+      
+      // Check for duplicates
+      const duplicates = findDuplicates(row.name, items, 0.7)
+      
+      if (duplicates.length > 0) {
+        setDetectedDuplicates(duplicates)
+        setPendingItem({
+          name: row.name.trim(),
+          quantity: row.quantity,
+          unit: row.unit,
+          category: category
+        })
+        setShowDuplicateModal(true)
+        return
+      }
+      
+      await shoppingListService.addItem(currentList.id, {
+        name: row.name.trim(),
+        quantity: row.quantity,
+        unit: row.unit,
+        category: category
+      })
+      
+      // Remove the submitted row and add a new empty one
+      setNewItemRows(prev => {
+        const filtered = prev.filter(r => r.id !== rowId)
+        const newId = Math.max(...filtered.map(r => r.id)) + 1
+        return [{ id: newId, name: '', quantity: '', unit: '', category: 'Other' }, ...filtered]
+      })
+      
+      setSuccess('Item added successfully')
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (error) {
+      console.error('Failed to add item:', error)
+      setError('Failed to add item')
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   const addItemDirectly = async (itemToAdd) => {
@@ -275,16 +336,6 @@ function ShoppingListPage() {
     setTimeout(() => setSuccess(null), 3000)
   }
 
-  const handleAISuggestions = (suggestions) => {
-    setNewItem(prev => ({
-      ...prev,
-      category: suggestions.category,
-      unit: suggestions.units[0] || prev.unit
-    }))
-    setSuccess('AI suggestions applied successfully')
-    setTimeout(() => setSuccess(null), 3000)
-  }
-
   const handleUncheckAll = async () => {
     if (!currentList) return
 
@@ -311,6 +362,23 @@ function ShoppingListPage() {
   const handleListCreated = (newList) => {
     setLists(prev => [...prev, newList])
     setCurrentList(newList)
+  }
+
+  const handleListDeleted = (deletedListId) => {
+    setLists(prev => prev.filter(list => list.id !== deletedListId))
+    
+    // If deleted list was current, switch to another list or create new one
+    if (currentList?.id === deletedListId) {
+      const remainingLists = lists.filter(list => list.id !== deletedListId)
+      if (remainingLists.length > 0) {
+        setCurrentList(remainingLists[0])
+      } else {
+        setCurrentList(null)
+      }
+    }
+    
+    setSuccess('Shopping list deleted successfully')
+    setTimeout(() => setSuccess(null), 3000)
   }
 
   const handleItemNameChange = (e) => {
@@ -442,75 +510,13 @@ function ShoppingListPage() {
         </PageSection>
       )}
 
-      {/* Add Item Form */}
+      {/* View Mode Selector */}
       {currentList && (
         <PageSection>
-          <form onSubmit={handleAddItem} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <Input
-                placeholder="Item name"
-                value={newItem.name}
-                onChange={handleItemNameChange}
-                className="md:col-span-2"
-                required
-              />
-              <Input
-                placeholder="Quantity"
-                value={newItem.quantity}
-                onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
-              />
-              <Input
-                placeholder="Unit"
-                value={newItem.unit}
-                onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-              />
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <select
-                    value={newItem.category}
-                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {CATEGORIES.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                  {newItem.name.trim() && detectCategory(newItem.name) !== 'Other' && (
-                    <p className="text-xs text-blue-600 mt-1">
-                      ✓ Auto-detected category
-                    </p>
-                  )}
-                </div>
-                
-                <Button
-                  type="submit"
-                  disabled={isAdding || !newItem.name.trim()}
-                  className="flex-1"
-                >
-                  {isAdding ? 'Adding...' : 'Add Item'}
-                </Button>
-              </div>
-              
-              {/* Unit Conversion Widget */}
-              {newItem.quantity && newItem.unit && (
-                <UnitConversionWidget
-                  itemName={newItem.name}
-                  currentQuantity={newItem.quantity}
-                  currentUnit={newItem.unit}
-                  onConvert={handleUnitConversion}
-                />
-              )}
-              
-              {/* AI Suggestion Widget */}
-              <AISuggestionWidget
-                itemName={newItem.name}
-                onApplySuggestions={handleAISuggestions}
-              />
-            </div>
-          </form>
+          <ViewModeSelector
+            currentView={viewMode}
+            onViewChange={setViewMode}
+          />
         </PageSection>
       )}
 
@@ -527,15 +533,8 @@ function ShoppingListPage() {
         </Message>
       )}
 
-      {/* Connection Status */}
-      {isConnected && (
-        <Message variant="info" className="mb-4">
-          Real-time sync active
-        </Message>
-      )}
-
-      {/* Active Items */}
-      {currentList && uncheckedItems.length > 0 && (
+      {/* Active Items - Render based on view mode */}
+      {currentList && (uncheckedItems.length > 0 || newItemRows.length > 0) && (
         <PageSection>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">
@@ -558,21 +557,196 @@ function ShoppingListPage() {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <div className="space-y-4">
-              {CATEGORIES.map(category => {
-                const categoryItems = uncheckedItems.filter(item => item.category === category)
-                return (
-                  <SortableCategorySection
-                    key={category}
-                    category={category}
-                    items={categoryItems}
-                    onToggleItem={handleToggleItem}
-                    onDeleteItem={handleDeleteItem}
-                    onUpdateItem={handleUpdateItem}
-                  />
-                )
-              })}
-            </div>
+            {/* Add new item button - above the most recent line item */}
+            <button
+              onClick={handleAddNewRow}
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm mb-2"
+            >
+              <span className="text-lg">+</span>
+              <span>Add new item</span>
+            </button>
+
+            {/* New Item Rows - Always at the top */}
+            {newItemRows.map((row) => (
+              <div key={row.id} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg mb-2 hover:shadow-sm transition-shadow">
+                {/* Drag handle icon (decorative) */}
+                <div className="text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                  </svg>
+                </div>
+
+                {/* Checkbox (decorative) */}
+                <div className="w-5 h-5 border-2 border-gray-300 rounded" style={{ borderRadius: '2px' }}></div>
+
+                {/* Item name field */}
+                <input
+                  type="text"
+                  placeholder="Item name"
+                  value={row.name}
+                  onChange={(e) => handleUpdateNewItemRow(row.id, 'name', e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSubmitNewItemRow(row.id)
+                    }
+                  }}
+                  className="flex-1 px-2 py-1 focus:outline-none"
+                  style={{ touchAction: 'manipulation' }}
+                />
+
+                {/* Amount field */}
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  value={`${row.quantity || ''} ${row.unit || ''}`.trim()}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    // Simple parsing: split by space, first part is quantity, rest is unit
+                    const parts = value.trim().split(' ')
+                    const quantity = parts[0] || ''
+                    const unit = parts.slice(1).join(' ') || ''
+                    handleUpdateNewItemRow(row.id, 'quantity', quantity)
+                    handleUpdateNewItemRow(row.id, 'unit', unit)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSubmitNewItemRow(row.id)
+                    }
+                  }}
+                  className="w-32 px-2 py-1 focus:outline-none"
+                  style={{ touchAction: 'manipulation' }}
+                />
+              </div>
+            ))}
+
+            {/* Existing Items */}
+            {uncheckedItems.length > 0 && (
+              <>
+                {viewMode === VIEW_MODES.GENERAL.id && (
+                  <div className="space-y-4">
+                    {uncheckedItems.length > 0 ? (
+                      <div className="space-y-2">
+                        {/* Section header */}
+                        <div className="text-sm font-medium text-gray-700 flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                          <span className="text-lg">📝</span>
+                          Custom Items
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            {uncheckedItems.length}
+                          </span>
+                          <span className="text-xs text-gray-500 ml-auto">
+                            Drop items here
+                          </span>
+                        </div>
+                        
+                        {/* Sortable items */}
+                        <SortableContext items={uncheckedItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-2">
+                            {uncheckedItems.map((item) => (
+                              <DraggableShoppingListItem
+                                key={item.id}
+                                item={item}
+                                onToggle={handleToggleItem}
+                                onDelete={handleDeleteItem}
+                                onUpdate={handleUpdateItem}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-gray-400 flex items-center gap-2 p-2 rounded-lg border-2 border-dashed border-gray-200 min-h-[40px]">
+                          <span className="text-lg">📝</span>
+                          Custom Items
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">
+                            0
+                          </span>
+                          <span className="text-xs text-gray-400 ml-auto">
+                            Drop items here
+                          </span>
+                        </div>
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No custom items added yet</p>
+                          <p className="text-sm mt-1">Add items manually using the form above</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {viewMode === VIEW_MODES.MEALS.id && (
+                  <div className="space-y-4">
+                    {uncheckedItems.length > 0 ? (
+                      <div className="space-y-2">
+                        {/* Section header */}
+                        <div className="text-sm font-medium text-gray-700 flex items-center gap-2 p-2 rounded-lg bg-gray-50 border border-gray-200">
+                          <span className="text-lg">🍽️</span>
+                          Meal Plan Items
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            {uncheckedItems.length}
+                          </span>
+                          <span className="text-xs text-gray-500 ml-auto">
+                            Drop items here
+                          </span>
+                        </div>
+                        
+                        {/* Sortable items */}
+                        <SortableContext items={uncheckedItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-2">
+                            {uncheckedItems.map((item) => (
+                              <DraggableShoppingListItem
+                                key={item.id}
+                                item={item}
+                                onToggle={handleToggleItem}
+                                onDelete={handleDeleteItem}
+                                onUpdate={handleUpdateItem}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-gray-400 flex items-center gap-2 p-2 rounded-lg border-2 border-dashed border-gray-200 min-h-[40px]">
+                          <span className="text-lg">🍽️</span>
+                          Meal Plan Items
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">
+                            0
+                          </span>
+                          <span className="text-xs text-gray-400 ml-auto">
+                            Drop items here
+                          </span>
+                        </div>
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No meal plan items yet</p>
+                          <p className="text-sm mt-1">Import items from your meal plans</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {viewMode === VIEW_MODES.GROCERY.id && (
+                  <div className="space-y-4">
+                    {CATEGORIES.map(category => {
+                      const categoryItems = uncheckedItems.filter(item => item.category === category)
+                      return (
+                        <SortableCategorySection
+                          key={category}
+                          category={category}
+                          items={categoryItems}
+                          onToggleItem={handleToggleItem}
+                          onDeleteItem={handleDeleteItem}
+                          onUpdateItem={handleUpdateItem}
+                        />
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )}
           </DndContext>
         </PageSection>
       )}

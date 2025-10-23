@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
-import { shoppingListService } from '../services/shoppingListService.js'
+import { serviceSelector } from '../services/serviceSelector.js'
+
+// @ai-context: ShoppingList component generates shopping lists from recipes
+// Uses service layer for data access and shopping list generation
 
 function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
   const [shoppingList, setShoppingList] = useState({})
@@ -17,6 +20,8 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
   const generateShoppingList = async () => {
     setLoading(true)
     try {
+      // @ai-context: Generate shopping list using service layer
+      const shoppingListService = await serviceSelector.getShoppingListService()
       const list = await shoppingListService.generateShoppingList(recipes, excludePantry)
       setShoppingList(list)
 
@@ -33,13 +38,17 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
 
   const handleCopyToClipboard = async () => {
     try {
+      // @ai-context: Generate copy text using service layer
+      const shoppingListService = await serviceSelector.getShoppingListService()
       const text = shoppingListService.generateCopyText(shoppingList, groupByRecipe)
       await navigator.clipboard.writeText(text)
       setCopySuccess(true)
       setTimeout(() => setCopySuccess(false), 2000)
     } catch (error) {
       console.error('Failed to copy to clipboard:', error)
+      // @ai-technical-debt(low, low, low) - Fallback clipboard method for older browsers
       // Fallback: create a text area and select the text
+      const shoppingListService = await serviceSelector.getShoppingListService()
       const textArea = document.createElement('textarea')
       textArea.value = shoppingListService.generateCopyText(shoppingList, groupByRecipe)
       document.body.appendChild(textArea)
@@ -79,8 +88,14 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden flex flex-col">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-6 border-b flex justify-between items-center">
           <div>
@@ -227,7 +242,7 @@ function ShoppingList({ recipes, weeklyPlanId, isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-50 flex justify-end">
+        <div className="flex-shrink-0 p-4 border-t bg-gray-50 flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"

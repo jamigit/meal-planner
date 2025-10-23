@@ -5,9 +5,11 @@
  * 
  * Migrates existing recipes from old tag taxonomy (74 tags) to new taxonomy (51 tags).
  * Handles consolidation, renaming, and removal of tags across both IndexedDB and Supabase.
+ * @ai-context: One-time migration script for tag taxonomy changes
+ * @ai-dependencies: Requires TAG_MIGRATION_MAP and TAG_TAXONOMY constants
  */
 
-import { readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { TAG_MIGRATION_MAP } from '../src/utils/tagMigrationMap.js'
 import { TAG_TAXONOMY } from '../src/constants/recipeTags.js'

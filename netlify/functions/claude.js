@@ -1,3 +1,7 @@
+// @ai-context: Netlify function for Claude API proxy
+// Handles AI meal planning requests with proper error handling
+// @ai-dependencies: Requires CLAUDE_API_KEY environment variable
+
 exports.handler = async (event, context) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
@@ -8,7 +12,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { prompt, userNotes } = JSON.parse(event.body)
+    const { prompt } = JSON.parse(event.body)
     
     if (!prompt) {
       return {

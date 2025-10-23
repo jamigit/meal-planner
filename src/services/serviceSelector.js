@@ -1,5 +1,6 @@
-// Service selector that automatically chooses between IndexedDB and Supabase
+// @ai-context: Service selector automatically chooses between IndexedDB and Supabase
 // based on authentication status and environment variables
+// This is the core abstraction layer for dual storage architecture
 
 import { recipeService } from '../database/recipeService.js'
 import { weeklyPlanService } from '../database/weeklyPlanService.js'
@@ -19,7 +20,8 @@ class ServiceSelector {
   }
 
   checkSupabaseAvailability() {
-    // Check if Supabase is configured and user is authenticated
+    // @ai-context: Check if Supabase is configured and user is authenticated
+    // This determines which storage backend to use
     this.useSupabase = isSupabaseConfigured() && authService.isAuthenticated()
     
     console.log('🔧 Service selector:', this.useSupabase ? 'Using Supabase' : 'Using IndexedDB')
@@ -31,7 +33,8 @@ class ServiceSelector {
   }
 
   async getRecipeService() {
-    // Always check current auth status
+    // @ai-context: Always check current auth status for service selection
+    // This ensures we use the correct storage backend based on current state
     const shouldUseSupabase = isSupabaseConfigured() && authService.isAuthenticated()
     console.log('🔧 Recipe service:', shouldUseSupabase ? 'Using Supabase' : 'Using IndexedDB')
     

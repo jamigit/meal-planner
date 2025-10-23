@@ -3,23 +3,23 @@ import { motion } from 'framer-motion'
 import Button from './ui/Button'
 
 const VIEW_MODES = {
-  CATEGORY: {
-    id: 'category',
-    name: 'By Category',
-    icon: '📂',
-    description: 'Group items by grocery store sections'
+  GENERAL: {
+    id: 'general',
+    name: 'General',
+    icon: '📝',
+    description: 'Custom added items only'
   },
-  ROLE: {
-    id: 'role',
-    name: 'By Role',
-    icon: '🎭',
-    description: 'Organize by meal planning roles'
+  MEALS: {
+    id: 'meals',
+    name: 'Meals',
+    icon: '🍽️',
+    description: 'Items added from meal plans'
   },
   GROCERY: {
     id: 'grocery',
-    name: 'Grocery Store',
-    icon: '🏪',
-    description: 'Optimized for store layout'
+    name: 'By Grocery',
+    icon: '🛒',
+    description: 'All items organized by grocery categories'
   }
 }
 

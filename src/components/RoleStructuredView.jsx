@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { SortableContext, verticalListSortingStrategy, useDroppable } from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useDroppable } from '@dnd-kit/core'
 import DraggableShoppingListItem from './DraggableShoppingListItem.jsx'
 
 function RoleStructuredView({ 
