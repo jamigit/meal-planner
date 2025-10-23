@@ -62,7 +62,7 @@ function ShoppingListPage() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 1, // Very small distance to allow drag to start easily
+        distance: 8, // Standard 8px threshold to prevent conflicts with clicks
       },
     }),
     useSensor(KeyboardSensor, {
@@ -92,6 +92,7 @@ function ShoppingListPage() {
   // Determine which data to use based on service type
   const isUsingSupabase = isSupabaseConfigured() && authService.isAuthenticated()
   
+  // Use realtimeItems for Supabase users, localItems for IndexedDB users
   const items = isUsingSupabase ? realtimeItems : localItems
   const isLoading = isUsingSupabase ? realtimeLoading : isLoadingLocal
   const totalItems = isUsingSupabase ? realtimeTotalItems : localItems.length
@@ -134,6 +135,7 @@ function ShoppingListPage() {
       loadLocalItems()
     }
   }, [currentList?.id, isUsingSupabase])
+
 
   // Helper functions to filter items by source
   const isMealPlanItem = (item) => {
@@ -331,20 +333,19 @@ function ShoppingListPage() {
             const reorderedItems = arrayMove(items, oldIndex, newIndex)
             const itemIds = reorderedItems.map(item => item.id)
             
+            // For IndexedDB users, update local state immediately for visual feedback
+            if (!isUsingSupabase) {
+              setLocalItems(reorderedItems)
+            }
+            
             try {
               await shoppingListService.reorderItems(currentList.id, itemIds)
               setSuccess('Items reordered successfully')
               setTimeout(() => setSuccess(null), 3000)
             } catch (reorderError) {
-              console.error('Reorder failed, likely missing sort_order column:', reorderError)
-              // For now, just update local state for IndexedDB users
-              if (!isUsingSupabase) {
-                setLocalItems(reorderedItems)
-                setSuccess('Items reordered successfully (local)')
-                setTimeout(() => setSuccess(null), 3000)
-              } else {
-                setError('Database schema needs update - please run migration')
-              }
+              console.error('Reorder failed:', reorderError)
+              setError('Failed to reorder items. Please try again.')
+              setTimeout(() => setError(null), 5000)
             }
           }
         }
@@ -892,9 +893,13 @@ function ShoppingListPage() {
             
             <DragOverlay>
               {activeId ? (
-                <div className="bg-white border-2 border-blue-500 rounded-lg shadow-2xl p-3 opacity-90">
-                  Dragging...
-                </div>
+                <DraggableShoppingListItem
+                  item={items.find(item => item.id === activeId)}
+                  onToggle={() => {}}
+                  onDelete={() => {}}
+                  onUpdate={() => {}}
+                  isDragging={true}
+                />
               ) : null}
             </DragOverlay>
           </DndContext>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { motion } from 'framer-motion'
 import { GripVertical } from 'lucide-react'
 
 function DraggableShoppingListItem({ 
@@ -35,11 +34,13 @@ function DraggableShoppingListItem({
   const handleToggle = (e) => {
     // Prevent drag events from interfering with checkbox clicks
     e.stopPropagation()
+    e.preventDefault()
     onToggle(item.id, !item.checked)
   }
 
   const handleDelete = (e) => {
     e.stopPropagation()
+    e.preventDefault()
     if (window.confirm('Are you sure you want to delete this item?')) {
       onDelete(item.id)
     }
@@ -77,12 +78,9 @@ function DraggableShoppingListItem({
   }, [isEditing])
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       style={style}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
       className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
         item.checked
           ? 'bg-gray-50 border-gray-200 opacity-60'
@@ -95,6 +93,7 @@ function DraggableShoppingListItem({
         {...listeners}
         className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 p-1 flex-shrink-0"
         title="Drag to reorder"
+        style={{ touchAction: 'none' }}
       >
         <GripVertical className="w-4 h-4" />
       </div>
@@ -102,6 +101,7 @@ function DraggableShoppingListItem({
       {/* Checkbox - square style like Google Keep */}
       <button
         onClick={handleToggle}
+        data-no-dnd="true"
         className={`w-5 h-5 border-2 flex items-center justify-center transition-colors ${
           item.checked
             ? 'bg-green-500 border-green-500 text-white'
@@ -158,6 +158,7 @@ function DraggableShoppingListItem({
       <div className="flex items-center gap-1">
         <button
           onClick={handleDelete}
+          data-no-dnd="true"
           className="text-gray-400 hover:text-red-600 p-1"
           title="Delete item"
         >
@@ -166,7 +167,7 @@ function DraggableShoppingListItem({
           </svg>
         </button>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
