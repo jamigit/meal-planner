@@ -6,6 +6,11 @@ import ShoppingListCard from './ShoppingListCard'
 import RecipeCard from './RecipeCard'
 import { PageContainer, PageHeader, PageSection } from './layout'
 
+// @ai-context: SavedPlans displays and manages saved weekly meal plans
+// @ai-dependencies: Requires serviceSelector for data access, emailService for notifications
+// @ai-technical-debt(medium, medium, high) - Uses alert() for user feedback instead of proper toast system
+// @ai-technical-debt(low, low, medium) - Complex state management could benefit from useReducer
+
 function SavedPlans() {
   const [savedPlans, setSavedPlans] = useState([])
   const [eatenMeals, setEatenMeals] = useState(new Set()) // Track which meals are marked as eaten
@@ -65,6 +70,7 @@ function SavedPlans() {
 
   const handleMarkAsEaten = async (recipe, planCreatedAt) => {
     try {
+      // @ai-context: Mark meal as eaten in meal history for analytics
       // Use plan creation date as the week reference
       const eatenDate = new Date().toISOString().split('T')[0] // Today
 
@@ -76,12 +82,14 @@ function SavedPlans() {
 
       console.log(`✅ Marked "${recipe.name}" as eaten`)
 
+      // @ai-technical-debt(high, medium, high) - Uses alert() instead of proper toast notification system
       // Optional: Show success feedback
       // Could add a toast notification here in the future
 
     } catch (error) {
       console.error('Failed to mark meal as eaten:', error)
       
+      // @ai-technical-debt(medium, low, medium) - Complex error message logic could be extracted to utility
       // Provide more specific error messages
       let errorMessage = 'Failed to mark meal as eaten. Please try again.'
       

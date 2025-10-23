@@ -46,6 +46,12 @@
 - **Service Selector**: Automatically routes to appropriate service
 - **Data Consistency**: Same API interface for both storage types
 
+### Technical Debt Management
+- **Debt Tracking**: Comprehensive system for identifying and managing technical debt
+- **AI Annotations**: `@ai-technical-debt(priority, effort, impact)` format for documenting shortcuts
+- **Automated Reporting**: CLI tools for generating debt reports and statistics
+- **Priority System**: Critical, High, Medium, Low priority levels with effort and impact scoring
+
 ### Service Interface
 ```javascript
 // All services follow this pattern

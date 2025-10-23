@@ -40,6 +40,29 @@ export async function loadRecipes() {
 - Go through Netlify Function proxy for Claude per environment.
 - Parse and validate AI outputs before rendering.
 
+## Technical Debt Management
+- Use `@ai-technical-debt(priority, effort, impact)` annotations for documenting shortcuts
+- Priority levels: `critical`, `high`, `medium`, `low`
+- Effort levels: `extreme` (>8h), `high` (4-8h), `medium` (1-4h), `low` (<1h)
+- Impact levels: `critical`, `high`, `medium`, `low`
+- Example:
+```js
+// @ai-technical-debt(high, medium, high) - Uses alert() instead of proper toast notification system
+alert('Operation completed')
+```
+
+## AI-Friendly Documentation
+- Use `@ai-context` to explain business logic and component purpose
+- Use `@ai-dependencies` to document external system relationships
+- Example:
+```js
+// @ai-context: Service selector automatically chooses between IndexedDB and Supabase
+// @ai-dependencies: authService, isSupabaseConfigured
+class ServiceSelector {
+  // Implementation
+}
+```
+
 ## Commit Hygiene
 - Small, focused commits.
 - Useful messages: imperative mood, reference issue when applicable.

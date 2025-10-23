@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core'
+import { GripVertical } from 'lucide-react'
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { serviceSelector } from '../services/serviceSelector.js'
 import { shoppingListService } from '../services/shoppingListService.js'
 import { useShoppingList } from '../hooks/useShoppingListRealtime.js'
+import { authService } from '../services/authService.js'
+import { isSupabaseConfigured } from '../lib/supabase.js'
 import { detectCategory, suggestCategories } from '../utils/categoryDetection.js'
 import { findDuplicates } from '../utils/duplicateDetection.js'
 import { suggestUnitsForItem } from '../utils/unitConversion.js'
@@ -53,29 +56,84 @@ function ShoppingListPage() {
   const [detectedDuplicates, setDetectedDuplicates] = useState([])
   const [viewMode, setViewMode] = useState(VIEW_MODES.GENERAL.id)
   const [newItemRows, setNewItemRows] = useState([{ id: 1, name: '', quantity: '', unit: '', category: 'Other' }])
+  const [activeId, setActiveId] = useState(null)
 
   // Drag and drop sensors
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 1, // Very small distance to allow drag to start easily
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
 
-  // Use real-time hook if we have a current list
+  // Use real-time hook if we have a current list and are using Supabase
   const {
-    items,
-    itemsByCategory,
-    uncheckedItems: allUncheckedItems,
-    checkedItems: allCheckedItems,
-    isLoading,
+    items: realtimeItems,
+    itemsByCategory: realtimeItemsByCategory,
+    uncheckedItems: realtimeUncheckedItems,
+    checkedItems: realtimeCheckedItems,
+    isLoading: realtimeLoading,
     isConnected,
-    totalItems,
-    checkedCount,
-    uncheckedCount
+    totalItems: realtimeTotalItems,
+    checkedCount: realtimeCheckedCount,
+    uncheckedCount: realtimeUncheckedCount
   } = useShoppingList(currentList?.id, {
     enableRealtime: !!currentList?.id
   })
+
+  // Local state for IndexedDB users (fallback)
+  const [localItems, setLocalItems] = useState([])
+  const [isLoadingLocal, setIsLoadingLocal] = useState(false)
+
+  // Determine which data to use based on service type
+  const isUsingSupabase = isSupabaseConfigured() && authService.isAuthenticated()
+  
+  const items = isUsingSupabase ? realtimeItems : localItems
+  const isLoading = isUsingSupabase ? realtimeLoading : isLoadingLocal
+  const totalItems = isUsingSupabase ? realtimeTotalItems : localItems.length
+  const checkedCount = isUsingSupabase ? realtimeCheckedCount : localItems.filter(item => item.checked).length
+  const uncheckedCount = isUsingSupabase ? realtimeUncheckedCount : localItems.filter(item => !item.checked).length
+
+  // Group items by category
+  const itemsByCategory = items.reduce((acc, item) => {
+    const category = item.category || 'Other'
+    if (!acc[category]) {
+      acc[category] = []
+    }
+    acc[category].push(item)
+    return acc
+  }, {})
+
+  const allUncheckedItems = items.filter(item => !item.checked)
+  const allCheckedItems = items.filter(item => item.checked)
+
+  // Load items for IndexedDB users
+  const loadLocalItems = async () => {
+    if (!currentList || isUsingSupabase) return
+    
+    try {
+      setIsLoadingLocal(true)
+      const shoppingListService = await serviceSelector.getShoppingListService()
+      const localItems = await shoppingListService.getItems(currentList.id)
+      setLocalItems(localItems || [])
+    } catch (error) {
+      console.error('Failed to load local items:', error)
+      setError('Failed to load items')
+    } finally {
+      setIsLoadingLocal(false)
+    }
+  }
+
+  // Load items when current list changes (for IndexedDB users)
+  useEffect(() => {
+    if (!isUsingSupabase && currentList) {
+      loadLocalItems()
+    }
+  }, [currentList?.id, isUsingSupabase])
 
   // Helper functions to filter items by source
   const isMealPlanItem = (item) => {
@@ -101,6 +159,7 @@ function ShoppingListPage() {
 
   const uncheckedItems = getFilteredItems(allUncheckedItems)
   const checkedItems = getFilteredItems(allCheckedItems)
+
 
   // Load lists and set current list on mount
   useEffect(() => {
@@ -166,12 +225,17 @@ function ShoppingListPage() {
         return
       }
       
-      await shoppingListService.addItem(currentList.id, {
+      const newItem = await shoppingListService.addItem(currentList.id, {
         name: row.name.trim(),
         quantity: row.quantity,
         unit: row.unit,
         category: category
       })
+      
+      // Update local state for IndexedDB users
+      if (!isUsingSupabase && newItem) {
+        setLocalItems(prev => [...prev, newItem])
+      }
       
       // Remove the submitted row and add a new empty one
       setNewItemRows(prev => {
@@ -233,7 +297,12 @@ function ShoppingListPage() {
     }
   }
 
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id)
+  }
+
   const handleDragEnd = async (event) => {
+    setActiveId(null)
     const { active, over } = event
 
     if (!active || !over || active.id === over.id) {
@@ -247,44 +316,97 @@ function ShoppingListPage() {
       const draggedItem = items.find(item => item.id === active.id)
       if (!draggedItem) return
 
-      // Check if dropping on another item or on a category header
-      const targetItem = items.find(item => item.id === over.id)
-      
-      if (targetItem) {
-        // Dropping on another item - determine if it's same category or different
-        if (draggedItem.category === targetItem.category) {
-          // Same category - reorder within category
-          const categoryItems = itemsByCategory[draggedItem.category] || []
-          const oldIndex = categoryItems.findIndex(item => item.id === active.id)
-          const newIndex = categoryItems.findIndex(item => item.id === over.id)
+      // Handle different drop targets based on view mode
+      if (viewMode === VIEW_MODES.GENERAL.id || viewMode === VIEW_MODES.MEALS.id) {
+        // In General/Meals view, items can be reordered within the same section
+        const targetItem = items.find(item => item.id === over.id)
+        
+        if (targetItem) {
+          // For General/Meals view, we need to reorder ALL items, not just filtered ones
+          // Find the positions of the dragged and target items in the full list
+          const oldIndex = items.findIndex(item => item.id === active.id)
+          const newIndex = items.findIndex(item => item.id === over.id)
 
           if (oldIndex !== -1 && newIndex !== -1) {
-            const reorderedItems = arrayMove(categoryItems, oldIndex, newIndex)
+            const reorderedItems = arrayMove(items, oldIndex, newIndex)
             const itemIds = reorderedItems.map(item => item.id)
             
-            await shoppingListService.reorderItems(currentList.id, itemIds)
-            setSuccess('Items reordered successfully')
+            try {
+              await shoppingListService.reorderItems(currentList.id, itemIds)
+              setSuccess('Items reordered successfully')
+              setTimeout(() => setSuccess(null), 3000)
+            } catch (reorderError) {
+              console.error('Reorder failed, likely missing sort_order column:', reorderError)
+              // For now, just update local state for IndexedDB users
+              if (!isUsingSupabase) {
+                setLocalItems(reorderedItems)
+                setSuccess('Items reordered successfully (local)')
+                setTimeout(() => setSuccess(null), 3000)
+              } else {
+                setError('Database schema needs update - please run migration')
+              }
+            }
+          }
+        }
+      } else if (viewMode === VIEW_MODES.GROCERY.id) {
+        // In Grocery view, handle category-based drops
+        const targetItem = items.find(item => item.id === over.id)
+        
+        if (targetItem) {
+          // Dropping on another item - determine if it's same category or different
+          if (draggedItem.category === targetItem.category) {
+            // Same category - reorder within category
+            const categoryItems = itemsByCategory[draggedItem.category] || []
+            const oldIndex = categoryItems.findIndex(item => item.id === active.id)
+            const newIndex = categoryItems.findIndex(item => item.id === over.id)
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+              const reorderedItems = arrayMove(categoryItems, oldIndex, newIndex)
+              const itemIds = reorderedItems.map(item => item.id)
+              
+              try {
+                await shoppingListService.reorderItems(currentList.id, itemIds)
+                setSuccess('Items reordered successfully')
+                setTimeout(() => setSuccess(null), 3000)
+              } catch (reorderError) {
+                console.error('Reorder failed, likely missing sort_order column:', reorderError)
+                // For now, just update local state for IndexedDB users
+                if (!isUsingSupabase) {
+                  // Update the local items with the reordered category items
+                  const updatedItems = items.map(item => {
+                    if (item.category === draggedItem.category) {
+                      const newIndex = reorderedItems.findIndex(ri => ri.id === item.id)
+                      return newIndex !== -1 ? reorderedItems[newIndex] : item
+                    }
+                    return item
+                  })
+                  setLocalItems(updatedItems)
+                  setSuccess('Items reordered successfully (local)')
+                  setTimeout(() => setSuccess(null), 3000)
+                } else {
+                  setError('Database schema needs update - please run migration')
+                }
+              }
+            }
+          } else {
+            // Different category - move item to new category
+            await shoppingListService.moveItemToCategory(active.id, targetItem.category)
+            setSuccess(`Item moved to ${targetItem.category}`)
             setTimeout(() => setSuccess(null), 3000)
           }
         } else {
-          // Different category - move item to new category
-          await shoppingListService.moveItemToCategory(active.id, targetItem.category)
-          setSuccess(`Item moved to ${targetItem.category}`)
-          setTimeout(() => setSuccess(null), 3000)
-        }
-      } else {
-        // Dropping on category header or empty space
-        // Check if over.id matches a category name
-        const targetCategory = CATEGORIES.find(cat => cat === over.id)
-        if (targetCategory && targetCategory !== draggedItem.category) {
-          await shoppingListService.moveItemToCategory(active.id, targetCategory)
-          setSuccess(`Item moved to ${targetCategory}`)
-          setTimeout(() => setSuccess(null), 3000)
+          // Dropping on category header
+          const targetCategory = CATEGORIES.find(cat => cat === over.id)
+          if (targetCategory && targetCategory !== draggedItem.category) {
+            await shoppingListService.moveItemToCategory(active.id, targetCategory)
+            setSuccess(`Item moved to ${targetCategory}`)
+            setTimeout(() => setSuccess(null), 3000)
+          }
         }
       }
     } catch (error) {
       console.error('Failed to reorder items:', error)
-      setError('Failed to reorder items')
+      setError('Failed to reorder items - ' + error.message)
     }
   }
 
@@ -292,6 +414,13 @@ function ShoppingListPage() {
     try {
       const shoppingListService = await serviceSelector.getShoppingListService()
       await shoppingListService.toggleItemChecked(itemId, checked)
+      
+      // Update local state for IndexedDB users
+      if (!isUsingSupabase) {
+        setLocalItems(prev => prev.map(item => 
+          item.id === itemId ? { ...item, checked } : item
+        ))
+      }
     } catch (error) {
       console.error('Failed to toggle item:', error)
       setError('Failed to update item')
@@ -306,6 +435,12 @@ function ShoppingListPage() {
     try {
       const shoppingListService = await serviceSelector.getShoppingListService()
       await shoppingListService.deleteItem(itemId)
+      
+      // Update local state for IndexedDB users
+      if (!isUsingSupabase) {
+        setLocalItems(prev => prev.filter(item => item.id !== itemId))
+      }
+      
       setSuccess('Item deleted successfully')
       setTimeout(() => setSuccess(null), 3000)
     } catch (error) {
@@ -318,6 +453,14 @@ function ShoppingListPage() {
     try {
       const shoppingListService = await serviceSelector.getShoppingListService()
       await shoppingListService.updateItem(itemId, updates)
+      
+      // Update local state for IndexedDB users
+      if (!isUsingSupabase) {
+        setLocalItems(prev => prev.map(item => 
+          item.id === itemId ? { ...item, ...updates } : item
+        ))
+      }
+      
       setSuccess('Item updated successfully')
       setTimeout(() => setSuccess(null), 3000)
     } catch (error) {
@@ -555,6 +698,7 @@ function ShoppingListPage() {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
             {/* Add new item button - above the most recent line item */}
@@ -571,9 +715,7 @@ function ShoppingListPage() {
               <div key={row.id} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg mb-2 hover:shadow-sm transition-shadow">
                 {/* Drag handle icon (decorative) */}
                 <div className="text-gray-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-                  </svg>
+                  <GripVertical className="w-4 h-4" />
                 </div>
 
                 {/* Checkbox (decorative) */}
@@ -747,6 +889,14 @@ function ShoppingListPage() {
                 )}
               </>
             )}
+            
+            <DragOverlay>
+              {activeId ? (
+                <div className="bg-white border-2 border-blue-500 rounded-lg shadow-2xl p-3 opacity-90">
+                  Dragging...
+                </div>
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </PageSection>
       )}

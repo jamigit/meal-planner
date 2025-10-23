@@ -146,7 +146,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50"
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
@@ -235,22 +235,26 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
               {filteredRecipes.map((recipe) => {
                 const isSelected = selectedMealIds.includes(recipe.id)
                 return (
-                  <div key={recipe.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                  <div key={recipe.id} className="flex flex-col md:flex-row md:items-center md:justify-between p-3 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 truncate">{recipe.name}</h3>
-                        {recipe.prep_time && (
-                          <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
-                            {recipe.prep_time} min prep
-                          </span>
-                        )}
-                        {recipe.cook_time && (
-                          <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
-                            {recipe.cook_time} min cook
-                          </span>
-                        )}
+                      {/* Recipe name and timing badges - responsive layout */}
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2 md:mb-1">
+                        <h3 className="font-semibold text-sm md:text-base text-gray-900 break-words">{recipe.name}</h3>
+                        <div className="flex gap-2 flex-wrap">
+                          {recipe.prep_time && (
+                            <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
+                              {recipe.prep_time} min prep
+                            </span>
+                          )}
+                          {recipe.cook_time && (
+                            <span className="text-xs text-text-secondary bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
+                              {recipe.cook_time} min cook
+                            </span>
+                          )}
+                        </div>
                       </div>
                       
+                      {/* Tags - always below recipe name on mobile, inline on desktop */}
                       <div className="text-xs text-gray-600">
                         {recipe.cuisine_tags?.length > 0 && (
                           <span className="mr-3">
@@ -265,7 +269,7 @@ export default function RecipeListModal({ isOpen, onClose, onAddMeal, selectedMe
                       </div>
                     </div>
                     
-                    <div className="ml-4 flex-shrink-0">
+                    <div className="mt-2 md:mt-0 md:ml-4 flex-shrink-0 flex justify-end md:justify-start">
                       <button
                         onClick={() => handleAddMeal(recipe)}
                         disabled={isSelected}

@@ -17,6 +17,14 @@ export default defineConfig({
 })
 ```
 
+### Available Test Scripts
+```bash
+npm run test         # Run tests in watch mode
+npm run test:run     # Run tests once
+npm run test:coverage # Run tests with coverage report
+npm run test:ui      # Run tests with UI interface
+```
+
 ### Test Setup
 **File**: `src/tests/setup.js`
 

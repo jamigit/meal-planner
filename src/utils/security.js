@@ -3,6 +3,11 @@
  * 
  * Provides comprehensive security measures including XSS prevention,
  * CSRF protection, secure token handling, and input validation.
+ * 
+ * @ai-context: Core security utilities for the application
+ * @ai-dependencies: Requires DOM manipulation, crypto APIs, and file system access
+ * @ai-technical-debt(high, medium, high) - Regex-based HTML sanitization is vulnerable to bypasses
+ * @ai-technical-debt(medium, low, medium) - Hardcoded security config should be environment-based
  */
 
 /**

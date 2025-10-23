@@ -184,7 +184,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
       </div>
 
       {/* Content */}
-      <div className="max-h-96 overflow-y-auto bg-brand-surface p-3 space-y-6 rounded-lg">
+      <div className="max-h-96 overflow-y-auto bg-brand-surface p-2 space-y-3 rounded-lg">
         {loading ? (
           <div className="text-center py-6">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
@@ -195,11 +195,11 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
             <p className="text-black text-sm">No ingredients found.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2">
             {groupByRecipe ? (
               // Recipe-based view
               Object.entries(getRecipeBasedView()).map(([recipe, items]) => (
-                <div key={recipe} className="bg-brand-surface rounded-lg p-3">
+                <div key={recipe} className="bg-brand-surface rounded-lg p-2">
                   <h4 className="font-medium text-black text-sm mb-2">{recipe}</h4>
                   <div className="space-y-1">
                     {items.map((item, index) => (
@@ -217,7 +217,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
                 if (items.length === 0) return null
 
                 return (
-                  <div key={category} className="border-b border-gray-200 last:border-b-0 pb-3 last:pb-0">
+                  <div key={category} className="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0">
                     <h4 className="font-medium text-black text-sm mb-2 flex items-center">
                       <span className="mr-1 text-xs">{getCategoryIcon(category)}</span>
                       {category}
@@ -225,7 +225,7 @@ function ShoppingListCard({ recipes, weeklyPlanId, className = '', showTitle = f
                         ({items.length})
                       </span>
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {items.map((item, index) => {
                         const showSources = item.sources.length > 1
 

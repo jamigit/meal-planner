@@ -4,6 +4,11 @@ import { serviceSelector } from '../services/serviceSelector.js'
 import Button from './ui/Button'
 import Message from './ui/Message'
 
+// @ai-context: ImportShoppingListModal handles importing generated shopping lists to persistent storage
+// @ai-dependencies: Requires serviceSelector for data access, Button/Message for UI
+// @ai-technical-debt(medium, low, medium) - Modal uses direct DOM manipulation for scroll locking
+// @ai-technical-debt(low, low, low) - Uses confirm() for delete confirmation instead of proper modal
+
 function ImportShoppingListModal({ 
   isOpen, 
   onClose, 
@@ -68,9 +73,10 @@ function ImportShoppingListModal({
       setIsImporting(true)
       setError(null)
 
-      // Get shopping list service
+      // @ai-context: Get shopping list service through service layer
       const shoppingListService = await serviceSelector.getShoppingListService()
       
+      // @ai-technical-debt(low, medium, low) - Complex item key generation logic could be extracted to utility
       // Get or create shopping list
       let shoppingList
       if (targetListId) {
@@ -184,20 +190,18 @@ function ImportShoppingListModal({
               {getTotalSelectedItems()} of {getTotalItems()} items selected
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
                 onClick={handleSelectAll}
+                className="px-3 py-1.5 text-sm font-medium border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors rounded-md"
               >
                 Select All
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
+              </button>
+              <button
                 onClick={handleSelectNone}
+                className="px-3 py-1.5 text-sm font-medium border-2 border-black bg-white text-black hover:bg-gray-50 transition-colors rounded-md"
               >
                 Select None
-              </Button>
+              </button>
             </div>
           </div>
 
@@ -269,13 +273,13 @@ function ImportShoppingListModal({
           )}
 
           <div className="flex justify-end gap-3">
-            <Button
-              variant="secondary"
+            <button
               onClick={onClose}
               disabled={isImporting}
+              className="px-4 py-2 text-sm font-medium border-2 border-black bg-white text-black hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-md"
             >
               Cancel
-            </Button>
+            </button>
             <Button
               onClick={handleImport}
               disabled={isImporting || selectedItems.size === 0}

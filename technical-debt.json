@@ -1,0 +1,189 @@
+{
+  "debts": [
+    {
+      "id": "debt-DevUtilsjsx-7l",
+      "filePath": "src/components/DevUtils.jsx",
+      "lineNumber": 6,
+      "priority": "medium",
+      "effort": "low",
+      "impact": "medium",
+      "description": "DevUtils bypasses service layer for direct database access",
+      "createdAt": "2025-10-23T09:18:53.553Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-ImportShoppingListModaljsx-br",
+      "filePath": "src/components/ImportShoppingListModal.jsx",
+      "lineNumber": 9,
+      "priority": "medium",
+      "effort": "low",
+      "impact": "medium",
+      "description": "Modal uses direct DOM manipulation for scroll locking",
+      "createdAt": "2025-10-23T09:18:53.554Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-ImportShoppingListModaljsx-ei",
+      "filePath": "src/components/ImportShoppingListModal.jsx",
+      "lineNumber": 10,
+      "priority": "low",
+      "effort": "low",
+      "impact": "low",
+      "description": "Uses confirm() for delete confirmation instead of proper modal",
+      "createdAt": "2025-10-23T09:18:53.554Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-ImportShoppingListModaljsx-1vq",
+      "filePath": "src/components/ImportShoppingListModal.jsx",
+      "lineNumber": 79,
+      "priority": "low",
+      "effort": "medium",
+      "impact": "low",
+      "description": "Complex item key generation logic could be extracted to utility",
+      "createdAt": "2025-10-23T09:18:53.554Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-MealHistoryDebugjsx-35",
+      "filePath": "src/components/MealHistoryDebug.jsx",
+      "lineNumber": 4,
+      "priority": "low",
+      "effort": "low",
+      "impact": "low",
+      "description": "Debug component bypasses service layer for direct access",
+      "createdAt": "2025-10-23T09:18:53.554Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-SavedPlansjsx-f8",
+      "filePath": "src/components/SavedPlans.jsx",
+      "lineNumber": 11,
+      "priority": "medium",
+      "effort": "medium",
+      "impact": "high",
+      "description": "Uses alert() for user feedback instead of proper toast system",
+      "createdAt": "2025-10-23T09:18:53.555Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-SavedPlansjsx-i8",
+      "filePath": "src/components/SavedPlans.jsx",
+      "lineNumber": 12,
+      "priority": "low",
+      "effort": "low",
+      "impact": "medium",
+      "description": "Complex state management could benefit from useReducer",
+      "createdAt": "2025-10-23T09:18:53.555Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-SavedPlansjsx-2gp",
+      "filePath": "src/components/SavedPlans.jsx",
+      "lineNumber": 85,
+      "priority": "high",
+      "effort": "medium",
+      "impact": "high",
+      "description": "Uses alert() instead of proper toast notification system",
+      "createdAt": "2025-10-23T09:18:53.555Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-SavedPlansjsx-2oy",
+      "filePath": "src/components/SavedPlans.jsx",
+      "lineNumber": 92,
+      "priority": "medium",
+      "effort": "low",
+      "impact": "medium",
+      "description": "Complex error message logic could be extracted to utility",
+      "createdAt": "2025-10-23T09:18:53.555Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-ShoppingListjsx-1gd",
+      "filePath": "src/components/ShoppingList.jsx",
+      "lineNumber": 49,
+      "priority": "low",
+      "effort": "low",
+      "impact": "low",
+      "description": "Fallback clipboard method for older browsers",
+      "createdAt": "2025-10-23T09:18:53.555Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-securityjs-ar",
+      "filePath": "src/utils/security.js",
+      "lineNumber": 9,
+      "priority": "high",
+      "effort": "medium",
+      "impact": "high",
+      "description": "Regex-based HTML sanitization is vulnerable to bypasses",
+      "createdAt": "2025-10-23T09:18:53.558Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-securityjs-dj",
+      "filePath": "src/utils/security.js",
+      "lineNumber": 10,
+      "priority": "medium",
+      "effort": "low",
+      "impact": "medium",
+      "description": "Hardcoded security config should be environment-based",
+      "createdAt": "2025-10-23T09:18:53.558Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-tagMigrationjs-95",
+      "filePath": "src/utils/tagMigration.js",
+      "lineNumber": 11,
+      "priority": "medium",
+      "effort": "high",
+      "impact": "medium",
+      "description": "Large hardcoded mapping object should be externalized to JSON",
+      "createdAt": "2025-10-23T09:18:53.559Z",
+      "status": "open"
+    },
+    {
+      "id": "debt-tagMigrationjs-c5",
+      "filePath": "src/utils/tagMigration.js",
+      "lineNumber": 12,
+      "priority": "low",
+      "effort": "medium",
+      "impact": "low",
+      "description": "Case-insensitive matching could be optimized with Map",
+      "createdAt": "2025-10-23T09:18:53.559Z",
+      "status": "open"
+    }
+  ],
+  "stats": {
+    "total": 14,
+    "byPriority": {
+      "medium": 6,
+      "low": 6,
+      "high": 2
+    },
+    "byEffort": {
+      "low": 8,
+      "medium": 5,
+      "high": 1
+    },
+    "byImpact": {
+      "medium": 6,
+      "low": 5,
+      "high": 3
+    },
+    "byFile": {
+      "src/components/DevUtils.jsx": 1,
+      "src/components/ImportShoppingListModal.jsx": 3,
+      "src/components/MealHistoryDebug.jsx": 1,
+      "src/components/SavedPlans.jsx": 4,
+      "src/components/ShoppingList.jsx": 1,
+      "src/utils/security.js": 2,
+      "src/utils/tagMigration.js": 2
+    },
+    "byStatus": {
+      "open": 14
+    }
+  },
+  "generatedAt": "2025-10-23T09:18:53.559Z"
+}

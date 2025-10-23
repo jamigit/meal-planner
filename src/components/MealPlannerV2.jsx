@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useRef, useCallback, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useLoadingState } from '../utils/loadingStates.js'
 import { useRequestLifecycle } from '../utils/requestLifecycle.js'
 import { aiMealPlannerService } from '../services/aiMealPlannerService.js'
@@ -12,6 +12,7 @@ import ShoppingListCard from './ShoppingListCard.jsx'
 import SavePlanTransition from './SavePlanTransition.jsx'
 import MultiSelectDropdown from './ui/MultiSelectDropdown.jsx'
 import CategorizedTags from './CategorizedTags.jsx'
+import RecipeCard from './RecipeCard.jsx'
 import { useNavigate } from 'react-router-dom'
 import { TAG_TAXONOMY } from '../constants/recipeTags.js'
 import { PageContainer, PageHeader, PageSection } from './layout'
@@ -112,6 +113,7 @@ function mealPlanReducer(state, action) {
 export default function MealPlannerV2() {
   // Initialize with saved state or default state
   const [state, dispatch] = useReducer(mealPlanReducer, loadStateFromStorage() || initialState)
+  const [sidebarRecipe, setSidebarRecipe] = useState(null)
   const navigate = useNavigate()
   const { signal, cancel } = useRequestLifecycle('meal-planner')
   const { isLoading, startLoading, stopLoading } = useLoadingState('AI Suggestions')
@@ -644,6 +646,14 @@ export default function MealPlannerV2() {
                         </div>
                         
                         <button
+                          onClick={() => setSidebarRecipe(meal)}
+                          className="inline-flex items-center gap-2 border-2 border-black text-black rounded-lg font-heading font-black uppercase text-[14px] px-3 py-1 hover:bg-gray-50 transition-colors whitespace-nowrap"
+                        >
+                          View Recipe
+                          <span className="material-symbols-rounded text-base">arrow_forward</span>
+                        </button>
+                        
+                        <button
                           onClick={() => handleRemoveMeal(meal.id)}
                           className="text-red-500 hover:text-red-700 text-sm font-medium px-2 py-1"
                         >
@@ -747,6 +757,62 @@ export default function MealPlannerV2() {
         onComplete={handleTransitionComplete}
         message={state.transitionMessage}
       />
+
+      {/* Sidebar Backdrop */}
+      <AnimatePresence>
+        {sidebarRecipe && (
+          <motion.div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            style={{ zIndex: 1000 }}
+            onClick={() => setSidebarRecipe(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Recipe Sidebar */}
+      <AnimatePresence>
+        {sidebarRecipe && (
+          <motion.div 
+            className="fixed inset-y-0 right-0 w-96 bg-brand-surface shadow-xl border-l border-gray-200 flex flex-col"
+            style={{ zIndex: 1001 }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ 
+              type: "spring", 
+              damping: 25, 
+              stiffness: 300,
+              duration: 0.4 
+            }}
+          >
+            {/* Fixed Header */}
+            <div className="sticky top-0 flex-shrink-0 p-4 border-b border-gray-200 bg-brand-surface z-10">
+              <div className="flex justify-between items-center">
+                <h3 className="text-h3 font-heading font-black text-text-primary">Recipe Details</h3>
+                <button
+                  onClick={() => setSidebarRecipe(null)}
+                  className="btn-outline-black-sm flex items-center gap-2"
+                >
+                  <span>×</span>
+                  <span>Close</span>
+                </button>
+              </div>
+            </div>
+            
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <RecipeCard
+                recipe={sidebarRecipe}
+                showDetails={true}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </PageContainer>
   )

@@ -13,7 +13,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "debt:report": "node scripts/debt-report.js report",
+    "debt:validate": "node scripts/debt-report.js validate",
+    "debt:stats": "node scripts/debt-report.js stats"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -23,6 +26,7 @@
     "@supabase/supabase-js": "^2.57.4",
     "dexie": "^4.2.0",
     "framer-motion": "^12.23.16",
+    "lucide-react": "^0.546.0",
     "papaparse": "^5.5.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

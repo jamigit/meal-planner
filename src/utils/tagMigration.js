@@ -6,6 +6,11 @@ import {
   CONVENIENCE_TAGS
 } from '../constants/tagCategories.js'
 
+// @ai-context: Tag migration utilities for converting legacy tags to new categorized system
+// @ai-dependencies: Requires database access and tag category constants
+// @ai-technical-debt(medium, high, medium) - Large hardcoded mapping object should be externalized to JSON
+// @ai-technical-debt(low, medium, low) - Case-insensitive matching could be optimized with Map
+
 // Mapping of common legacy tags to new categorized tags
 const LEGACY_TAG_MAPPING = {
   // Cuisine mappings (case-insensitive)

@@ -85,6 +85,7 @@ The project uses a structured documentation approach:
 - **docs/security.md** - Security implementation and best practices
 - **docs/testing.md** - Testing framework and strategies
 - **docs/network-resilience.md** - Offline handling and network resilience
+- **docs/technical-debt-management.md** - Technical debt tracking and management system
 
 #### Specialized Documentation
 - **docs/checklists/crud-quality.md** - CRUD app quality checklist
@@ -103,6 +104,10 @@ The project uses a structured documentation approach:
 
 #### Migration Documentation
 - **docs/migrations/2025-10-22-shopping-list.md** - Shopping List Tables Migration
+
+#### Technical Debt Management
+- **TECHNICAL_DEBT_IMPLEMENTATION.md** - Complete technical debt tracking system implementation
+- **TECHNICAL_DEBT_REPORT.md** - Current technical debt status and recommendations
 
 ## Core Features
 - **Recipe Management**: Store recipes with name, URL, and intelligent AI-generated tags
@@ -537,6 +542,12 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run preview      # Preview production build
 npm run lint         # Run ESLint
+npm run test         # Run tests
+npm run test:run     # Run tests once
+npm run test:coverage # Run tests with coverage
+npm run debt:report  # Generate technical debt report
+npm run debt:validate # Validate debt annotations
+npm run debt:stats   # Show debt statistics
 ```
 
 API base URL config (optional for scraping):

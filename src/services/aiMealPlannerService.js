@@ -19,7 +19,7 @@ class AiMealPlannerService {
       this.apiUrl = netlifyUrl
     } else {
       // Development fallback
-      this.apiUrl = 'http://localhost:3002/api/claude'
+      this.apiUrl = 'http://localhost:3001/api/claude'
     }
     
     this.model = 'claude-3-5-sonnet-20241022'

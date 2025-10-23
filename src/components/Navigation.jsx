@@ -3,6 +3,11 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { isSupabaseConfigured } from '../lib/supabase.js'
 
+// @ai-context: Navigation component provides main app navigation with responsive design
+// @ai-dependencies: Requires React Router, AuthContext, and Supabase configuration
+// @ai-technical-debt(medium, low, medium) - Uses window.innerWidth for responsive behavior instead of CSS media queries
+// @ai-technical-debt(low, low, low) - Hamburger menu state could be extracted to custom hook
+
 function Navigation() {
   const location = useLocation()
   const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false)
@@ -164,10 +169,10 @@ function Navigation() {
 
 
           {/* Hamburger Menu */}
-          <div className="relative z-50">
+          <div className="relative z-50 flex-1">
             <button
               onClick={() => setIsHamburgerMenuOpen(!isHamburgerMenuOpen)}
-              className={`flex flex-col items-center justify-center flex-1 h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl ${
+              className={`flex flex-col items-center justify-center h-16 md:h-20 p-3 text-[10px] md:text-xs font-medium transition-colors rounded-r-2xl w-full ${
                 isHamburgerActive || isHamburgerMenuOpen
                   ? 'bg-white/10 text-white'
                   : 'text-stone-200 hover:bg-white/10 hover:text-white'
